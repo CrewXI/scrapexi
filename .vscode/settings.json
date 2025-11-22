@@ -37,5 +37,8 @@
     "--rcfile=./examples/python/.pylintrc"
   ],
   "python.analysis.typeCheckingMode": "standard",
-  "editor.rulers": [100]
+  "editor.rulers": [
+    100
+  ],
+  "cursorpyright.analysis.typeCheckingMode": "standard"
 }
