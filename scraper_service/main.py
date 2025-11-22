@@ -1,14 +1,14 @@
-import asyncio
-import json
-import os
-import random
-from typing import Any, Dict, Optional
 
-import google.generativeai as genai
-from bs4 import BeautifulSoup
+import os
+import json
+import random
+import asyncio
+from typing import Any, Dict, Optional
 from fastapi import Body, FastAPI, HTTPException
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
+import google.generativeai as genai
+from bs4 import BeautifulSoup
 
 # Init Gemini
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -42,8 +42,7 @@ class ScrapeRequest(BaseModel):
 
 @app.get("/")
 def health_check():
-    return {"status": "ok", "service": "browser-microservice", "version": "1.1.0"}
-
+    return {"status": "ok", "service": "browser-microservice", "version": "1.1.1"}
 
 def clean_html(html_content):
     soup = BeautifulSoup(html_content, "html.parser")
@@ -56,11 +55,12 @@ def clean_html(html_content):
     text = soup.get_text(separator=" ", strip=True)
     return text
 
-
 def extract_with_gemini(text_content: str, query: str, model_name: str):
     if not GOOGLE_API_KEY:
         return {"error": "Google API Key not configured on Scraper Service"}
 
+    print(f"DEBUG: Sending {len(text_content)} chars to Gemini...")
+    
     try:
         model = genai.GenerativeModel(model_name)
 
@@ -71,7 +71,7 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
         The user wants to extract information based on this query: "{query}"
         
         DATA SOURCE:
-        {text_content[:30000]}  # Limit context window if needed
+        {text_content[:100000]} 
         
         INSTRUCTIONS:
         1. Identify the data matching the query.
@@ -82,12 +82,13 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
         """
 
         response = model.generate_content(prompt)
-        return json.loads(response.text.replace("```json", "").replace("```", "").strip())
+        text_resp = response.text.replace("```json", "").replace("```", "").strip()
+        print(f"DEBUG: Gemini Response: {text_resp[:100]}...")
+        return json.loads(text_resp)
 
     except Exception as e:
         print(f"Gemini Error: {e}")
         return {"error": f"AI Extraction Failed: {str(e)}"}
-
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
@@ -138,9 +139,16 @@ def scrape(request: ScrapeRequest):
             except Exception as nav_error:
                 print(f"Navigation Error (continuing anyway): {nav_error}")
 
-            # 5. Wait
+            # 5. Wait - Robust Waiting
             print("Waiting for content...")
-            page.wait_for_timeout(request.wait_time * 1000)
+            # Wait for network idle (good for SPAs)
+            try:
+                page.wait_for_load_state("networkidle", timeout=10000)
+            except:
+                pass # Ignore timeout if network never idles
+                
+            # Add explicit wait time
+            page.wait_for_timeout(request.wait_time * 1000 + 2000) # Add 2s buffer
 
             # 6. Extract HTML
             content = page.content()
@@ -148,10 +156,12 @@ def scrape(request: ScrapeRequest):
 
             # 7. AI Processing
             print(f"Scrape successful. Content length: {len(content)}")
+            
+            clean_text = clean_html(content)
+            print(f"DEBUG: Extracted Text Preview: {clean_text[:500]}")
 
             if request.query or request.prompt:
                 print(f"Processing with Gemini... Query: {request.query}")
-                clean_text = clean_html(content)
                 data = extract_with_gemini(
                     clean_text, request.query or request.prompt, request.model_name
                 )
