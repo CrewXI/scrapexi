@@ -52,7 +52,10 @@ except ImportError:
     print("DEBUG: playwright-stealth not found. Stealth mode disabled.")
 
 # Import our local replacement service
-from .local_agentql_service import query_data_with_gemini, find_next_page_element
+try:
+    from .local_agentql_service import query_data_with_gemini, find_next_page_element
+except ImportError:
+    from local_agentql_service import query_data_with_gemini, find_next_page_element
 
 app = FastAPI(title="DIY AgentQL Scraper API")
 
