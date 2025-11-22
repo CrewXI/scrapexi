@@ -195,8 +195,12 @@
         let supabase;
 
         async function initSupabase() {
+            const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:8000' 
+                : '';
+
             try {
-                const res = await fetch('/config'); // Use relative path
+                const res = await fetch(`${API_BASE}/config`); // Use dynamic path
                 const config = await res.json();
 
                 console.log("Config loaded:", config); // Debug
