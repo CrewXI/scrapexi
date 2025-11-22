@@ -7,6 +7,15 @@ from typing import Any, Dict, Optional
 from fastapi import Body, FastAPI, HTTPException
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
+import google.generativeai as genai
+from bs4 import BeautifulSoup
+
+# Init Gemini
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+else:
+    print("WARNING: GOOGLE_API_KEY not set. AI extraction will fail.")
 
 # Stealth Import Logic
 try:
@@ -23,16 +32,59 @@ app = FastAPI(title="Dedicated Browser Service")
 
 class ScrapeRequest(BaseModel):
     url: str
+    query: Optional[str] = None
+    prompt: Optional[str] = None
+    model_name: str = "gemini-2.0-flash-exp"
     wait_time: int = 2
     stealth_mode: bool = True
     session_json: Optional[Dict[str, Any]] = None
-    # Add other fields as needed
 
 
 @app.get("/")
 def health_check():
-    return {"status": "ok", "service": "browser-microservice", "version": "1.0.2"}
+    return {"status": "ok", "service": "browser-microservice", "version": "1.1.0"}
 
+def clean_html(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Remove scripts and styles
+    for script in soup(["script", "style", "svg", "path", "noscript"]):
+        script.extract()
+        
+    # Get text
+    text = soup.get_text(separator=' ', strip=True)
+    return text
+
+def extract_with_gemini(text_content: str, query: str, model_name: str):
+    if not GOOGLE_API_KEY:
+        return {"error": "Google API Key not configured on Scraper Service"}
+        
+    try:
+        model = genai.GenerativeModel(model_name)
+        
+        prompt = f"""
+        You are a precise data extraction agent.
+        
+        CONTEXT:
+        The user wants to extract information based on this query: "{query}"
+        
+        DATA SOURCE:
+        {text_content[:30000]}  # Limit context window if needed
+        
+        INSTRUCTIONS:
+        1. Identify the data matching the query.
+        2. Return ONLY a valid JSON object.
+        3. The JSON should have meaningful keys matching the data (e.g., "products", "prices", "articles").
+        4. If no data is found, return an empty JSON object {{}}.
+        5. Do NOT include markdown formatting (```json). Just the raw JSON string.
+        """
+        
+        response = model.generate_content(prompt)
+        return json.loads(response.text.replace("```json", "").replace("```", "").strip())
+        
+    except Exception as e:
+        print(f"Gemini Error: {e}")
+        return {"error": f"AI Extraction Failed: {str(e)}"}
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
@@ -51,7 +103,7 @@ def scrape(request: ScrapeRequest):
                 "--no-zygote",
                 "--single-process",
                 "--disable-gpu",
-                "--ignore-certificate-errors", # Add ignore cert errors flag
+                "--ignore-certificate-errors", 
             ]
 
             browser = p.chromium.launch(headless=True, args=browser_args)
@@ -59,7 +111,7 @@ def scrape(request: ScrapeRequest):
             # 2. Context & Page
             context = browser.new_context(
                 user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                ignore_https_errors=True # Explicitly ignore HTTPS errors
+                ignore_https_errors=True
             )
 
             if request.session_json:
@@ -85,23 +137,30 @@ def scrape(request: ScrapeRequest):
             print("Waiting for content...")
             page.wait_for_timeout(request.wait_time * 1000)
 
-            # 6. Extract (Basic HTML for now, or you can integrate Gemini here too)
+            # 6. Extract HTML
             content = page.content()
-            
-            # Log success
-            print(f"Scrape successful. Content length: {len(content)}")
-
-            # Capture snapshot for debug/virtual view (optional)
-            # screenshot = page.screenshot(type='jpeg', quality=50)
-
             browser.close()
-
-            return {
-                "status": "success",
-                "url": request.url,
-                "content_length": len(content),
-                "html": content,
-            }
+            
+            # 7. AI Processing
+            print(f"Scrape successful. Content length: {len(content)}")
+            
+            if request.query or request.prompt:
+                print(f"Processing with Gemini... Query: {request.query}")
+                clean_text = clean_html(content)
+                data = extract_with_gemini(clean_text, request.query or request.prompt, request.model_name)
+                return {
+                    "status": "success",
+                    "url": request.url,
+                    "data": data
+                }
+            else:
+                # Raw HTML mode
+                return {
+                    "status": "success",
+                    "url": request.url,
+                    "content_length": len(content),
+                    "html": content,
+                }
 
     except Exception as e:
         print(f"Browser Error: {e}")

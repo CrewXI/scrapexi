@@ -4,4 +4,4 @@ playwright
 bs4
 requests
 playwright-stealth
-
+google-generativeai
