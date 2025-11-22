@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+agentql
+playwright
+python-dotenv
+beautifulsoup4
+google-generativeai
+playwright-stealth
+supabase
+stripe

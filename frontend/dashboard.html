@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrapeXi Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/midnight.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cyber: ['"Orbitron"', 'sans-serif'],
+                        tech: ['"Rajdhani"', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        neonPink: '#FF00FF',
+                        neonBlue: '#00FFFF',
+                        neonGreen: '#00FF99',
+                        darkBg: '#050510',
+                    },
+                    backgroundImage: {
+                        'cyber-grid': "linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050510;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 10% 10%, rgba(255, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(0, 255, 255, 0.15) 0%, transparent 40%);
+            overflow: hidden;
+        }
+
+        /* Moving Grid Background */
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 200%; height: 200%;
+            background-image: linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: grid-move 20s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+        @keyframes grid-move {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(20, 20, 35, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Neon Borders */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent, rgba(255, 0, 255, 0.3), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Glowing Text */
+        .text-glow-blue { text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
+        .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
+
+        /* Cyber Input */
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            color: #00FFFF;
+            transition: all 0.3s ease;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+        }
+        .cyber-input:focus {
+            border-color: #00FFFF;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            outline: none;
+        }
+
+        /* Cyber Button */
+        .cyber-btn {
+            position: relative;
+            background: transparent;
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            overflow: hidden;
+            transition: 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .cyber-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+            text-shadow: 0 0 8px #00FFFF;
+        }
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+
+        /* CodeMirror overrides */
+        .CodeMirror {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            height: 100% !important;
+            color: #a5b3ce !important;
+            font-family: 'Share Tech Mono', monospace !important;
+        }
+        .cm-variable { color: #ff79c6 !important; }
+        .cm-string { color: #f1fa8c !important; }
+        .cm-property { color: #8be9fd !important; }
+        
+        /* Accordion Animation */
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 500px; /* Arbitrary large height */
+            opacity: 1;
+        }
+        .chevron { transition: transform 0.3s ease; }
+        .chevron.rotate { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="text-gray-300 font-tech h-screen flex flex-col">
+
+    <div class="grid-overlay"></div>
+
+    <!-- Header -->
+    <header class="h-20 flex items-center justify-between px-8 z-10 border-b border-white/5 bg-darkBg/80 backdrop-blur-sm flex-shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-neonPink to-neonBlue rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative w-10 h-10 bg-black flex items-center justify-center rounded-lg border border-white/10">
+                    <span class="font-cyber text-xl text-white">S</span>
+                </div>
+            </div>
+            <div>
+                <h1 class="font-cyber text-2xl text-white tracking-widest uppercase"><span class="text-neonBlue text-glow-blue">Scrape</span><span class="text-neonPink text-glow-pink">Xi</span></h1>
+                <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-neonGreen animate-pulse shadow-[0_0_10px_#00FF99]"></div>
+                    <span class="text-[10px] tracking-[0.2em] text-neonGreen uppercase">System Online</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="hidden md:flex items-center gap-4 text-sm font-mono text-gray-500">
+                <span>CPU: <span class="text-neonBlue">12%</span></span>
+                <span>MEM: <span class="text-neonPink">2.4GB</span></span>
+                <span>NET: <span class="text-neonGreen">Active</span></span>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-2 glass-card rounded-lg">
+                <img id="userAvatar" src="" class="w-8 h-8 rounded border border-white/20">
+                <div class="text-right hidden sm:block">
+                    <p id="userName" class="text-xs font-bold text-white tracking-wider uppercase">Operator</p>
+                    <p class="text-[10px] text-neonBlue">Level 1 Access</p>
+                </div>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-500 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Interface -->
+    <div class="flex-1 flex overflow-hidden p-6 gap-6 z-10">
+        
+        <!-- Sidebar Nav -->
+        <nav class="w-16 lg:w-20 glass-card rounded-2xl flex flex-col items-center py-8 gap-8 flex-shrink-0">
+            <a href="#" class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </a>
+            <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            </a>
+            <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </a>
+            <div class="flex-1"></div>
+            <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </a>
+        </nav>
+
+        <!-- Configuration Module -->
+        <div class="w-[450px] flex flex-col gap-4 overflow-hidden">
+            
+            <!-- Target Input -->
+            <div class="glass-card p-5 rounded-2xl flex-shrink-0">
+                <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Target Vector
+                </h2>
+                <input type="text" id="url" value="https://scrapeme.live/shop" 
+                    class="cyber-input w-full p-3 rounded text-xs font-mono"
+                    placeholder="ENTER_TARGET_URL://">
+            </div>
+
+            <!-- Accordion Modules (Collapsible) -->
+            <div class="glass-card rounded-2xl flex-shrink-0 transition-all duration-300" id="optionsCard">
+                <button onclick="toggleAccordion()" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition">
+                    <h2 class="text-neonPink font-cyber text-xs uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-neonPink rounded-full"></span> Options
+                    </h2>
+                    <svg id="optionsChevron" class="w-4 h-4 text-gray-500 chevron rotate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                
+                <div id="optionsContent" class="accordion-content open px-5 pb-5 space-y-5">
+                    <!-- Pagination -->
+                    <div class="flex items-center justify-between group">
+                        <div>
+                            <span class="text-white font-bold text-sm tracking-wide">Pagination</span>
+                            <p class="text-[10px] text-gray-500 font-mono">AUTO_TRAVERSE</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div id="paginationParams" class="hidden">
+                                <input type="number" id="maxPages" value="3" class="w-12 bg-black/50 border border-neonBlue/30 text-neonBlue text-center text-[10px] rounded py-1 font-mono focus:outline-none focus:border-neonBlue">
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="pagination" class="sr-only peer">
+                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonBlue peer-checked:[&>div]:shadow-[0_0_10px_#00FFFF]">
+                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Login -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-white font-bold text-sm tracking-wide">Auth</span>
+                                <p class="text-[10px] text-gray-500 font-mono">CREDENTIALS</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="loginEnabled" class="sr-only peer">
+                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonPink peer-checked:[&>div]:shadow-[0_0_10px_#FF00FF]">
+                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="loginParams" class="hidden space-y-2 pt-2 border-t border-white/5">
+                            <input type="text" id="loginUrl" placeholder="Login URL" class="cyber-input w-full p-2 text-[10px] rounded">
+                            <form class="grid grid-cols-2 gap-2" onsubmit="return false;">
+                                <input type="text" id="username" placeholder="Username" class="cyber-input p-2 text-[10px] rounded">
+                                <input type="password" id="password" placeholder="Password" class="cyber-input p-2 text-[10px] rounded" autocomplete="off">
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Session -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-white font-bold tracking-wide">Session State</span>
+                                <p class="text-xs text-gray-500 font-mono">COOKIE_BYPASS</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="text-[10px] text-neonGreen hover:text-white underline font-mono">HELP</button>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="sessionEnabled" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonGreen peer-checked:[&>div]:shadow-[0_0_10px_#00FF99]">
+                                        <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="sessionParams" class="hidden pt-2 border-t border-white/5">
+                            <textarea id="sessionJson" placeholder='// PASTE AUTH.JSON DATA' class="cyber-input w-full h-20 text-[10px] p-2 rounded font-mono resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Stealth & Timing -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-white font-bold tracking-wide">Stealth Mode</span>
+                                <p class="text-xs text-gray-500 font-mono">ANTI_DETECTION</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="document.getElementById('stealthHelpModal').classList.remove('hidden')" class="text-[10px] text-purple-400 hover:text-white underline font-mono">HELP</button>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="stealthMode" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-purple-500 peer-checked:[&>div]:shadow-[0_0_10px_#a855f7]">
+                                        <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-2 border-t border-white/5">
+                            <div class="flex justify-between text-xs text-gray-400 mb-2">
+                                <span>WAIT_TIME_JITTER</span>
+                                <span id="waitDisplay" class="text-neonBlue font-mono">2s</span>
+                            </div>
+                            <div class="relative w-full h-2 bg-gray-800 rounded-full">
+                                <input type="range" id="waitTime" min="1" max="15" value="2" 
+                                    class="absolute w-full h-full opacity-0 cursor-pointer z-10"
+                                    oninput="updateWaitDisplay(this.value)">
+                                <div id="sliderTrack" class="absolute top-0 left-0 h-full bg-gradient-to-r from-neonBlue to-purple-500 rounded-full w-[13%]"></div>
+                                <div id="sliderThumb" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-neonBlue rounded-full shadow-[0_0_10px_#00FFFF] pointer-events-none transition-all left-[13%] -ml-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schema Editor (Expanded) -->
+            <div class="glass-card p-5 rounded-2xl flex-1 flex flex-col min-h-0">
+                <h2 class="text-neonGreen font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-neonGreen rounded-full"></span> Schema Def
+                </h2>
+                <div class="flex-1 rounded overflow-hidden border border-white/10 relative">
+                    <textarea id="query">{
+    products[] {
+        name
+        price
+        rating
+    }
+}</textarea>
+                </div>
+            </div>
+
+            <button id="scrapeBtn" onclick="runScraper()" class="cyber-btn w-full py-4 font-bold text-lg tracking-widest flex-shrink-0">
+                Initialize Extraction
+            </button>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden">
+            <div class="h-12 border-b border-white/5 flex items-center justify-between px-6 bg-black/20 flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-neonBlue animate-pulse"></div>
+                        <span class="font-mono text-xs text-neonBlue tracking-widest">DATA_STREAM</span>
+                    </div>
+                    <div class="text-[10px] font-mono text-gray-500 flex gap-3 border-l border-white/10 pl-3">
+                        <span id="resultCount">ITEMS: 0</span>
+                        <span id="charCount">SIZE: 0B</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="saveCurrentAsTemplate()" class="text-gray-500 hover:text-neonBlue font-mono text-xs transition-colors flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                        SAVE_TPL
+                    </button>
+                    <button onclick="openTemplatesModal()" class="text-gray-500 hover:text-neonPink font-mono text-xs transition-colors flex items-center gap-1 mr-4">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/></svg>
+                        EXPLORE
+                    </button>
+                    <div class="w-px h-4 bg-white/10 self-center mx-1"></div>
+                    <button onclick="copyToClipboard()" class="text-gray-500 hover:text-neonPink font-mono text-xs transition-colors">[COPY]</button>
+                    <button onclick="downloadRawJson()" class="text-gray-500 hover:text-white font-mono text-xs transition-colors">[RAW]</button>
+                    <button onclick="downloadCsv()" class="text-gray-500 hover:text-white font-mono text-xs transition-colors">[CSV]</button>
+                </div>
+            </div>
+            <div id="output" class="flex-1 p-6 overflow-auto font-mono text-sm text-gray-400 custom-scrollbar">
+                <div class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
+                    <div class="w-24 h-24 border border-dashed border-white/20 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
+                        <div class="w-16 h-16 border border-white/10 rounded-full"></div>
+                    </div>
+                    <p class="tracking-widest text-xs">AWAITING_INPUT_STREAM...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        <div class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-neonGreen/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="document.getElementById('helpModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl">&times;</button>
+            
+            <h2 class="text-xl font-cyber text-neonGreen mb-6 tracking-wide flex items-center gap-3">
+                <span class="text-2xl">🍪</span> HOW TO BYPASS LOGIN
+            </h2>
+            
+            <div class="space-y-8 font-mono text-sm text-gray-300">
+                
+                <div class="bg-black/40 p-5 rounded border-l-4 border-neonBlue">
+                    <h3 class="text-neonBlue font-bold text-base mb-3 uppercase">Method 1: The Easy Way (Chrome Extension)</h3>
+                    <ol class="list-decimal pl-5 space-y-3 marker:text-neonBlue">
+                        <li>Install the <strong>"EditThisCookie"</strong> extension for Chrome/Edge.</li>
+                        <li>Go to the website you want to scrape (e.g., <em>storyxi.com</em>) and <strong>log in manually</strong>.</li>
+                        <li>Click the cookie extension icon in your browser toolbar.</li>
+                        <li>Click the <strong>"Export"</strong> button (it looks like an arrow pointing out ➜). This copies the cookies to your clipboard.</li>
+                        <li><strong>Paste</strong> the copied text directly into the "Session State" box on this dashboard.</li>
+                    </ol>
+                </div>
+
+                <div class="bg-black/40 p-5 rounded border-l-4 border-neonPink">
+                    <h3 class="text-neonPink font-bold text-base mb-3 uppercase">Method 2: The Developer Way (Terminal)</h3>
+                    <p class="mb-3 text-xs text-gray-400">Use this if you have Node.js installed on your computer.</p>
+                    <ol class="list-decimal pl-5 space-y-3 marker:text-neonPink">
+                        <li>Open your computer's <strong>Terminal</strong> or Command Prompt.</li>
+                        <li>Copy and paste this command (replace the URL with your target):
+                            <div class="mt-2 bg-black p-3 rounded border border-white/10 relative group">
+                                <code class="text-neonPink text-xs break-all">npx playwright codegen --save-storage=auth.json https://www.storyxi.com</code>
+                            </div>
+                        </li>
+                        <li>A browser window will open. <strong>Log in</strong> to the site inside that window.</li>
+                        <li>Once logged in, <strong>close</strong> the browser window.</li>
+                        <li>A new file named <code>auth.json</code> was created in your current folder. Open it with a text editor (Notepad, TextEdit, VS Code).</li>
+                        <li>Copy the <strong>entire content</strong> of that file and paste it into the box here.</li>
+                    </ol>
+                </div>
+
+                <div class="text-xs text-gray-500 border-t border-white/10 pt-4">
+                    <strong>Why do I need this?</strong> <br>
+                    Automated bots cannot easily click "Login with Google" buttons because Google blocks them. By copying your "Session Cookies", you are effectively telling the bot: <em>"Pretend to be me, I'm already logged in."</em>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-right">
+                <button onclick="document.getElementById('helpModal').classList.add('hidden')" class="cyber-btn px-6 py-2 text-xs font-bold">UNDERSTOOD</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Modal -->
+    <div id="templatesModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        <div class="glass-card rounded-xl max-w-6xl w-full h-[90vh] flex flex-col border-neonPink/30">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/5">
+                <h2 class="text-2xl font-cyber text-white tracking-wide flex items-center gap-3">
+                    <span class="text-neonPink">TEMPLATE</span> LIBRARY
+                </h2>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <input type="text" placeholder="SEARCH_MODULES..." class="cyber-input bg-black/50 pl-10 pr-4 py-2 rounded text-xs w-64">
+                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <button onclick="document.getElementById('templatesModal').classList.add('hidden')" class="text-gray-500 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-black/20">
+                
+                <!-- User Saved Section -->
+                <div id="userTemplatesSection" class="mb-8 hidden">
+                    <h3 class="text-neonBlue font-cyber text-sm mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> LOCAL_STORAGE
+                    </h3>
+                    <div id="userTemplatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- User Templates Injected Here -->
+                    </div>
+                </div>
+
+                <!-- System Templates -->
+                <h3 class="text-neonPink font-cyber text-sm mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-neonPink rounded-full"></span> SYSTEM_MODULES
+                </h3>
+                <div id="systemTemplatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- System Templates Injected Here -->
+                </div>
+            </div>
+        </div>
+    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stealth Help Modal -->
+    <div id="stealthHelpModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        <div class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-purple-500/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl">&times;</button>
+            
+            <h2 class="text-xl font-cyber text-purple-400 mb-6 tracking-wide flex items-center gap-3">
+                <span class="text-2xl">👻</span> STEALTH PROTOCOLS
+            </h2>
+            
+            <div class="space-y-6 font-mono text-sm text-gray-300">
+                <p>
+                    Standard scraping bots are "loud" and easily detected by modern security systems (Cloudflare, Akamai, etc.). 
+                    <strong>Stealth Mode</strong> makes your scraper act more like a human.
+                </p>
+
+                <div class="bg-black/40 p-5 rounded border-l-4 border-purple-500">
+                    <h3 class="text-purple-400 font-bold text-base mb-3 uppercase">When to use this?</h3>
+                    <ul class="list-disc pl-5 space-y-2 marker:text-purple-500">
+                        <li>The target site is blocking you (403 Forbidden errors).</li>
+                        <li>You see CAPTCHAs or "Verify you are human" screens.</li>
+                        <li>You need to scrape high-security sites like LinkedIn, Instagram, or Twitter.</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-4 rounded border border-white/10">
+                        <strong class="text-white block mb-2">✅ PROS</strong>
+                        <ul class="text-xs space-y-1 text-gray-400">
+                            <li>• Evades bot detection scripts</li>
+                            <li>• Randomizes mouse movements</li>
+                            <li>• Masks browser automation flags</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded border border-white/10">
+                        <strong class="text-white block mb-2">⚠️ CONS</strong>
+                        <ul class="text-xs space-y-1 text-gray-400">
+                            <li>• Slightly slower execution</li>
+                            <li>• Higher memory usage</li>
+                            <li>• Not 100% guaranteed (nothing is)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-xs text-gray-500 border-t border-white/10 pt-4">
+                    <strong>Wait Time Jitter:</strong> <br>
+                    This slider adds a random delay (e.g., 2s ± 500ms) between actions. Increasing this makes the bot seem "thoughtful" rather than instant, drastically reducing ban rates.
+                </div>
+            </div>
+            
+            <div class="mt-8 text-right">
+                <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')" class="cyber-btn px-6 py-2 text-xs font-bold border-purple-500 text-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">INITIATE PROTOCOL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentData = null;
+        
+        // Initialize Supabase
+        let supabase;
+        
+        async function initSupabase() {
+            // Wait for Supabase global to be available
+            if (typeof supabase === 'undefined') {
+                console.log("Waiting for Supabase script...");
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            try {
+                // Fetch config from backend to avoid hardcoding keys in frontend source
+                const res = await fetch('http://localhost:8000/config');
+                const config = await res.json();
+                
+                if (config.supabase_url && config.supabase_key) {
+                    // @ts-ignore
+                    supabase = window.supabase.createClient(config.supabase_url, config.supabase_key);
+                    console.log("Supabase initialized");
+                    
+                    // Now check auth
+                    await checkAuth();
+                } else {
+                    console.error("Supabase config missing");
+                }
+            } catch (e) {
+                console.error("Failed to init Supabase:", e);
+            }
+        }
+        
+        // Call init immediately
+        initSupabase();
+
+        // Cache for loaded templates
+        let LOADED_TEMPLATES = {};
+
+        async function openTemplatesModal() {
+            document.getElementById('templatesModal').classList.remove('hidden');
+            await fetchAndRenderTemplates();
+        }
+
+        async function fetchAndRenderTemplates() {
+            const container = document.getElementById('systemTemplatesGrid'); 
+            if(!container) return;
+            
+            container.innerHTML = '<div class="text-neonBlue animate-pulse">LOADING_MODULES...</div>';
+
+            if (!supabase) {
+                 // Try to use global just in case
+                 if (window.supabase && window.supabase.auth) supabase = window.supabase;
+            }
+
+            if (!supabase || !supabase.from) {
+                 container.innerHTML = '<div class="text-red-500">DATABASE_CONNECTION_OFFLINE</div>';
+                 renderUserTemplates();
+                 return;
+            }
+
+            try {
+                // 1. Fetch System Templates from DB
+                const { data: systemTemplates, error } = await supabase
+                    .from('templates')
+                    .select('*')
+                    .eq('type', 'system');
+
+                if (error) throw error;
+
+                // Clear and Render
+                container.innerHTML = '';
+                
+                systemTemplates.forEach(tpl => {
+                    LOADED_TEMPLATES[tpl.id] = tpl; // Cache for loading
+                    
+                    // Parse config if it's a string (sometimes SQL returns jsonb as string depending on driver, but JS client usually handles it)
+                    const config = typeof tpl.config === 'string' ? JSON.parse(tpl.config) : tpl.config;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
+                    
+                    // Determine badges
+                    let badges = '';
+                    if (config.sessionEnabled) badges += `<div class="absolute top-0 right-0 bg-neonBlue/10 px-2 py-1 rounded-bl text-[10px] text-neonBlue font-mono border-l border-b border-neonBlue/20">SESSION_REQ</div>`;
+                    else if (config.loginEnabled) badges += `<div class="absolute top-0 right-0 bg-neonPink/10 px-2 py-1 rounded-bl text-[10px] text-neonPink font-mono border-l border-b border-neonPink/20">CREDS_ONLY</div>`;
+
+                    card.innerHTML = `
+                        ${badges}
+                        <h4 class="text-white font-bold text-lg mb-1">${tpl.name}</h4>
+                        <p class="text-gray-500 text-xs font-mono mb-4 h-8 overflow-hidden">${tpl.description || tpl.url}</p>
+                        
+                        <div class="space-y-2 mb-6">
+                            <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                                <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? `ON (${config.maxPages})` : 'OFF'}</span>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                                <span>STEALTH</span> <span class="${config.stealth ? 'text-purple-400' : 'text-gray-600'}">${config.stealth ? 'ACTIVE' : 'OFF'}</span>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                                <span>AUTH</span> <span class="${config.loginEnabled || config.sessionEnabled ? 'text-yellow-500' : 'text-gray-600'}">${config.sessionEnabled ? 'COOKIE' : (config.loginEnabled ? 'CREDS' : 'NONE')}</span>
+                            </div>
+                        </div>
+
+                        <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn w-full py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD_MODULE</button>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (e) {
+                console.error("Error loading templates:", e);
+                container.innerHTML = `<div class="text-red-500">ERROR_LOADING_DATABASE: ${e.message}</div>`;
+            }
+            
+            renderUserTemplates(); // Keep local storage for custom ones for now
+        }
+
+        function loadTemplate(templateId) {
+            let tpl = LOADED_TEMPLATES[templateId];
+            
+            // Fallback to local custom templates
+            if (!tpl) {
+                const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+                tpl = saved[templateId];
+            }
+
+            if (!tpl) return;
+
+            // Parse config if needed
+            const config = tpl.config || tpl; // Handle DB vs Local structure difference
+            
+            // Fill Fields
+            document.getElementById('url').value = tpl.url;
+            editor.setValue(tpl.query);
+            
+            // Set Toggles & Sliders
+            document.getElementById('pagination').checked = config.pagination;
+            document.getElementById('pagination').dispatchEvent(new Event('change'));
+            
+            document.getElementById('maxPages').value = config.maxPages || 1;
+            
+            document.getElementById('stealthMode').checked = config.stealth;
+            
+            document.getElementById('waitTime').value = config.waitTime || 2;
+            updateWaitDisplay(config.waitTime || 2);
+
+            // Auth Logic
+            document.getElementById('loginEnabled').checked = config.loginEnabled || false;
+            document.getElementById('loginEnabled').dispatchEvent(new Event('change'));
+            
+            if (config.loginEnabled) {
+                document.getElementById('username').value = config.username || '';
+                document.getElementById('password').value = config.password || '';
+                document.getElementById('loginUrl').value = tpl.url; 
+            }
+
+            document.getElementById('sessionEnabled').checked = config.sessionEnabled || false;
+            document.getElementById('sessionEnabled').dispatchEvent(new Event('change'));
+
+            // Close Modal
+            document.getElementById('templatesModal').classList.add('hidden');
+        }
+
+        async function saveCurrentAsTemplate() {
+            const name = prompt("Enter a name for this template (e.g., 'My Custom Scraper'):");
+            if (!name) return;
+
+            const tpl = {
+                name: name,
+                url: document.getElementById('url').value,
+                query: editor.getValue(),
+                type: 'user',
+                config: {
+                    pagination: document.getElementById('pagination').checked,
+                    maxPages: parseInt(document.getElementById('maxPages').value) || 1,
+                    stealth: document.getElementById('stealthMode').checked,
+                    loginEnabled: document.getElementById('loginEnabled').checked,
+                    username: document.getElementById('username').value, 
+                    sessionEnabled: document.getElementById('sessionEnabled').checked,
+                    waitTime: parseInt(document.getElementById('waitTime').value) || 2,
+                }
+            };
+
+            if (supabase) {
+                 const { data, error } = await supabase
+                    .from('templates')
+                    .insert([tpl])
+                    .select();
+                    
+                 if (error) {
+                     console.error("Error saving to DB:", error);
+                     alert("Failed to save to database. Saving locally instead.");
+                     // Fallback
+                 } else {
+                     alert("Template saved to Database!");
+                     return;
+                 }
+            }
+
+            // Local Storage Fallback
+            const localTpl = { ...tpl, id: 'user_' + Date.now(), timestamp: Date.now() };
+            const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+            saved[localTpl.id] = localTpl;
+            localStorage.setItem('user_templates', JSON.stringify(saved));
+            
+            alert("Template saved locally!");
+        }
+
+        function renderUserTemplates() {
+            // ... (Same as before, but adapted for consistency)
+            const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+            const container = document.getElementById('userTemplatesGrid');
+            const section = document.getElementById('userTemplatesSection');
+            
+            if (Object.keys(saved).length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            container.innerHTML = '';
+
+            Object.values(saved).forEach(tpl => {
+                const config = tpl.config || tpl; // Handle legacy
+                LOADED_TEMPLATES[tpl.id] = tpl;
+
+                const card = document.createElement('div');
+                card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 right-0 bg-white/10 px-2 py-1 rounded-bl text-[10px] text-white font-mono border-l border-b border-white/20">CUSTOM</div>
+                    <h4 class="text-white font-bold text-lg mb-1">${tpl.name}</h4>
+                    <p class="text-gray-500 text-xs font-mono mb-4 truncate">${tpl.url}</p>
+                    
+                    <div class="space-y-2 mb-6">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                            <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? 'ON' : 'OFF'}</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                            <span>STEALTH</span> <span class="${config.stealth ? 'text-purple-400' : 'text-gray-600'}">${config.stealth ? 'ACTIVE' : 'OFF'}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn flex-1 py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD</button>
+                        <button onclick="deleteTemplate('${tpl.id}')" class="text-gray-500 hover:text-red-500 px-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteTemplate(id) {
+            if(!confirm("Delete this template?")) return;
+            const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+            delete saved[id];
+            localStorage.setItem('user_templates', JSON.stringify(saved));
+            renderUserTemplates();
+        }
+
+        var editor = CodeMirror.fromTextArea(document.getElementById("query"), {
+            mode: "javascript",
+            theme: "midnight",
+            lineNumbers: true,
+            tabSize: 4,
+            indentUnit: 4,
+            lineWrapping: true
+        });
+
+        // Accordion Logic
+        function toggleAccordion() {
+            const content = document.getElementById('optionsContent');
+            const chevron = document.getElementById('optionsChevron');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                chevron.classList.remove('rotate');
+            } else {
+                content.classList.add('open');
+                chevron.classList.add('rotate');
+            }
+        }
+
+        // Slider Logic
+        function updateWaitDisplay(val) {
+            document.getElementById('waitDisplay').innerText = val + 's';
+            const min = 1, max = 15;
+            const percent = ((val - min) / (max - min)) * 100;
+            document.getElementById('sliderTrack').style.width = percent + '%';
+            document.getElementById('sliderThumb').style.left = percent + '%';
+        }
+
+        // Auth & Logic
+        async function checkAuth() {
+            if (!supabase) return; // Should be called after init
+
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const user = session.user;
+            // Use metadata from Google or fallback
+            const name = user.user_metadata.full_name || user.email.split('@')[0];
+            const avatar = user.user_metadata.avatar_url || user.user_metadata.picture || 'https://ui-avatars.com/api/?name=' + name;
+
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userAvatar').src = avatar;
+
+            // Record Login History
+            await recordLoginHistory(user.id);
+            // Fetch Profile & Credits
+            await fetchProfile(user.id);
+        }
+
+        async function recordLoginHistory(userId) {
+            // Simple debounce: check if we logged this in the last 5 mins in this session
+            const lastLog = sessionStorage.getItem('last_login_log');
+            if (lastLog && (Date.now() - parseInt(lastLog)) < 5 * 60 * 1000) {
+                return;
+            }
+
+            try {
+                await supabase.from('login_history').insert([{
+                    user_id: userId,
+                    user_agent: navigator.userAgent,
+                    ip_address: 'client-side', // Real IP would be captured by RLS or backend ideally
+                    metadata: { platform: navigator.platform }
+                }]);
+                sessionStorage.setItem('last_login_log', Date.now().toString());
+            } catch (e) {
+                console.error("Failed to log login history:", e);
+            }
+        }
+
+        async function fetchProfile(userId) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('subscription_tier, data_usage_mb_used, data_usage_mb_limit')
+                    .eq('id', userId)
+                    .single();
+                
+                if (data) {
+                    const limit = data.data_usage_mb_limit || 10;
+                    const used = data.data_usage_mb_used || 0;
+                    const tier = (data.subscription_tier || 'FREE').toUpperCase();
+                    
+                    // Update UI (create elements if they don't exist or update existing)
+                    // Assuming we want to show this near the user name
+                    const userContainer = document.getElementById('userName').parentNode;
+                    
+                    // Clear existing status lines if any (simple way)
+                    const existingStatus = userContainer.querySelectorAll('.user-status-line');
+                    existingStatus.forEach(el => el.remove());
+
+                    const statusHtml = `
+                        <p class="text-[10px] text-neonBlue user-status-line">${tier} PLAN</p>
+                        <p class="text-[10px] text-gray-400 user-status-line font-mono">DATA: ${used.toFixed(2)}/${limit.toFixed(0)} MB</p>
+                    `;
+                    
+                    // Remove the old "Level 1 Access" text
+                    const oldLevel = userContainer.querySelector('p.text-neonBlue');
+                    if (oldLevel && oldLevel.textContent === 'Level 1 Access') oldLevel.remove();
+
+                    userContainer.insertAdjacentHTML('beforeend', statusHtml);
+                }
+            } catch (e) {
+                console.error("Failed to fetch profile:", e);
+            }
+        }
+
+        async function logout() {
+            if (supabase) {
+                await supabase.auth.signOut();
+            }
+            localStorage.clear(); // Clear any legacy items
+            window.location.href = 'index.html';
+        }
+
+        // UI Logic: Toggles
+        const toggles = [
+            { id: 'pagination', panel: 'paginationParams' },
+            { id: 'loginEnabled', panel: 'loginParams', conflicts: 'sessionEnabled' },
+            { id: 'sessionEnabled', panel: 'sessionParams', conflicts: 'loginEnabled' }
+        ];
+
+        toggles.forEach(t => {
+            const el = document.getElementById(t.id);
+            if(!el) return;
+            el.addEventListener('change', function() {
+                const panel = document.getElementById(t.panel);
+                if (this.checked) {
+                    panel.classList.remove('hidden');
+                    if (t.conflicts) {
+                        document.getElementById(t.conflicts).checked = false;
+                        document.getElementById(toggles.find(x => x.id === t.conflicts).panel).classList.add('hidden');
+                    }
+                } else {
+                    panel.classList.add('hidden');
+                }
+            });
+        });
+
+        // Run Scraper
+        let currentJobId = null;
+        let pollInterval = null;
+
+        async function runScraper() {
+            const btn = document.getElementById('scrapeBtn');
+            const outputDiv = document.getElementById('output');
+            
+            // Check if cancelling
+            if (btn.innerHTML.includes('CANCEL')) {
+                if (currentJobId) {
+                    await fetch(`http://localhost:8000/job/${currentJobId}/cancel`, { method: 'POST' });
+                    clearInterval(pollInterval);
+                    outputDiv.innerHTML += `<div class="text-red-500 font-mono text-xs mt-2">>> ABORT SIGNAL SENT.</div>`;
+                    btn.innerHTML = 'Initialize Extraction';
+                    btn.classList.remove('border-red-500', 'text-red-500');
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            const url = document.getElementById('url').value;
+            const query = editor.getValue(); 
+            const pagination = document.getElementById('pagination').checked;
+            const maxPages = parseInt(document.getElementById('maxPages').value) || 3;
+            const loginEnabled = document.getElementById('loginEnabled').checked;
+            const loginUrl = document.getElementById('loginUrl').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const sessionEnabled = document.getElementById('sessionEnabled').checked;
+            
+            let sessionJson = null;
+            if (sessionEnabled) {
+                try {
+                    const raw = document.getElementById('sessionJson').value;
+                    if (raw) sessionJson = JSON.parse(raw);
+                } catch (e) {
+                    alert("Invalid JSON in Session box.");
+                    return;
+                }
+            }
+
+            // Loading State
+            btn.innerHTML = '<span class="animate-pulse">CANCEL OPERATION</span>';
+            btn.classList.add('border-red-500', 'text-red-500'); // Style for cancel
+            
+            outputDiv.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center space-y-4 font-mono">
+                    <div class="text-neonBlue text-xs animate-pulse">ESTABLISHING UPLINK...</div>
+                    <div class="w-64 h-1 bg-gray-800 rounded overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-neonBlue to-neonPink animate-[shimmer_2s_infinite] w-1/2"></div>
+                    </div>
+                    <div class="text-xs text-gray-500">Target: ${url}</div>
+                </div>
+            `;
+
+            // Get User ID for billing
+            let userId = null;
+            if (supabase) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) userId = session.user.id;
+            }
+
+            try {
+                // 1. Start Job
+                const response = await fetch('http://localhost:8000/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: url,
+                        query: query,
+                        use_local_backend: true,
+                        model_name: "gemini-2.0-flash-exp",
+                        wait_time: 2,
+                        pagination_enabled: pagination,
+                        max_pages: maxPages,
+                        login_enabled: loginEnabled,
+                        login_url: loginUrl,
+                        username: username,
+                        password: password,
+                        session_json: sessionJson,
+                        stealth_mode: document.getElementById('stealthMode').checked,
+                        user_id: userId
+                    })
+                });
+
+                const startData = await response.json();
+                currentJobId = startData.job_id;
+
+                // 2. Poll Status
+                pollInterval = setInterval(async () => {
+                    try {
+                        const statusRes = await fetch(`http://localhost:8000/job/${currentJobId}`);
+                        const statusData = await statusRes.json();
+
+                        if (statusData.status === 'completed') {
+                            clearInterval(pollInterval);
+                            currentData = statusData.data; // Store for download
+                            renderResults(statusData.data);
+                            resetButton();
+                        } else if (statusData.status === 'failed') {
+                            clearInterval(pollInterval);
+                            renderError(statusData.error);
+                            resetButton();
+                        } else if (statusData.status === 'cancelled') {
+                            clearInterval(pollInterval);
+                            outputDiv.innerHTML = `<div class="text-yellow-500 font-mono text-xs p-4">>> OPERATION CANCELLED BY USER</div>`;
+                            resetButton();
+                        }
+                    } catch (e) {
+                        console.error("Poll error", e);
+                    }
+                }, 2000); // Poll every 2s
+                
+            } catch (error) {
+                renderError(error.message);
+                resetButton();
+            }
+        }
+
+        function resetButton() {
+            const btn = document.getElementById('scrapeBtn');
+            btn.innerHTML = 'Initialize Extraction';
+            btn.classList.remove('border-red-500', 'text-red-500');
+            btn.disabled = false;
+        }
+
+        function renderResults(data) {
+            // Calculate metrics (same as before)
+            let itemCount = 0;
+            if (data && typeof data === 'object') {
+                const listKey = Object.keys(data).find(k => Array.isArray(data[k]));
+                if (listKey) itemCount = data[listKey].length;
+                else if (data.data) {
+                        const innerKey = Object.keys(data.data).find(k => Array.isArray(data.data[k]));
+                        if (innerKey) itemCount = data.data[innerKey].length;
+                }
+            }
+            
+            const jsonString = JSON.stringify(data, null, 2);
+            document.getElementById('resultCount').innerText = `ITEMS: ${itemCount}`;
+            document.getElementById('charCount').innerText = `SIZE: ${formatBytes(jsonString.length)}`;
+            document.getElementById('output').innerHTML = `<pre class="text-neonGreen text-xs leading-relaxed p-4">${jsonString}</pre>`;
+        }
+
+        function renderError(msg) {
+            document.getElementById('output').innerHTML = `
+                <div class="p-6 border border-red-500/50 bg-red-900/20 text-red-400 font-mono">
+                    <h3 class="font-bold mb-2 text-lg">CRITICAL FAILURE</h3>
+                    <p class="text-xs">${msg}</p>
+                </div>
+            `;
+        }
+
+        // Helper: Format Bytes
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        // --- Action Functions ---
+
+        function copyToClipboard() {
+            if (!currentData) return;
+            const str = JSON.stringify(currentData, null, 2);
+            navigator.clipboard.writeText(str).then(() => {
+                const btn = document.querySelector('button[onclick="copyToClipboard()"]');
+                const original = btn.innerText;
+                btn.innerText = "[COPIED!]";
+                btn.classList.add('text-neonGreen');
+                setTimeout(() => {
+                    btn.innerText = original;
+                    btn.classList.remove('text-neonGreen');
+                }, 2000);
+            });
+        }
+
+        function downloadRawJson() {
+            if (!currentData) {
+                alert("No data to download.");
+                return;
+            }
+            // If the data is wrapped in a 'data' key from the API response, unwrap it for the file if desired, 
+            // OR keep the full response. Usually users want the extraction result.
+            // Our API returns { data: {...}, message: ... }. Let's download the inner data if present.
+            const payload = currentData.data || currentData;
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "scrape_results.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function downloadCsv() {
+            if (!currentData) {
+                alert("No data to download.");
+                return;
+            }
+            
+            // Unwrap { data: ... } if present
+            const payload = currentData.data || currentData;
+
+            // Heuristic: Find the first array
+            let targetArray = null;
+            for (const key in payload) {
+                if (Array.isArray(payload[key])) {
+                    targetArray = payload[key];
+                    break;
+                }
+            }
+
+            if (!targetArray || targetArray.length === 0) {
+                alert("No list found to convert to CSV.");
+                return;
+            }
+
+            // Extract headers
+            const headers = Object.keys(targetArray[0]);
+            const csvRows = [];
+            csvRows.push(headers.join(','));
+
+            for (const row of targetArray) {
+                const values = headers.map(header => {
+                    const val = row[header] || ''; 
+                    const escaped = ('' + val).replace(/"/g, '\\"');
+                    return `"${escaped}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "scrape_results.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+    <style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,255,255,0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,255,255,0.4); }
+    </style>
+</body>
+</html>
