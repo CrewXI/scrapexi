@@ -579,9 +579,14 @@
         let supabase;
         
         async function initSupabase() {
+            // Determine API Base URL
+            const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:8000' 
+                : ''; 
+
             try {
                 // Fetch config from backend to avoid hardcoding keys in frontend source
-                const res = await fetch('/config'); // Use relative path
+                const res = await fetch(`${API_BASE}/config`); // Use dynamic path
                 const config = await res.json();
                 
                 if (config.supabase_url && config.supabase_anon_key) {
@@ -771,11 +776,19 @@
             const name = prompt("Enter a name for this template (e.g., 'My Custom Scraper'):");
             if (!name) return;
 
+            // Get current user
+            let userId = null;
+            if (supabase) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) userId = session.user.id;
+            }
+
             const tpl = {
                 name: name,
                 url: document.getElementById('url').value,
                 query: editor.getValue(),
                 type: 'user',
+                user_id: userId, // REQUIRED for RLS
                 config: {
                     pagination: document.getElementById('pagination').checked,
                     maxPages: parseInt(document.getElementById('maxPages').value) || 1,
