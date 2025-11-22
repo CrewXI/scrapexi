@@ -50,6 +50,7 @@ def ensure_browser_installed():
     """
     Checks if Chromium is installed. If not, installs it.
     Useful for Vercel environments where the binary might be missing.
+    Returns the executable path if found.
     """
     import glob
     import subprocess
@@ -57,7 +58,7 @@ def ensure_browser_installed():
 
     # Only run on Vercel
     if not os.getenv("VERCEL"):
-        return
+        return None
 
     print("DEBUG: Vercel environment detected. configuring Playwright...")
 
@@ -79,19 +80,27 @@ def ensure_browser_installed():
         print("DEBUG: Installation successful.")
     except subprocess.CalledProcessError as e:
         print(f"ERROR: Install failed: {e.stderr.decode()}")
-        return
+        return None
 
-    # 3. Verify
+    # 3. Verify & Find Executable
     print(f"DEBUG: Verifying {target_path}...")
-    files = glob.glob(f"{target_path}/**/*", recursive=True)
-    print(f"DEBUG: Found {len(files)} files in browser cache.")
-    # Limit output
-    if len(files) > 0:
-        print(f"DEBUG: Sample: {files[:3]}")
+    # Look for the executable. It's usually inside a folder like chromium-XXXX/chrome-linux/chrome
+    # or similar. We use glob to find 'chrome' or 'chromium' executable.
+    # Standard Playwright structure: /tmp/pw-browsers/chromium-<ver>/chrome-linux/chrome
+    files = glob.glob(f"{target_path}/**/chrome", recursive=True)
+    if not files:
+        files = glob.glob(f"{target_path}/**/chromium", recursive=True)
+
+    if files:
+        print(f"DEBUG: Found binary at {files[0]}")
+        return files[0]
+
+    print("ERROR: Browser installed but binary not found in glob search.")
+    return None
 
 
 # Run this on startup
-ensure_browser_installed()
+VERCEL_BROWSER_PATH = ensure_browser_installed()
 
 # Plan Limits (MB)
 PLAN_LIMITS = {
@@ -240,7 +249,15 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "--no-sandbox",
                 ]
 
-            browser = playwright.chromium.launch(headless=True, args=browser_args)
+            # Launch Options
+            launch_options = {"headless": True, "args": browser_args}
+
+            # If on Vercel, use the explicit path we found
+            if os.getenv("VERCEL") and VERCEL_BROWSER_PATH:
+                print(f"DEBUG: Using Vercel binary at {VERCEL_BROWSER_PATH}")
+                launch_options["executable_path"] = VERCEL_BROWSER_PATH
+
+            browser = playwright.chromium.launch(**launch_options)
 
             context_args = {
                 "ignore_https_errors": True,
@@ -256,6 +273,17 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
             context = browser.new_context(**context_args)
             page = context.new_page()
+
+            # OPTIMIZATION: Block heavy resources (Images, Fonts, CSS)
+            # This solves memory issues on Vercel (1GB limit)
+            def block_heavy_resources(route):
+                if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
+                    route.abort()
+                else:
+                    route.continue_()
+
+            # Apply blocking unless explicitly needed (for now, apply to all to be safe)
+            page.route("**/*", block_heavy_resources)
 
             if request.stealth_mode and STEALTH_AVAILABLE:
                 print("DEBUG: Applying stealth patches...")
