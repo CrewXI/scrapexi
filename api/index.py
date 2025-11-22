@@ -228,6 +228,19 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
             if request.user_id:
                 update_data_usage(request.user_id, size_mb)
+                # Log to History (Jobs Table)
+                try:
+                    supabase.table("jobs").insert({
+                        "id": job_id,
+                        "user_id": request.user_id,
+                        "url": request.url,
+                        "query": request.query,
+                        "status": "completed",
+                        "data_usage_mb": size_mb,
+                        "completed_at": "now()"
+                    }).execute()
+                except Exception as e:
+                    print(f"Failed to log job history: {e}")
 
             return
 
@@ -236,6 +249,23 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             # DO NOT FALLBACK. Show the real error.
             active_jobs[job_id]["status"] = "failed"
             active_jobs[job_id]["error"] = f"Remote Service Configured but Failed: {str(e)}"
+            
+            # Log Failure to History
+            if request.user_id:
+                try:
+                    supabase.table("jobs").insert({
+                        "id": job_id,
+                        "user_id": request.user_id,
+                        "url": request.url,
+                        "query": request.query,
+                        "status": "failed",
+                        "error": str(e),
+                        "data_usage_mb": 0,
+                        "completed_at": "now()"
+                    }).execute()
+                except Exception as log_err:
+                    print(f"Failed to log job failure: {log_err}")
+            
             return
 
     print(
@@ -418,6 +448,19 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
                 if request.user_id:
                     update_data_usage(request.user_id, size_mb)
+                    # Log to History
+                    try:
+                        supabase.table("jobs").insert({
+                            "id": job_id,
+                            "user_id": request.user_id,
+                            "url": request.url,
+                            "query": request.query,
+                            "status": "completed",
+                            "data_usage_mb": size_mb,
+                            "completed_at": "now()"
+                        }).execute()
+                    except Exception as e:
+                        print(f"Failed to log job history: {e}")
 
                 active_jobs[job_id]["status"] = "completed"
                 active_jobs[job_id]["data"] = result_data
@@ -428,6 +471,21 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
         print(f"ERROR in job {job_id}: {e}")
         active_jobs[job_id]["status"] = "failed"
         active_jobs[job_id]["error"] = str(e)
+        
+        if request.user_id:
+            try:
+                supabase.table("jobs").insert({
+                    "id": job_id,
+                    "user_id": request.user_id,
+                    "url": request.url,
+                    "query": request.query,
+                    "status": "failed",
+                    "error": str(e),
+                    "data_usage_mb": 0,
+                    "completed_at": "now()"
+                }).execute()
+            except Exception as log_err:
+                print(f"Failed to log job failure: {log_err}")
 
 
 @app.post("/scrape", response_model=ScrapeResponse)
