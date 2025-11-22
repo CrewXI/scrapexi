@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import os
@@ -46,6 +45,7 @@ if os.getenv("VERCEL"):
 def ensure_browser_installed():
     # Skip this locally if not needed, or keep as fallback
     return None
+
 
 # Plan Limits (MB)
 PLAN_LIMITS = {
@@ -170,7 +170,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
     # ENTERPRISE MODE: Delegate to External Browser Service if configured
     browser_service_url = os.getenv("BROWSER_SERVICE_URL")
-    
+
     # Debug Print: CRITICAL to see what Vercel sees
     print(f"DEBUG: BROWSER_SERVICE_URL is set to: '{browser_service_url}'")
 
@@ -178,32 +178,33 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
         print(f"DEBUG: Offloading to Browser Service at {browser_service_url}")
         try:
             import requests
+
             # Forward the request to the microservice
             # Ensure we hit the /scrape endpoint
             target_url = f"{browser_service_url.rstrip('/')}/scrape"
-            
+
             print(f"DEBUG: POSTing to {target_url}")
-            
+
             resp = requests.post(
                 target_url,
                 json={
                     "url": request.url,
-                    "query": request.query, # Pass query to backend
-                    "prompt": request.prompt, # Pass prompt to backend
-                    "model_name": request.model_name, # Pass model name
+                    "query": request.query,  # Pass query to backend
+                    "prompt": request.prompt,  # Pass prompt to backend
+                    "model_name": request.model_name,  # Pass model name
                     "wait_time": request.wait_time,
                     "stealth_mode": request.stealth_mode,
-                    "session_json": request.session_json
+                    "session_json": request.session_json,
                 },
-                timeout=120 # Long timeout for scraping
+                timeout=120,  # Long timeout for scraping
             )
             resp.raise_for_status()
             result = resp.json()
-            
+
             # Handle Smart vs Raw response
             final_data = None
             message = "Remote Scrape Complete"
-            
+
             if "data" in result:
                 # AI Extraction Success
                 final_data = result["data"]
@@ -212,24 +213,24 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                 # Raw HTML fallback
                 final_data = {"raw_html_preview": str(result["html"])[:500] + "..."}
                 message = "Raw HTML Extracted"
-            
+
             # Update Job
             active_jobs[job_id]["status"] = "completed"
             active_jobs[job_id]["data"] = final_data
             active_jobs[job_id]["message"] = message
-            
+
             # Calculate Size for Billing (Rough estimate)
             size_mb = 0.0
             if final_data:
                 json_str = json.dumps(final_data)
                 size_bytes = len(json_str.encode("utf-8"))
                 size_mb = size_bytes / (1024 * 1024)
-            
+
             if request.user_id:
                 update_data_usage(request.user_id, size_mb)
-                
+
             return
-            
+
         except Exception as e:
             print(f"CRITICAL ERROR: Remote Browser Failed: {e}")
             # DO NOT FALLBACK. Show the real error.
@@ -237,8 +238,10 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             active_jobs[job_id]["error"] = f"Remote Service Configured but Failed: {str(e)}"
             return
 
-    print("WARNING: No BROWSER_SERVICE_URL found. Attempting local browser launch (likely to fail on Vercel)...")
-    
+    print(
+        "WARNING: No BROWSER_SERVICE_URL found. Attempting local browser launch (likely to fail on Vercel)..."
+    )
+
     try:
         # Sync Check usage (double check inside task)
         if request.user_id:
@@ -260,12 +263,9 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "--disable-infobars",
                     "--no-sandbox",
                 ]
-            
-            launch_options = {
-                "headless": True,
-                "args": browser_args
-            }
-            
+
+            launch_options = {"headless": True, "args": browser_args}
+
             browser = playwright.chromium.launch(**launch_options)
 
             context_args = {
@@ -282,14 +282,14 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
             context = browser.new_context(**context_args)
             page = context.new_page()
-            
+
             # OPTIMIZATION: Block heavy resources (Images, Fonts, CSS)
             def block_heavy_resources(route):
                 if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
                     route.abort()
                 else:
                     route.continue_()
-            
+
             page.route("**/*", block_heavy_resources)
 
             if request.stealth_mode and STEALTH_AVAILABLE:
