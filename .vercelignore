@@ -1,0 +1,14 @@
+node_modules
+examples
+stripe-sample-code
+stripe-sample-code.zip
+my_scraper_api
+.git
+*.md
+env.local
+.env.local
+fix_structure.py
+Makefile
+__pycache__
+*.pyc
+

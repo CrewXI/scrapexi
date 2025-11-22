@@ -1,5 +1,11 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index.py" }
-  ]
+  ],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60,
+      "excludeFiles": "examples/**,node_modules/**,stripe-sample-code.zip,my_scraper_api/**,*.md"
+    }
+  }
 }
