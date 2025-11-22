@@ -787,7 +787,7 @@
                 name: name,
                 url: document.getElementById('url').value,
                 query: editor.getValue(),
-                type: 'user',
+                type: 'private', // Changed from 'user' to 'private' to match DB constraint
                 user_id: userId, // REQUIRED for RLS
                 config: {
                     pagination: document.getElementById('pagination').checked,
