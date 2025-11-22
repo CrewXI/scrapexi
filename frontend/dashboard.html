@@ -569,26 +569,28 @@
         let supabase;
         
         async function initSupabase() {
-            // Wait for Supabase global to be available
-            if (typeof supabase === 'undefined') {
-                console.log("Waiting for Supabase script...");
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-
             try {
                 // Fetch config from backend to avoid hardcoding keys in frontend source
                 const res = await fetch('/config'); // Use relative path
                 const config = await res.json();
                 
-                if (config.supabase_url && config.supabase_key) {
+                if (config.supabase_url && config.supabase_anon_key) {
                     // @ts-ignore
-                    supabase = window.supabase.createClient(config.supabase_url, config.supabase_key);
-                    console.log("Supabase initialized");
-                    
-                    // Now check auth
-                    await checkAuth();
+                    // Ensure window.supabase object from CDN exists before using it
+                    if (window.supabase && window.supabase.createClient) {
+                        supabase = window.supabase.createClient(config.supabase_url, config.supabase_anon_key);
+                        console.log("Supabase initialized");
+                        
+                        // Now check auth
+                        await checkAuth();
+                    } else {
+                        console.error("Supabase SDK not loaded yet");
+                        // Retry once after small delay if SDK script is racing
+                        setTimeout(() => initSupabase(), 500); 
+                        return;
+                    }
                 } else {
-                    console.error("Supabase config missing");
+                    console.error("Supabase config missing", config);
                 }
             } catch (e) {
                 console.error("Failed to init Supabase:", e);
