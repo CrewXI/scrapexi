@@ -6,8 +6,16 @@ import asyncio
 from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Body
 from playwright.sync_api import sync_playwright
-from playwright_stealth import stealth_sync
 from pydantic import BaseModel
+
+# Stealth Import Logic
+try:
+    # Try the standard import
+    from playwright_stealth import stealth_sync
+    STEALTH_AVAILABLE = True
+except ImportError:
+    STEALTH_AVAILABLE = False
+    print("WARNING: playwright-stealth not found or import failed. Stealth mode disabled.")
 
 app = FastAPI(title="Dedicated Browser Service")
 
@@ -57,8 +65,11 @@ def scrape(request: ScrapeRequest):
             page = context.new_page()
             
             # 3. Apply Stealth
-            if request.stealth_mode:
-                stealth_sync(page)
+            if request.stealth_mode and STEALTH_AVAILABLE:
+                try:
+                    stealth_sync(page)
+                except Exception as e:
+                    print(f"Stealth failed: {e}")
                 
             # 4. Navigate
             page.goto(request.url, timeout=60000)
@@ -80,8 +91,6 @@ def scrape(request: ScrapeRequest):
                 "url": request.url,
                 "content_length": len(content),
                 "html": content 
-                # In a real enterprise setup, you'd upload HTML to S3/Supabase Storage 
-                # and return a URL to keep the JSON payload small.
             }
 
     except Exception as e:
@@ -91,4 +100,3 @@ def scrape(request: ScrapeRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
-
