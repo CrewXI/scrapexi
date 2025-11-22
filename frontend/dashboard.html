@@ -626,6 +626,9 @@
 
         async function fetchAndRenderTemplates() {
             const container = document.getElementById('systemTemplatesGrid'); 
+            const userContainer = document.getElementById('userTemplatesGrid');
+            const userSection = document.getElementById('userTemplatesSection');
+
             if(!container) return;
             
             container.innerHTML = '<div class="text-neonBlue animate-pulse">LOADING_MODULES...</div>';
@@ -642,59 +645,86 @@
             }
 
             try {
-                // 1. Fetch System Templates from DB
-                const { data: systemTemplates, error } = await supabase
+                // 1. Fetch System Templates
+                const { data: systemTemplates, error: sysError } = await supabase
                     .from('templates')
                     .select('*')
                     .eq('type', 'system');
 
-                if (error) throw error;
+                if (sysError) throw sysError;
 
-                // Clear and Render
+                // 2. Fetch User Private Templates
+                let privateTemplates = [];
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    const { data, error: userError } = await supabase
+                        .from('templates')
+                        .select('*')
+                        .eq('user_id', session.user.id)
+                        .order('created_at', { ascending: false });
+                    
+                    if (!userError && data) privateTemplates = data;
+                }
+
+                // --- Render System Templates ---
                 container.innerHTML = '';
-                
-                systemTemplates.forEach(tpl => {
-                    LOADED_TEMPLATES[tpl.id] = tpl; // Cache for loading
-                    
-                    // Parse config if it's a string (sometimes SQL returns jsonb as string depending on driver, but JS client usually handles it)
-                    const config = typeof tpl.config === 'string' ? JSON.parse(tpl.config) : tpl.config;
-                    
-                    const card = document.createElement('div');
-                    card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
-                    
-                    // Determine badges
-                    let badges = '';
-                    if (config.sessionEnabled) badges += `<div class="absolute top-0 right-0 bg-neonBlue/10 px-2 py-1 rounded-bl text-[10px] text-neonBlue font-mono border-l border-b border-neonBlue/20">SESSION_REQ</div>`;
-                    else if (config.loginEnabled) badges += `<div class="absolute top-0 right-0 bg-neonPink/10 px-2 py-1 rounded-bl text-[10px] text-neonPink font-mono border-l border-b border-neonPink/20">CREDS_ONLY</div>`;
+                systemTemplates.forEach(tpl => renderTemplateCard(tpl, container));
 
-                    card.innerHTML = `
-                        ${badges}
-                        <h4 class="text-white font-bold text-lg mb-1">${tpl.name}</h4>
-                        <p class="text-gray-500 text-xs font-mono mb-4 h-8 overflow-hidden">${tpl.description || tpl.url}</p>
-                        
-                        <div class="space-y-2 mb-6">
-                            <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
-                                <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? `ON (${config.maxPages})` : 'OFF'}</span>
-                            </div>
-                            <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
-                                <span>STEALTH</span> <span class="${config.stealth ? 'text-purple-400' : 'text-gray-600'}">${config.stealth ? 'ACTIVE' : 'OFF'}</span>
-                            </div>
-                            <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
-                                <span>AUTH</span> <span class="${config.loginEnabled || config.sessionEnabled ? 'text-yellow-500' : 'text-gray-600'}">${config.sessionEnabled ? 'COOKIE' : (config.loginEnabled ? 'CREDS' : 'NONE')}</span>
-                            </div>
-                        </div>
-
-                        <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn w-full py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD_MODULE</button>
-                    `;
-                    container.appendChild(card);
-                });
+                // --- Render Private Templates ---
+                if (privateTemplates.length > 0) {
+                    userSection.classList.remove('hidden');
+                    userContainer.innerHTML = '';
+                    // Rename header to reflect cloud status
+                    userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (CLOUD)';
+                    
+                    privateTemplates.forEach(tpl => renderTemplateCard(tpl, userContainer, true));
+                }
 
             } catch (e) {
                 console.error("Error loading templates:", e);
                 container.innerHTML = `<div class="text-red-500">ERROR_LOADING_DATABASE: ${e.message}</div>`;
             }
             
-            renderUserTemplates(); // Keep local storage for custom ones for now
+            // Also render local ones if any exist (legacy support)
+            renderUserTemplates(); 
+        }
+
+        function renderTemplateCard(tpl, container, isUser = false) {
+            LOADED_TEMPLATES[tpl.id] = tpl; // Cache
+            
+            const config = typeof tpl.config === 'string' ? JSON.parse(tpl.config) : tpl.config;
+            
+            const card = document.createElement('div');
+            card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
+            
+            let badges = '';
+            if (config.sessionEnabled) badges += `<div class="absolute top-0 right-0 bg-neonBlue/10 px-2 py-1 rounded-bl text-[10px] text-neonBlue font-mono border-l border-b border-neonBlue/20">SESSION</div>`;
+            else if (config.loginEnabled) badges += `<div class="absolute top-0 right-0 bg-neonPink/10 px-2 py-1 rounded-bl text-[10px] text-neonPink font-mono border-l border-b border-neonPink/20">CREDS</div>`;
+            
+            if (isUser) {
+                 badges += `<div class="absolute top-0 right-0 bg-green-500/10 px-2 py-1 rounded-bl text-[10px] text-green-400 font-mono border-l border-b border-green-500/20" style="right: ${config.sessionEnabled || config.loginEnabled ? '60px' : '0'}">PRIVATE</div>`;
+            }
+
+            card.innerHTML = `
+                ${badges}
+                <h4 class="text-white font-bold text-lg mb-1">${tpl.name}</h4>
+                <p class="text-gray-500 text-xs font-mono mb-4 h-8 overflow-hidden">${tpl.description || tpl.url}</p>
+                
+                <div class="space-y-2 mb-6">
+                    <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                        <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? `ON (${config.maxPages})` : 'OFF'}</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                        <span>STEALTH</span> <span class="${config.stealth ? 'text-purple-400' : 'text-gray-600'}">${config.stealth ? 'ACTIVE' : 'OFF'}</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
+                        <span>AUTH</span> <span class="${config.loginEnabled || config.sessionEnabled ? 'text-yellow-500' : 'text-gray-600'}">${config.sessionEnabled ? 'COOKIE' : (config.loginEnabled ? 'CREDS' : 'NONE')}</span>
+                    </div>
+                </div>
+
+                <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn w-full py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD_MODULE</button>
+            `;
+            container.appendChild(card);
         }
 
         function loadTemplate(templateId) {
