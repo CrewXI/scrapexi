@@ -233,6 +233,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
         print(f"DEBUG: Offloading to Browser Service at {browser_service_url}")
         try:
             import requests
+
             # Forward the request to the microservice
             resp = requests.post(
                 f"{browser_service_url}/scrape",
@@ -240,24 +241,26 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "url": request.url,
                     "wait_time": request.wait_time,
                     "stealth_mode": request.stealth_mode,
-                    "session_json": request.session_json
+                    "session_json": request.session_json,
                 },
-                timeout=120 # Long timeout for scraping
+                timeout=120,  # Long timeout for scraping
             )
             resp.raise_for_status()
             result = resp.json()
-            
+
             # For now, we just get the HTML. In a real integration, we'd process it with Gemini here.
             # Assuming the service returns raw HTML, we might need to parse it or just store it.
-            # To keep it compatible with current logic, let's assume we want to process it locally 
+            # To keep it compatible with current logic, let's assume we want to process it locally
             # OR the service returns the data.
-            
+
             # Simple Pass-through for now
             active_jobs[job_id]["status"] = "completed"
-            active_jobs[job_id]["data"] = {"raw_html_preview": result.get("html")[:500] + "..."} # Truncate for preview
+            active_jobs[job_id]["data"] = {
+                "raw_html_preview": result.get("html")[:500] + "..."
+            }  # Truncate for preview
             active_jobs[job_id]["message"] = "Remote Scrape Complete"
             return
-            
+
         except Exception as e:
             print(f"Remote Browser Failed: {e}")
             # Fallback to local or just fail?
