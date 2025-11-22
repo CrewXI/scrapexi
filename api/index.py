@@ -13,9 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
-import agentql
-from agentql.ext.playwright.sync_api import Page
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Page
 from dotenv import load_dotenv
 import stripe
 from supabase import create_client, Client

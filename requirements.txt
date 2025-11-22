@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-agentql
 playwright
 python-dotenv
 beautifulsoup4
