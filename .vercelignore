@@ -12,3 +12,4 @@ Makefile
 __pycache__
 *.pyc
 
+scraper_service
