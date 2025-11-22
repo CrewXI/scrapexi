@@ -31,7 +31,7 @@ class ScrapeRequest(BaseModel):
 
 @app.get("/")
 def health_check():
-    return {"status": "ok", "service": "browser-microservice", "version": "1.0.1"}
+    return {"status": "ok", "service": "browser-microservice", "version": "1.0.2"}
 
 
 @app.post("/scrape")
@@ -51,17 +51,19 @@ def scrape(request: ScrapeRequest):
                 "--no-zygote",
                 "--single-process",
                 "--disable-gpu",
+                "--ignore-certificate-errors", # Add ignore cert errors flag
             ]
 
             browser = p.chromium.launch(headless=True, args=browser_args)
 
             # 2. Context & Page
             context = browser.new_context(
-                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                ignore_https_errors=True # Explicitly ignore HTTPS errors
             )
 
             if request.session_json:
-                context = browser.new_context(storage_state=request.session_json)
+                context = browser.new_context(storage_state=request.session_json, ignore_https_errors=True)
 
             page = context.new_page()
 
@@ -73,14 +75,21 @@ def scrape(request: ScrapeRequest):
                     print(f"Stealth failed: {e}")
 
             # 4. Navigate
-            page.goto(request.url, timeout=60000)
+            print(f"Navigating to {request.url}...")
+            try:
+                page.goto(request.url, timeout=60000, wait_until="domcontentloaded")
+            except Exception as nav_error:
+                print(f"Navigation Error (continuing anyway): {nav_error}")
 
             # 5. Wait
-            page.wait_for_load_state("domcontentloaded")
+            print("Waiting for content...")
             page.wait_for_timeout(request.wait_time * 1000)
 
             # 6. Extract (Basic HTML for now, or you can integrate Gemini here too)
             content = page.content()
+            
+            # Log success
+            print(f"Scrape successful. Content length: {len(content)}")
 
             # Capture snapshot for debug/virtual view (optional)
             # screenshot = page.screenshot(type='jpeg', quality=50)
