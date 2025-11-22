@@ -189,16 +189,15 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <div class="hidden md:flex items-center gap-4 text-sm font-mono text-gray-500">
-                <span>CPU: <span class="text-neonBlue">12%</span></span>
-                <span>MEM: <span class="text-neonPink">2.4GB</span></span>
-                <span>NET: <span class="text-neonGreen">Active</span></span>
+            <div id="userStats" class="hidden md:flex items-center gap-4 text-sm font-mono text-gray-500">
+                <span>DATA USED: <span id="statUsed" class="text-neonBlue">...</span></span>
+                <span>DATA LEFT: <span id="statLeft" class="text-neonPink">...</span></span>
+                <span>PLAN: <span id="statPlan" class="text-neonGreen">...</span></span>
             </div>
             <div class="flex items-center gap-3 px-4 py-2 glass-card rounded-lg">
                 <img id="userAvatar" src="" class="w-8 h-8 rounded border border-white/20">
                 <div class="text-right hidden sm:block">
                     <p id="userName" class="text-xs font-bold text-white tracking-wider uppercase">Operator</p>
-                    <p class="text-[10px] text-neonBlue">Level 1 Access</p>
                 </div>
                 <button onclick="logout()" class="text-gray-500 hover:text-red-500 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"/></svg>
@@ -212,13 +211,13 @@
         
         <!-- Sidebar Nav -->
         <nav class="w-16 lg:w-20 glass-card rounded-2xl flex flex-col items-center py-8 gap-8 flex-shrink-0">
-            <a href="#" class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110">
+            <a href="#" onclick="closeAllModals()" class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </a>
-            <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+            <a href="#" onclick="openTemplatesModal()" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Template Library">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
             </a>
-            <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+            <a href="#" onclick="openHistoryModal()" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Search History">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </a>
             <div class="flex-1"></div>
@@ -230,11 +229,35 @@
         <!-- Configuration Module -->
         <div class="w-[450px] flex flex-col gap-4 overflow-hidden">
             
-            <!-- URL Builder Module (Hidden by default) -->
-            <div id="urlBuilderModule" class="glass-card p-5 rounded-2xl flex-shrink-0 hidden">
+            <!-- Search Parameters Module -->
+            <div id="searchParamsModule" class="glass-card p-5 rounded-2xl flex-shrink-0">
                 <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
                     <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Search Parameters
                 </h2>
+                
+                <!-- Pagination (Always Visible) -->
+                <div class="mb-4 border-b border-white/5 pb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[10px] text-gray-400 font-mono uppercase">Pagination Range</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="pagination" class="sr-only peer">
+                            <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonBlue">
+                                <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="paginationControls" class="grid grid-cols-2 gap-2 hidden">
+                        <div>
+                            <label class="text-[9px] text-gray-500 block mb-1">START PAGE</label>
+                            <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-xs font-mono text-center">
+                        </div>
+                        <div>
+                            <label class="text-[9px] text-gray-500 block mb-1">END PAGE</label>
+                            <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-xs font-mono text-center">
+                        </div>
+                    </div>
+                </div>
+
                 <div id="urlBuilderFields" class="space-y-3">
                     <!-- Dynamic Inputs injected here -->
                 </div>
@@ -260,24 +283,6 @@
                 </button>
                 
                 <div id="optionsContent" class="accordion-content open px-5 pb-5 space-y-5">
-                    <!-- Pagination -->
-                    <div class="flex items-center justify-between group">
-                        <div>
-                            <span class="text-white font-bold text-sm tracking-wide">Pagination</span>
-                            <p class="text-[10px] text-gray-500 font-mono">AUTO_TRAVERSE</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div id="paginationParams" class="hidden">
-                                <input type="number" id="maxPages" value="3" class="w-12 bg-black/50 border border-neonBlue/30 text-neonBlue text-center text-[10px] rounded py-1 font-mono focus:outline-none focus:border-neonBlue">
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="pagination" class="sr-only peer">
-                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonBlue peer-checked:[&>div]:shadow-[0_0_10px_#00FFFF]">
-                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
 
                     <!-- Login -->
                     <div class="space-y-2">
@@ -513,6 +518,42 @@
             </div>
         </div>
     </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        <div class="glass-card rounded-xl max-w-5xl w-full h-[90vh] flex flex-col border-neonBlue/30">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/5">
+                <h2 class="text-2xl font-cyber text-white tracking-wide flex items-center gap-3">
+                    <span class="text-neonBlue">MISSION</span> LOGS
+                </h2>
+                <div class="flex items-center gap-4">
+                    <button onclick="document.getElementById('historyModal').classList.add('hidden')" class="text-gray-500 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-0 bg-black/20">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-white/5 text-xs uppercase font-mono text-gray-400 sticky top-0 backdrop-blur-md">
+                        <tr>
+                            <th class="p-4 border-b border-white/10">Status</th>
+                            <th class="p-4 border-b border-white/10">Target</th>
+                            <th class="p-4 border-b border-white/10">Data Usage</th>
+                            <th class="p-4 border-b border-white/10">Time</th>
+                            <th class="p-4 border-b border-white/10 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="text-sm font-mono text-gray-300">
+                        <!-- History Rows Injected Here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -778,7 +819,8 @@
             document.getElementById('pagination').checked = config.pagination;
             document.getElementById('pagination').dispatchEvent(new Event('change'));
             
-            document.getElementById('maxPages').value = config.maxPages || 1;
+            document.getElementById('startPage').value = config.startPage || 1;
+            document.getElementById('endPage').value = config.endPage || config.maxPages || 1;
             
             document.getElementById('stealthMode').checked = config.stealth;
             
@@ -821,7 +863,9 @@
                 user_id: userId, // REQUIRED for RLS
                 config: {
                     pagination: document.getElementById('pagination').checked,
-                    maxPages: parseInt(document.getElementById('maxPages').value) || 1,
+                    startPage: parseInt(document.getElementById('startPage').value) || 1,
+                    endPage: parseInt(document.getElementById('endPage').value) || 1,
+                    maxPages: parseInt(document.getElementById('endPage').value) || 1, // Fallback
                     stealth: document.getElementById('stealthMode').checked,
                     loginEnabled: document.getElementById('loginEnabled').checked,
                     username: document.getElementById('username').value, 
@@ -1011,28 +1055,15 @@
                     .single();
                 
                 if (data) {
-                    const limit = data.data_usage_mb_limit || 10;
-                    const used = data.data_usage_mb_used || 0;
+                    const limit = parseFloat(data.data_usage_mb_limit || 10);
+                    const used = parseFloat(data.data_usage_mb_used || 0);
+                    const left = Math.max(0, limit - used);
                     const tier = (data.subscription_tier || 'FREE').toUpperCase();
                     
-                    // Update UI (create elements if they don't exist or update existing)
-                    // Assuming we want to show this near the user name
-                    const userContainer = document.getElementById('userName').parentNode;
-                    
-                    // Clear existing status lines if any (simple way)
-                    const existingStatus = userContainer.querySelectorAll('.user-status-line');
-                    existingStatus.forEach(el => el.remove());
-
-                    const statusHtml = `
-                        <p class="text-[10px] text-neonBlue user-status-line">${tier} PLAN</p>
-                        <p class="text-[10px] text-gray-400 user-status-line font-mono">DATA: ${used.toFixed(2)}/${limit.toFixed(0)} MB</p>
-                    `;
-                    
-                    // Remove the old "Level 1 Access" text
-                    const oldLevel = userContainer.querySelector('p.text-neonBlue');
-                    if (oldLevel && oldLevel.textContent === 'Level 1 Access') oldLevel.remove();
-
-                    userContainer.insertAdjacentHTML('beforeend', statusHtml);
+                    // Update Stats Bar
+                    document.getElementById('statUsed').innerText = `${used.toFixed(2)} MB`;
+                    document.getElementById('statLeft').innerText = `${left.toFixed(2)} MB`;
+                    document.getElementById('statPlan').innerText = tier;
                 }
             } catch (e) {
                 console.error("Failed to fetch profile:", e);
@@ -1049,7 +1080,7 @@
 
         // UI Logic: Toggles
         const toggles = [
-            { id: 'pagination', panel: 'paginationParams' },
+            { id: 'pagination', panel: 'paginationControls' },
             { id: 'loginEnabled', panel: 'loginParams', conflicts: 'sessionEnabled' },
             { id: 'sessionEnabled', panel: 'sessionParams', conflicts: 'loginEnabled' }
         ];
@@ -1070,6 +1101,71 @@
                 }
             });
         });
+
+        function closeAllModals() {
+            document.querySelectorAll('[id$="Modal"]').forEach(el => el.classList.add('hidden'));
+        }
+
+        async function openHistoryModal() {
+            closeAllModals();
+            document.getElementById('historyModal').classList.remove('hidden');
+            
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-neonBlue animate-pulse">LOADING LOGS...</td></tr>';
+
+            if (!supabase) return;
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                const { data, error } = await supabase
+                    .from('jobs')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) throw error;
+
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">NO MISSION LOGS FOUND</td></tr>';
+                    return;
+                }
+
+                data.forEach(job => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-white/5 hover:bg-white/5 transition';
+                    
+                    let statusColor = 'text-gray-500';
+                    if (job.status === 'completed') statusColor = 'text-neonGreen';
+                    else if (job.status === 'failed') statusColor = 'text-red-500';
+                    else if (job.status === 'running') statusColor = 'text-neonBlue animate-pulse';
+
+                    const date = new Date(job.created_at).toLocaleString();
+                    const usage = job.data_usage_mb ? parseFloat(job.data_usage_mb).toFixed(4) + ' MB' : '0.00 MB';
+
+                    row.innerHTML = `
+                        <td class="p-4 ${statusColor} font-bold uppercase text-xs">${job.status}</td>
+                        <td class="p-4 truncate max-w-[200px]" title="${job.url}">${job.url}</td>
+                        <td class="p-4 font-mono text-xs">${usage}</td>
+                        <td class="p-4 text-xs text-gray-500">${date}</td>
+                        <td class="p-4 text-right">
+                            ${job.status === 'completed' && job.data ? 
+                                `<button onclick="loadJobData('${job.id}')" class="text-neonBlue hover:text-white text-xs underline">LOAD DATA</button>` : 
+                                '<span class="text-gray-600">-</span>'}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (e) {
+                console.error("History Error:", e);
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">ERROR: ${e.message}</td></tr>`;
+            }
+        }
+
 
         // Run Scraper
         let currentJobId = null;
@@ -1095,7 +1191,10 @@
             const url = document.getElementById('url').value;
             const query = editor.getValue(); 
             const pagination = document.getElementById('pagination').checked;
-            const maxPages = parseInt(document.getElementById('maxPages').value) || 3;
+            const startPage = parseInt(document.getElementById('startPage').value) || 1;
+            const endPage = parseInt(document.getElementById('endPage').value) || 1;
+            const maxPages = pagination ? Math.max(1, endPage - startPage + 1) : 1;
+
             const loginEnabled = document.getElementById('loginEnabled').checked;
             const loginUrl = document.getElementById('loginUrl').value;
             const username = document.getElementById('username').value;
