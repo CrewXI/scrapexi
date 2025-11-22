@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+playwright
+bs4
+requests
+playwright-stealth
+
