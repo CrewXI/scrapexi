@@ -188,6 +188,9 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                 target_url,
                 json={
                     "url": request.url,
+                    "query": request.query, # Pass query to backend
+                    "prompt": request.prompt, # Pass prompt to backend
+                    "model_name": request.model_name, # Pass model name
                     "wait_time": request.wait_time,
                     "stealth_mode": request.stealth_mode,
                     "session_json": request.session_json
@@ -197,10 +200,34 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             resp.raise_for_status()
             result = resp.json()
             
-            # Simple Pass-through for now
+            # Handle Smart vs Raw response
+            final_data = None
+            message = "Remote Scrape Complete"
+            
+            if "data" in result:
+                # AI Extraction Success
+                final_data = result["data"]
+                message = "AI Extraction Complete"
+            elif "html" in result:
+                # Raw HTML fallback
+                final_data = {"raw_html_preview": str(result["html"])[:500] + "..."}
+                message = "Raw HTML Extracted"
+            
+            # Update Job
             active_jobs[job_id]["status"] = "completed"
-            active_jobs[job_id]["data"] = {"raw_html_preview": str(result.get("html"))[:500] + "..."} # Truncate for preview
-            active_jobs[job_id]["message"] = "Remote Scrape Complete"
+            active_jobs[job_id]["data"] = final_data
+            active_jobs[job_id]["message"] = message
+            
+            # Calculate Size for Billing (Rough estimate)
+            size_mb = 0.0
+            if final_data:
+                json_str = json.dumps(final_data)
+                size_bytes = len(json_str.encode("utf-8"))
+                size_mb = size_bytes / (1024 * 1024)
+            
+            if request.user_id:
+                update_data_usage(request.user_id, size_mb)
+                
             return
             
         except Exception as e:
