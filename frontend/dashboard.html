@@ -230,6 +230,16 @@
         <!-- Configuration Module -->
         <div class="w-[450px] flex flex-col gap-4 overflow-hidden">
             
+            <!-- URL Builder Module (Hidden by default) -->
+            <div id="urlBuilderModule" class="glass-card p-5 rounded-2xl flex-shrink-0 hidden">
+                <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Search Parameters
+                </h2>
+                <div id="urlBuilderFields" class="space-y-3">
+                    <!-- Dynamic Inputs injected here -->
+                </div>
+            </div>
+
             <!-- Target Input -->
             <div class="glass-card p-5 rounded-2xl flex-shrink-0">
                 <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -602,6 +612,7 @@
 
         // Cache for loaded templates
         let LOADED_TEMPLATES = {};
+        let currentUrlBuilder = null;
 
         async function openTemplatesModal() {
             document.getElementById('templatesModal').classList.remove('hidden');
@@ -695,6 +706,35 @@
             // Parse config if needed
             const config = tpl.config || tpl; // Handle DB vs Local structure difference
             
+            // Handle URL Builder
+            const builder = config.urlBuilder;
+            const builderModule = document.getElementById('urlBuilderModule');
+            const builderContainer = document.getElementById('urlBuilderFields');
+            
+            if (builder && builder.pattern && builder.fields) {
+                currentUrlBuilder = builder;
+                builderModule.classList.remove('hidden');
+                builderContainer.innerHTML = '';
+                
+                builder.fields.forEach(field => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <label class="text-[10px] text-gray-400 font-mono mb-1 block uppercase">${field.label}</label>
+                        <input type="text" data-key="${field.key}" 
+                            class="cyber-input w-full p-2 rounded text-xs font-mono builder-input" 
+                            placeholder="${field.placeholder || ''}"
+                            oninput="updateBuiltUrl()">
+                    `;
+                    builderContainer.appendChild(div);
+                });
+                
+                // Trigger initial build (clears URL until typed or keeps default?)
+                // Let's not clear immediately, wait for input
+            } else {
+                currentUrlBuilder = null;
+                builderModule.classList.add('hidden');
+            }
+
             // Fill Fields
             document.getElementById('url').value = tpl.url;
             editor.setValue(tpl.query);
@@ -824,6 +864,22 @@
             delete saved[id];
             localStorage.setItem('user_templates', JSON.stringify(saved));
             renderUserTemplates();
+        }
+
+        function updateBuiltUrl() {
+            if (!currentUrlBuilder) return;
+            
+            let url = currentUrlBuilder.pattern;
+            const inputs = document.querySelectorAll('.builder-input');
+            
+            inputs.forEach(input => {
+                const key = input.getAttribute('data-key');
+                const value = input.value.trim(); 
+                // Simple replacement. Ideally we'd handle encoding.
+                url = url.replace(`{${key}}`, encodeURIComponent(value));
+            });
+            
+            document.getElementById('url').value = url;
         }
 
         var editor = CodeMirror.fromTextArea(document.getElementById("query"), {
