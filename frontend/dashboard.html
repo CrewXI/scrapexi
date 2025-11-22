@@ -697,13 +697,7 @@
             
             // Fill Fields
             document.getElementById('url').value = tpl.url;
-            
-            // Handle raw newline characters from JSON storage
-            let queryVal = tpl.query || '';
-            if (typeof queryVal === 'string') {
-                queryVal = queryVal.replace(/\\n/g, '\n');
-            }
-            editor.setValue(queryVal);
+            editor.setValue(tpl.query);
             
             // Set Toggles & Sliders
             document.getElementById('pagination').checked = config.pagination;
