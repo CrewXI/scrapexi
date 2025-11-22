@@ -67,6 +67,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount frontend static files FIRST, but exclude /api paths (which are defined below)
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
 active_jobs = {}
 
 class ScrapeRequest(BaseModel):
@@ -385,6 +388,19 @@ async def stripe_webhook(request: Request):
                     print(f"Error updating subscription: {e}")
     
     return {"status": "success"}
+
+# Serve Frontend (SPA)
+@app.get("/")
+async def read_index():
+    return FileResponse('frontend/index.html')
+
+@app.get("/dashboard")
+async def read_dashboard():
+    return FileResponse('frontend/dashboard.html')
+
+@app.get("/dashboard.html")
+async def read_dashboard_html():
+    return FileResponse('frontend/dashboard.html')
 
 if __name__ == "__main__":
     import uvicorn

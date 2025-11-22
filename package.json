@@ -4,8 +4,8 @@
   "description": "A DIY alternative to AgentQL using local LLMs",
   "main": "frontend/index.html",
   "scripts": {
-    "install-python-deps": "pip install -r my_scraper_api/requirements.txt && playwright install chromium",
-    "start-backend": "uvicorn my_scraper_api.main:app --reload --host 0.0.0.0 --port 8000",
+    "install-python-deps": "pip install -r requirements.txt && playwright install chromium",
+    "start-backend": "uvicorn api.index:app --reload --host 0.0.0.0 --port 8000",
     "start-frontend": "npx serve frontend -p 4000",
     "dev": "concurrently \"npm run start-backend\" \"npm run start-frontend\""
   },
@@ -14,4 +14,3 @@
     "serve": "^14.2.1"
   }
 }
-

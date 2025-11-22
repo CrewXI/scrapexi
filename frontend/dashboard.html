@@ -577,7 +577,7 @@
 
             try {
                 // Fetch config from backend to avoid hardcoding keys in frontend source
-                const res = await fetch('http://localhost:8000/config');
+                const res = await fetch('/config'); // Use relative path
                 const config = await res.json();
                 
                 if (config.supabase_url && config.supabase_key) {
@@ -981,7 +981,7 @@
             // Check if cancelling
             if (btn.innerHTML.includes('CANCEL')) {
                 if (currentJobId) {
-                    await fetch(`http://localhost:8000/job/${currentJobId}/cancel`, { method: 'POST' });
+                    await fetch(`/job/${currentJobId}/cancel`, { method: 'POST' });
                     clearInterval(pollInterval);
                     outputDiv.innerHTML += `<div class="text-red-500 font-mono text-xs mt-2">>> ABORT SIGNAL SENT.</div>`;
                     btn.innerHTML = 'Initialize Extraction';
@@ -1035,7 +1035,7 @@
 
             try {
                 // 1. Start Job
-                const response = await fetch('http://localhost:8000/scrape', {
+                const response = await fetch('/scrape', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1062,7 +1062,7 @@
                 // 2. Poll Status
                 pollInterval = setInterval(async () => {
                     try {
-                        const statusRes = await fetch(`http://localhost:8000/job/${currentJobId}`);
+                        const statusRes = await fetch(`/job/${currentJobId}`);
                         const statusData = await statusRes.json();
 
                         if (statusData.status === 'completed') {

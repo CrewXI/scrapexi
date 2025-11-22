@@ -196,7 +196,7 @@
 
         async function initSupabase() {
             try {
-                const res = await fetch('http://localhost:8000/config');
+                const res = await fetch('/config'); // Use relative path
                 const config = await res.json();
 
                 console.log("Config loaded:", config); // Debug
@@ -227,7 +227,7 @@
                 // Retry init if it failed silently or is slow
                 await initSupabase();
                 if (!supabase) {
-                    const res = await fetch('http://localhost:8000/config').catch(e => ({ ok: false }));
+                    const res = await fetch('/config').catch(e => ({ ok: false }));
                     if (!res.ok) {
                         alert("Error: Backend API is unreachable. Please check if the server is running on port 8000.");
                     } else {
@@ -252,7 +252,7 @@
                 const { data, error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'http://localhost:4000/dashboard.html'
+                        redirectTo: window.location.origin + '/dashboard'
                     }
                 });
                 if (error) throw error;
