@@ -36,6 +36,33 @@ except Exception as e:
     print(f"WARNING: Failed to init Supabase in backend: {e}")
     supabase = None
 
+# VERCEL PLAYWRIGHT FIX
+# On Vercel, we can't rely on the build-time browser installation persisting effectively 
+# within the 250MB limit in the standard cache location.
+# We configure Playwright to look in /tmp (which has more space at runtime)
+# and install it there if missing.
+if os.getenv("VERCEL"):
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/tmp/pw-browsers"
+
+def ensure_browser_installed():
+    """
+    Checks if Chromium is installed. If not, installs it.
+    Useful for Vercel environments where the binary might be missing.
+    """
+    import subprocess
+    try:
+        # Check if we can launch a process, or just blindly install if we know we are in Vercel
+        if os.getenv("VERCEL"):
+            print("DEBUG: Running on Vercel. Checking browser installation...")
+            # Run install command
+            subprocess.run(["playwright", "install", "chromium"], check=True)
+            print("DEBUG: Browser installation complete.")
+    except Exception as e:
+        print(f"WARNING: Failed to install browser: {e}")
+
+# Run this on startup
+ensure_browser_installed()
+
 # Plan Limits (MB)
 PLAN_LIMITS = {
     "price_1SWK4S8nEz73sTkiiWWP5tQ2": 10.0,
