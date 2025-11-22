@@ -1,3 +1,4 @@
+
 import asyncio
 import json
 import os
@@ -37,70 +38,14 @@ except Exception as e:
     print(f"WARNING: Failed to init Supabase in backend: {e}")
     supabase = None
 
-# VERCEL PLAYWRIGHT FIX
-# On Vercel, we can't rely on the build-time browser installation persisting effectively
-# within the 250MB limit in the standard cache location.
-# We configure Playwright to look in /tmp (which has more space at runtime)
-# and install it there if missing.
+# VERCEL PLAYWRIGHT FIX (Keeping this for backup, but we want Remote mainly)
 if os.getenv("VERCEL"):
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/tmp/pw-browsers"
 
 
 def ensure_browser_installed():
-    """
-    Checks if Chromium is installed. If not, installs it.
-    Useful for Vercel environments where the binary might be missing.
-    Returns the executable path if found.
-    """
-    import glob
-    import subprocess
-    import sys
-
-    # Only run on Vercel
-    if not os.getenv("VERCEL"):
-        return None
-
-    print("DEBUG: Vercel environment detected. configuring Playwright...")
-
-    # 1. Set Path
-    target_path = "/tmp/pw-browsers"
-    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = target_path
-
-    # 2. Install
-    print(f"DEBUG: Installing Chromium to {target_path}...")
-    try:
-        # Use python -m playwright to be safe
-        subprocess.run(
-            [sys.executable, "-m", "playwright", "install", "chromium"],
-            env=os.environ,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        print("DEBUG: Installation successful.")
-    except subprocess.CalledProcessError as e:
-        print(f"ERROR: Install failed: {e.stderr.decode()}")
-        return None
-
-    # 3. Verify & Find Executable
-    print(f"DEBUG: Verifying {target_path}...")
-    # Look for the executable. It's usually inside a folder like chromium-XXXX/chrome-linux/chrome
-    # or similar. We use glob to find 'chrome' or 'chromium' executable.
-    # Standard Playwright structure: /tmp/pw-browsers/chromium-<ver>/chrome-linux/chrome
-    files = glob.glob(f"{target_path}/**/chrome", recursive=True)
-    if not files:
-        files = glob.glob(f"{target_path}/**/chromium", recursive=True)
-
-    if files:
-        print(f"DEBUG: Found binary at {files[0]}")
-        return files[0]
-
-    print("ERROR: Browser installed but binary not found in glob search.")
+    # Skip this locally if not needed, or keep as fallback
     return None
-
-
-# Run this on startup
-VERCEL_BROWSER_PATH = ensure_browser_installed()
 
 # Plan Limits (MB)
 PLAN_LIMITS = {
@@ -174,10 +119,6 @@ class JobStatusResponse(BaseModel):
 
 @app.get("/config")
 def get_config():
-    # Debug print to check env loading
-    print("DEBUG CONFIG: URL=", os.getenv("SUPABASE_URL"))
-    print("DEBUG CONFIG: KEY=", os.getenv("SUPABASE_ANON_KEY"))
-
     return {
         "google_client_id": os.getenv("GOOGLE_CLIENT_ID"),
         "supabase_url": os.getenv("SUPABASE_URL"),
@@ -229,45 +170,48 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
     # ENTERPRISE MODE: Delegate to External Browser Service if configured
     browser_service_url = os.getenv("BROWSER_SERVICE_URL")
+    
+    # Debug Print: CRITICAL to see what Vercel sees
+    print(f"DEBUG: BROWSER_SERVICE_URL is set to: '{browser_service_url}'")
+
     if browser_service_url:
         print(f"DEBUG: Offloading to Browser Service at {browser_service_url}")
         try:
             import requests
-
             # Forward the request to the microservice
+            # Ensure we hit the /scrape endpoint
+            target_url = f"{browser_service_url.rstrip('/')}/scrape"
+            
+            print(f"DEBUG: POSTing to {target_url}")
+            
             resp = requests.post(
-                f"{browser_service_url}/scrape",
+                target_url,
                 json={
                     "url": request.url,
                     "wait_time": request.wait_time,
                     "stealth_mode": request.stealth_mode,
-                    "session_json": request.session_json,
+                    "session_json": request.session_json
                 },
-                timeout=120,  # Long timeout for scraping
+                timeout=120 # Long timeout for scraping
             )
             resp.raise_for_status()
             result = resp.json()
-
-            # For now, we just get the HTML. In a real integration, we'd process it with Gemini here.
-            # Assuming the service returns raw HTML, we might need to parse it or just store it.
-            # To keep it compatible with current logic, let's assume we want to process it locally
-            # OR the service returns the data.
-
+            
             # Simple Pass-through for now
             active_jobs[job_id]["status"] = "completed"
-            active_jobs[job_id]["data"] = {
-                "raw_html_preview": result.get("html")[:500] + "..."
-            }  # Truncate for preview
+            active_jobs[job_id]["data"] = {"raw_html_preview": str(result.get("html"))[:500] + "..."} # Truncate for preview
             active_jobs[job_id]["message"] = "Remote Scrape Complete"
             return
-
+            
         except Exception as e:
-            print(f"Remote Browser Failed: {e}")
-            # Fallback to local or just fail?
-            # active_jobs[job_id]["error"] = f"Remote Service Failed: {str(e)}"
-            # return
-            print("Falling back to local browser...")
+            print(f"CRITICAL ERROR: Remote Browser Failed: {e}")
+            # DO NOT FALLBACK. Show the real error.
+            active_jobs[job_id]["status"] = "failed"
+            active_jobs[job_id]["error"] = f"Remote Service Configured but Failed: {str(e)}"
+            return
 
+    print("WARNING: No BROWSER_SERVICE_URL found. Attempting local browser launch (likely to fail on Vercel)...")
+    
     try:
         # Sync Check usage (double check inside task)
         if request.user_id:
@@ -289,15 +233,12 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "--disable-infobars",
                     "--no-sandbox",
                 ]
-
-            # Launch Options
-            launch_options = {"headless": True, "args": browser_args}
-
-            # If on Vercel, use the explicit path we found
-            if os.getenv("VERCEL") and VERCEL_BROWSER_PATH:
-                print(f"DEBUG: Using Vercel binary at {VERCEL_BROWSER_PATH}")
-                launch_options["executable_path"] = VERCEL_BROWSER_PATH
-
+            
+            launch_options = {
+                "headless": True,
+                "args": browser_args
+            }
+            
             browser = playwright.chromium.launch(**launch_options)
 
             context_args = {
@@ -314,16 +255,14 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
             context = browser.new_context(**context_args)
             page = context.new_page()
-
+            
             # OPTIMIZATION: Block heavy resources (Images, Fonts, CSS)
-            # This solves memory issues on Vercel (1GB limit)
             def block_heavy_resources(route):
                 if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
                     route.abort()
                 else:
                     route.continue_()
-
-            # Apply blocking unless explicitly needed (for now, apply to all to be safe)
+            
             page.route("**/*", block_heavy_resources)
 
             if request.stealth_mode and STEALTH_AVAILABLE:
