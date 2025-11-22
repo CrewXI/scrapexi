@@ -1,14 +1,14 @@
-
-import os
-import json
-import random
 import asyncio
+import json
+import os
+import random
 from typing import Any, Dict, Optional
+
+import google.generativeai as genai
+from bs4 import BeautifulSoup
 from fastapi import Body, FastAPI, HTTPException
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
-import google.generativeai as genai
-from bs4 import BeautifulSoup
 
 # Init Gemini
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -44,6 +44,7 @@ class ScrapeRequest(BaseModel):
 def health_check():
     return {"status": "ok", "service": "browser-microservice", "version": "1.1.1"}
 
+
 def clean_html(html_content):
     soup = BeautifulSoup(html_content, "html.parser")
 
@@ -55,12 +56,13 @@ def clean_html(html_content):
     text = soup.get_text(separator=" ", strip=True)
     return text
 
+
 def extract_with_gemini(text_content: str, query: str, model_name: str):
     if not GOOGLE_API_KEY:
         return {"error": "Google API Key not configured on Scraper Service"}
 
     print(f"DEBUG: Sending {len(text_content)} chars to Gemini...")
-    
+
     try:
         model = genai.GenerativeModel(model_name)
 
@@ -89,6 +91,7 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
     except Exception as e:
         print(f"Gemini Error: {e}")
         return {"error": f"AI Extraction Failed: {str(e)}"}
+
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
@@ -145,10 +148,10 @@ def scrape(request: ScrapeRequest):
             try:
                 page.wait_for_load_state("networkidle", timeout=10000)
             except:
-                pass # Ignore timeout if network never idles
-                
+                pass  # Ignore timeout if network never idles
+
             # Add explicit wait time
-            page.wait_for_timeout(request.wait_time * 1000 + 2000) # Add 2s buffer
+            page.wait_for_timeout(request.wait_time * 1000 + 2000)  # Add 2s buffer
 
             # 6. Extract HTML
             content = page.content()
@@ -156,7 +159,7 @@ def scrape(request: ScrapeRequest):
 
             # 7. AI Processing
             print(f"Scrape successful. Content length: {len(content)}")
-            
+
             clean_text = clean_html(content)
             print(f"DEBUG: Extracted Text Preview: {clean_text[:500]}")
 
