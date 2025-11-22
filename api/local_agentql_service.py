@@ -3,13 +3,8 @@ import os
 import json
 import re
 from bs4 import BeautifulSoup
-import google.generativeai as genai
+import requests
 from playwright.sync_api import Page
-
-# Configure Gemini
-# Expects GOOGLE_API_KEY in environment variables
-if os.getenv("GOOGLE_API_KEY"):
-    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def clean_html(html_content: str) -> str:
     """
@@ -44,6 +39,46 @@ def clean_json_string(json_str: str) -> str:
         
     return json_str
 
+def call_gemini_api(prompt: str, api_key: str, model_name: str = "gemini-2.0-flash-exp", response_schema: bool = False) -> str:
+    """
+    Calls Google Gemini REST API directly to avoid heavy SDK dependencies.
+    """
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+
+    if response_schema:
+        payload["generationConfig"] = {
+            "response_mime_type": "application/json"
+        }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Extract text from response
+        try:
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError):
+             # Check for safety block
+             if "promptFeedback" in data and "blockReason" in data["promptFeedback"]:
+                 raise Exception(f"Blocked by safety filters: {data['promptFeedback']['blockReason']}")
+             raise Exception(f"Unexpected API response format: {data}")
+
+    except requests.exceptions.RequestException as e:
+        if hasattr(e, 'response') and e.response is not None:
+            raise Exception(f"Gemini API Error {e.response.status_code}: {e.response.text}")
+        raise e
+
 def query_data_with_gemini(page: Page, query: str, model_name: str = "gemini-2.0-flash-exp") -> dict:
     """
     Uses Google Gemini to extract data from the page based on a GraphQL-like query.
@@ -52,9 +87,6 @@ def query_data_with_gemini(page: Page, query: str, model_name: str = "gemini-2.0
     if not api_key:
         raise ValueError("GOOGLE_API_KEY is not set")
     
-    # Configure on every call to ensure we have the latest env var
-    genai.configure(api_key=api_key)
-
     raw_html = page.content()
     cleaned_html = clean_html(raw_html)
     
@@ -78,12 +110,7 @@ def query_data_with_gemini(page: Page, query: str, model_name: str = "gemini-2.0
     """
 
     try:
-        # Set response_mime_type to application/json to force structured output
-        generation_config = {"response_mime_type": "application/json"}
-        model = genai.GenerativeModel(model_name, generation_config=generation_config)
-        
-        response = model.generate_content(prompt)
-        response_text = response.text
+        response_text = call_gemini_api(prompt, api_key, model_name, response_schema=True)
         
         # Clean up any markdown blocks if the model still outputs them
         if "```json" in response_text:
@@ -117,6 +144,11 @@ def find_next_page_element(page: Page, model_name: str = "gemini-2.0-flash-exp")
     """
     Asks Gemini to identify the CSS selector for the 'Next Page' button/link.
     """
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        # Ideally shouldn't happen if called from main flow
+        return None
+
     raw_html = page.content()
     cleaned_html = clean_html(raw_html)[:30000] # Limit context for selector finding
     
@@ -132,17 +164,11 @@ def find_next_page_element(page: Page, model_name: str = "gemini-2.0-flash-exp")
     """
     
     try:
-        # Ensure configured
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if api_key: genai.configure(api_key=api_key)
-        
-        model = genai.GenerativeModel(model_name)
-        response = model.generate_content(prompt)
-        selector = response.text.strip().replace("`", "")
+        selector = call_gemini_api(prompt, api_key, model_name, response_schema=False)
+        selector = selector.strip().replace("`", "")
         if "NONE" in selector or not selector:
             return None
         return selector
     except Exception as e:
         print(f"Next Page Detection Error: {e}")
         return None
-

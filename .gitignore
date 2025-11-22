@@ -40,3 +40,6 @@ tmp/
 examples/js/node_modules/
 examples/python/__pycache__/
 examples/python/.venv/
+
+# Temp envs
+temp_size_check_env/

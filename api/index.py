@@ -7,7 +7,7 @@ import uuid
 import random
 from typing import Optional, Dict, Any
 from bs4 import BeautifulSoup
-import google.generativeai as genai
+# import google.generativeai as genai
 from fastapi import FastAPI, HTTPException, Body, BackgroundTasks, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
