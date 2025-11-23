@@ -158,6 +158,19 @@
         .faq-icon {
             transition: transform 0.3s ease;
         }
+
+        /* Interactive Title Effect */
+        .interactive-title {
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
+            transition: all 0.5s ease;
+        }
+        .interactive-title:hover {
+            background-position: right center;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 40px rgba(255, 0, 255, 0.6));
+            letter-spacing: 0.02em;
+            transform: scale(1.02);
+        }
     </style>
     <script>
         tailwind.config = {
@@ -232,7 +245,7 @@
 
                     <h1 class="text-4xl md:text-6xl 3xl:text-8xl font-cyber font-bold tracking-wide mb-6 tall:mb-10 text-white leading-tight">
                         MAKE THE WEB <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPink text-glow-blue">AI-COMPATIBLE</span>
+                        <span class="interactive-title inline-block text-transparent bg-clip-text bg-gradient-to-r from-neonBlue via-white to-neonPink text-glow-blue cursor-default">AI-COMPATIBLE</span>
                     </h1>
 
                     <p class="text-lg 3xl:text-2xl text-gray-400 max-w-xl 3xl:max-w-3xl mb-8 tall:mb-12 leading-relaxed font-light">
