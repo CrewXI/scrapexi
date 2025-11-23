@@ -97,6 +97,8 @@ class ScrapeRequest(BaseModel):
     model_name: str = "gemini-2.5-flash"
     pagination_enabled: bool = False
     max_pages: int = 3
+    page2_url: Optional[str] = None
+    page3_url: Optional[str] = None
     login_enabled: bool = False
     login_url: Optional[str] = None
     username: Optional[str] = None
@@ -223,6 +225,8 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "pagination_enabled": request.pagination_enabled,
                     "start_page": 1,  # Frontend sends max_pages, convert to start/end
                     "end_page": request.max_pages if request.pagination_enabled else 1,
+                    "page2_url": request.page2_url,
+                    "page3_url": request.page3_url,
                     "session_json": request.session_json,
                 },
                 timeout=120,  # Long timeout for scraping

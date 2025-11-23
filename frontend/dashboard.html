@@ -360,20 +360,43 @@
                                 <p class="text-[10px] text-gray-500">Auto-traverse multiple pages</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="pagination" class="sr-only peer" onchange="updateSummary()">
+                                <input type="checkbox" id="pagination" class="sr-only peer" onchange="togglePagination()">
                                 <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonBlue">
                                     <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all"></div>
                                 </div>
                             </label>
                         </div>
-                        <div id="paginationControls" class="grid grid-cols-2 gap-4 hidden">
-                            <div>
-                                <label class="text-[10px] text-gray-400 block mb-1 uppercase">Start</label>
-                                <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                        <div id="paginationControls" class="space-y-4 hidden">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] text-gray-400 block mb-1 uppercase">Start Page</label>
+                                    <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 block mb-1 uppercase">End Page</label>
+                                    <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] text-gray-400 block mb-1 uppercase">End</label>
-                                <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                            
+                            <!-- Example URLs for Pattern Recognition -->
+                            <div class="border-t border-white/10 pt-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <svg class="w-4 h-4 text-neonBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    <span class="text-[10px] text-gray-400 font-semibold uppercase">AI Pattern Recognition (Optional)</span>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mb-3">Provide example URLs for Page 2 & 3 so AI can learn the pagination pattern:</p>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="text-[10px] text-gray-400 block mb-1">Page 2 URL (Example)</label>
+                                        <input type="text" id="page2Url" placeholder="https://example.com/page/2" class="cyber-input w-full h-10 px-3 text-xs rounded font-mono bg-black/50">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-gray-400 block mb-1">Page 3 URL (Example)</label>
+                                        <input type="text" id="page3Url" placeholder="https://example.com/page/3" class="cyber-input w-full h-10 px-3 text-xs rounded font-mono bg-black/50">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1458,6 +1481,17 @@
         }
 
         // Summary Logic
+        function togglePagination() {
+            const enabled = document.getElementById('pagination').checked;
+            const controls = document.getElementById('paginationControls');
+            if (enabled) {
+                controls.classList.remove('hidden');
+            } else {
+                controls.classList.add('hidden');
+            }
+            updateSummary();
+        }
+
         function updateSummary() {
             const url = document.getElementById('url').value;
             let site = "CUSTOM";
@@ -1804,6 +1838,10 @@
             const startPage = parseInt(document.getElementById('startPage').value) || 1;
             const endPage = parseInt(document.getElementById('endPage').value) || 1;
             const maxPages = pagination ? Math.max(1, endPage - startPage + 1) : 1;
+            
+            // Get example URLs for pattern recognition
+            const page2Url = document.getElementById('page2Url').value || null;
+            const page3Url = document.getElementById('page3Url').value || null;
 
             const loginEnabled = document.getElementById('loginEnabled').checked;
             const loginUrl = document.getElementById('loginUrl').value;
@@ -1849,6 +1887,8 @@
                         wait_time: 2,
                         pagination_enabled: pagination,
                         max_pages: maxPages,
+                        page2_url: page2Url,
+                        page3_url: page3Url,
                         login_enabled: loginEnabled,
                         login_url: loginUrl,
                         username: username,

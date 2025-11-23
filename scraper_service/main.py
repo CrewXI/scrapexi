@@ -41,6 +41,8 @@ class ScrapeRequest(BaseModel):
     pagination_enabled: bool = False
     start_page: int = 1
     end_page: int = 1
+    page2_url: Optional[str] = None
+    page3_url: Optional[str] = None
 
 
 @app.get("/")
@@ -70,6 +72,45 @@ def clean_html(html_content):
     # Get text
     text = soup.get_text(separator=" ", strip=True)
     return text
+
+
+def learn_pagination_pattern(page1_url: str, page2_url: str, page3_url: str, target_page: int, model_name: str):
+    """
+    Use AI to learn the pagination pattern from example URLs and generate the URL for any page.
+    Returns the predicted URL for the target page.
+    """
+    if not GOOGLE_API_KEY or not page2_url or not page3_url:
+        return None
+    
+    try:
+        model = genai.GenerativeModel(model_name)  # type: ignore
+        prompt = f"""
+        You are analyzing URL patterns for pagination.
+        
+        Here are example URLs:
+        Page 1: {page1_url}
+        Page 2: {page2_url}
+        Page 3: {page3_url}
+        
+        Analyze the pattern and generate the URL for Page {target_page}.
+        
+        Look for patterns in:
+        - Path changes (e.g., /page/2/, /page/3/)
+        - Query parameters (e.g., ?page=2, ?startIndex=10)
+        - URL structure changes
+        
+        Respond with ONLY the complete URL for Page {target_page}, nothing else.
+        """
+        
+        response = model.generate_content(prompt)
+        predicted_url = response.text.strip()
+        
+        print(f"AI predicted Page {target_page} URL: {predicted_url}")
+        return predicted_url
+        
+    except Exception as e:
+        print(f"Error learning pagination pattern: {e}")
+        return None
 
 
 def find_next_page_button(page, model_name: str):
@@ -284,40 +325,63 @@ def scrape(request: ScrapeRequest):
                 all_content.append(page_content)
                 print(f"Page {page_num + 1} scraped ({len(page_content)} bytes)")
 
-                # If this isn't the last page, find and click "Next"
+                # If this isn't the last page, navigate to next
                 if request.pagination_enabled and page_num < pages_to_scrape - 1:
-                    print(f"Looking for 'Next' button...")
-                    next_selector = find_next_page_button(page, request.model_name)
-
-                    if next_selector:
-                        try:
-                            print(f"Clicking next button: {next_selector}")
-                            page.click(next_selector, timeout=5000)
-                            page.wait_for_timeout(2000)  # Wait for navigation
-                        except Exception as e:
-                            print(f"Failed to click next button: {e}")
-                            print("Trying URL pattern fallback...")
-                            # Fallback to URL pattern approach
-                            import re
-
-                            current_url = page.url
-                            if "page/" in current_url:
-                                new_url = re.sub(
-                                    r"/page/\d+/?", f"/page/{page_num + 2}/", current_url
-                                )
-                            elif "?" in current_url:
-                                new_url = f"{current_url}&page={page_num + 2}"
-                            else:
-                                new_url = f"{current_url.rstrip('/')}/page/{page_num + 2}/"
-
+                    next_page_num = page_num + 2  # Next page number
+                    next_url = None
+                    
+                    # Strategy 1: Use AI pattern learning if example URLs provided
+                    if request.page2_url and request.page3_url:
+                        print(f"Using AI pattern learning for page {next_page_num}...")
+                        next_url = learn_pagination_pattern(
+                            request.url,
+                            request.page2_url,
+                            request.page3_url,
+                            next_page_num,
+                            request.model_name
+                        )
+                        
+                        if next_url:
                             try:
-                                page.goto(new_url, timeout=60000, wait_until="domcontentloaded")
-                            except Exception as fallback_error:
-                                print(f"Fallback navigation failed: {fallback_error}")
-                                break  # Stop pagination if we can't navigate
+                                print(f"Navigating to AI-predicted URL: {next_url}")
+                                page.goto(next_url, timeout=60000, wait_until="domcontentloaded")
+                                continue  # Skip other strategies
+                            except Exception as e:
+                                print(f"AI-predicted URL failed: {e}")
+                                next_url = None
+                    
+                    # Strategy 2: Try to find and click "Next" button
+                    if not next_url:
+                        print(f"Looking for 'Next' button...")
+                        next_selector = find_next_page_button(page, request.model_name)
+
+                        if next_selector:
+                            try:
+                                print(f"Clicking next button: {next_selector}")
+                                page.click(next_selector, timeout=5000)
+                                page.wait_for_timeout(2000)  # Wait for navigation
+                                continue  # Success, move to next iteration
+                            except Exception as e:
+                                print(f"Failed to click next button: {e}")
+                    
+                    # Strategy 3: Fallback to URL pattern guessing
+                    print("Trying URL pattern fallback...")
+                    import re
+                    current_url = page.url
+                    
+                    if "page/" in current_url:
+                        next_url = re.sub(r"/page/\d+/?", f"/page/{next_page_num}/", current_url)
+                    elif "?" in current_url:
+                        next_url = f"{current_url}&page={next_page_num}"
                     else:
-                        print("No 'Next' button found, stopping pagination")
-                        break
+                        next_url = f"{current_url.rstrip('/')}/page/{next_page_num}/"
+
+                    try:
+                        print(f"Navigating to fallback URL: {next_url}")
+                        page.goto(next_url, timeout=60000, wait_until="domcontentloaded")
+                    except Exception as fallback_error:
+                        print(f"All pagination strategies failed: {fallback_error}")
+                        break  # Stop pagination if we can't navigate
 
             # Combine all pages
             content = "\n\n".join(all_content)
