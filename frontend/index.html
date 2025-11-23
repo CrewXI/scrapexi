@@ -7,12 +7,18 @@
     <title>ScrapeXi - AI-Powered Web Scraping</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* Custom Fonts */
+        .font-cyber { font-family: 'Orbitron', sans-serif; }
+        .font-tech { font-family: 'Rajdhani', sans-serif; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            position: relative;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #050510;
+            overflow-x: hidden;
         }
 
         /* Background Overlay Image */
@@ -29,19 +35,69 @@
             background-repeat: no-repeat;
             opacity: 0.05; /* Barely visible */
             z-index: -1;
-            filter: grayscale(100%) contrast(1.2); /* Optional overlay effect */
+            filter: grayscale(100%) contrast(1.2);
             pointer-events: none;
         }
 
-        .gradient-text {
-            background: linear-gradient(to right, #60A5FA, #A78BFA);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* Neon Text */
+        .text-glow-blue { text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
+        .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
+        .text-neonBlue { color: #00FFFF; }
+        .text-neonPink { color: #FF00FF; }
+        
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(20, 20, 35, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.3);
         }
 
+        /* Neon Borders */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent, rgba(255, 0, 255, 0.3), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Hero Glow */
         .hero-glow {
-            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle at 70% 30%, rgba(0, 255, 255, 0.1) 0%, transparent 60%),
+                        radial-gradient(circle at 30% 70%, rgba(255, 0, 255, 0.1) 0%, transparent 60%);
+        }
+
+        /* Cyber Button */
+        .cyber-btn {
+            position: relative;
+            background: transparent;
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            overflow: hidden;
+            transition: 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .cyber-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+            text-shadow: 0 0 8px #00FFFF;
         }
     </style>
     <script>
@@ -50,9 +106,9 @@
                 extend: {
                     colors: {
                         dark: {
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155'
+                            900: '#050510',
+                            800: '#0a0a1a',
+                            700: '#151525'
                         }
                     }
                 }
@@ -61,27 +117,27 @@
     </script>
 </head>
 
-<body class="bg-dark-900 text-white min-h-screen flex flex-col">
+<body class="bg-dark-900 text-gray-300 min-h-screen flex flex-col">
 
     <!-- Navigation -->
-    <nav class="border-b border-dark-700 backdrop-blur-md bg-dark-900/80 fixed w-full z-50">
+    <nav class="border-b border-white/10 backdrop-blur-md bg-dark-900/80 fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-lg overflow-hidden border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
-                        <img src="ScrapeXiLogo1.jpg" alt="ScrapeXi Logo" class="w-full h-full object-cover">
-                    </div>
-                    <span class="font-bold text-xl tracking-tight">ScrapeXi</span>
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center">
+                    <span class="text-3xl mr-3">🕷️</span>
+                    <h1 class="font-cyber text-2xl text-white tracking-widest uppercase">
+                        <span class="text-neonBlue text-glow-blue">Scrape</span><span class="text-neonPink text-glow-pink">Xi</span>
+                    </h1>
                 </div>
-                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-300">
-                    <a href="#" class="hover:text-white transition">Docs</a>
-                    <a href="#" class="hover:text-white transition">Pricing</a>
-                    <a href="#" class="hover:text-white transition">Blog</a>
+                <div class="hidden md:flex space-x-8 text-sm font-bold tracking-widest text-gray-400 uppercase">
+                    <a href="#" class="hover:text-neonBlue transition duration-300">Docs</a>
+                    <a href="#" class="hover:text-neonPink transition duration-300">Pricing</a>
+                    <a href="#" class="hover:text-white transition duration-300">Blog</a>
                 </div>
                 <div>
                     <button id="loginBtnNav" onclick="signInWithGoogle()"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                        Sign In
+                        class="cyber-btn px-6 py-2 font-bold text-xs">
+                        System Login
                     </button>
                 </div>
             </div>
@@ -90,126 +146,95 @@
 
     <!-- Hero Section -->
     <main class="flex-grow pt-32 pb-16 hero-glow relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <div
-                class="inline-flex items-center px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-medium mb-8">
-                ✨ New: Powered by Gemini 2.0 Flash
-            </div>
-
-            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-8">
-                Make the web <span class="gradient-text">AI-ready</span>
-            </h1>
-
-            <p class="text-xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-                Stop writing fragile selectors. ScrapeXi connects LLMs to the entire web,
-                allowing you to extract structured data using natural language queries.
-            </p>
-
-            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-                <!-- Supabase Auth Button -->
-                <button id="supabaseLoginBtn" onclick="signInWithGoogle()"
-                    class="px-8 py-3 rounded-full bg-white text-gray-900 font-medium hover:bg-gray-100 transition flex items-center justify-center gap-3">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24">
-                        <path
-                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                            fill="#4285F4" />
-                        <path
-                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                            fill="#34A853" />
-                        <path
-                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                            fill="#FBBC05" />
-                        <path
-                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                            fill="#EA4335" />
-                    </svg>
-                    Continue with Google
-                </button>
-
-                <a href="#"
-                    class="px-8 py-3 rounded-full border border-dark-700 hover:bg-dark-800 text-slate-300 font-medium transition flex items-center justify-center gap-2">
-                    View Documentation <span>→</span>
-                </a>
-            </div>
-
-            <!-- Code Demo / Visual -->
-            <div
-                class="max-w-5xl mx-auto bg-dark-800 rounded-xl border border-dark-700 shadow-2xl overflow-hidden text-left transform hover:scale-[1.01] transition duration-500">
-                <div class="flex border-b border-dark-700 bg-dark-900/50 p-4 gap-2">
-                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                    <div class="ml-4 text-xs text-slate-500 font-mono">query.graphql</div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="p-6 border-r border-dark-700 bg-dark-900/30">
-                        <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-4">Input Query</h3>
-                        <pre class="text-sm font-mono text-slate-300 overflow-x-auto">
-{
-  products[] {
-    product_name
-    product_price(include currency)
-    rating
-  }
-}</pre>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Left Content -->
+                <div class="text-left">
+                    <div class="inline-flex items-center px-3 py-1 rounded border border-neonBlue/30 bg-neonBlue/10 text-neonBlue text-xs font-mono tracking-widest mb-8">
+                        <span class="w-2 h-2 rounded-full bg-neonBlue animate-pulse mr-2"></span>
+                        POWERED BY GEMINI 2.0 FLASH
                     </div>
-                    <div class="p-6 bg-dark-800">
-                        <h3 class="text-xs font-bold text-green-400 uppercase tracking-wider mb-4">JSON Output</h3>
-                        <pre class="text-sm font-mono text-green-300 overflow-x-auto">
+
+                    <h1 class="text-5xl md:text-7xl font-cyber font-bold tracking-wide mb-6 text-white leading-tight">
+                        MAKE THE WEB <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPink">AI-COMPATIBLE</span>
+                    </h1>
+
+                    <p class="text-xl text-gray-400 max-w-xl mb-10 leading-relaxed font-light">
+                        Stop writing fragile selectors. ScrapeXi connects LLMs to the entire web, 
+                        allowing you to extract structured data using natural language queries.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 mb-16">
+                        <button id="supabaseLoginBtn" onclick="signInWithGoogle()"
+                            class="px-8 py-4 rounded bg-white text-black font-cyber font-bold tracking-widest hover:bg-gray-200 transition flex items-center justify-center gap-3 clip-path-polygon hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                            </svg>
+                            INITIALIZE SESSION
+                        </button>
+
+                        <a href="#"
+                            class="px-8 py-4 rounded border border-white/20 text-white font-cyber font-bold tracking-widest hover:bg-white/5 transition flex items-center justify-center gap-2">
+                            READ DOCS <span class="text-neonBlue">→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Content: Spider Hero Image -->
+                <div class="relative hidden lg:block">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-neonBlue to-neonPink rounded-2xl blur-xl opacity-30 animate-pulse"></div>
+                    <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl transform hover:scale-105 transition duration-500 group">
+                        <img src="ScrapeXiLogo1.jpg" alt="ScrapeXi Spider" class="w-full h-auto object-cover grayscale hover:grayscale-0 transition duration-500">
+                        
+                        <!-- Floating Code Card Overlay -->
+                        <div class="absolute -bottom-10 -left-10 w-80 glass-card p-4 rounded-lg transform rotate-3 group-hover:rotate-0 transition duration-500">
+                            <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                <span class="text-[10px] font-mono text-gray-500 ml-auto">extraction_protocol.json</span>
+                            </div>
+                            <pre class="text-[10px] font-mono text-neonGreen">
 {
-  "products": [
-    {
-      "product_name": "Wool Cap",
-      "product_price": "$48.00",
-      "rating": 4.8
-    },
-    {
-      "product_name": "Canvas Tote",
-      "product_price": "$24.00",
-      "rating": 4.5
-    }
-  ]
+  "target": "internet",
+  "mode": "autonomous",
+  "status": "connected",
+  "extraction_rate": "99.9%"
 }</pre>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Features Grid (Neon Cards) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24">
+                <div class="glass-card p-8 rounded-2xl">
+                    <div class="w-12 h-12 bg-neonBlue/10 border border-neonBlue/30 rounded-lg flex items-center justify-center text-2xl mb-6 shadow-[0_0_15px_rgba(0,255,255,0.2)]">🤖</div>
+                    <h3 class="text-xl font-cyber font-bold mb-3 text-white">Self-Healing Selectors</h3>
+                    <p class="text-gray-400 leading-relaxed text-sm">UI changes won't break your scrapers. Our AI understands the page semantics, not just the DOM structure.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl">
+                    <div class="w-12 h-12 bg-neonPink/10 border border-neonPink/30 rounded-lg flex items-center justify-center text-2xl mb-6 shadow-[0_0_15px_rgba(255,0,255,0.2)]">⚡</div>
+                    <h3 class="text-xl font-cyber font-bold mb-3 text-white">Powered by Gemini 2.0</h3>
+                    <p class="text-gray-400 leading-relaxed text-sm">Leverage the massive context window and reasoning of Gemini Flash 2.0 for complex data extraction.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl">
+                    <div class="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center text-2xl mb-6 shadow-[0_0_15px_rgba(0,255,153,0.2)]">💰</div>
+                    <h3 class="text-xl font-cyber font-bold mb-3 text-white">Free & Open Source</h3>
+                    <p class="text-gray-400 leading-relaxed text-sm">No $99/month subscriptions. You own the code, you control the API keys. 100% free to deploy.</p>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <!-- Features Grid -->
-    <section class="py-24 bg-dark-800/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div
-                    class="p-8 rounded-2xl bg-dark-800 border border-dark-700 hover:border-indigo-500/50 transition duration-300">
-                    <div class="w-12 h-12 bg-indigo-500/10 rounded-lg flex items-center justify-center text-2xl mb-6">🤖
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Self-Healing Selectors</h3>
-                    <p class="text-slate-400 leading-relaxed">UI changes won't break your scrapers. Our AI understands
-                        the page semantics, not just the DOM structure.</p>
-                </div>
-                <div
-                    class="p-8 rounded-2xl bg-dark-800 border border-dark-700 hover:border-indigo-500/50 transition duration-300">
-                    <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-2xl mb-6">⚡
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Powered by Gemini 2.0</h3>
-                    <p class="text-slate-400 leading-relaxed">Leverage the massive context window and reasoning of
-                        Gemini Flash 2.0 for complex data extraction.</p>
-                </div>
-                <div
-                    class="p-8 rounded-2xl bg-dark-800 border border-dark-700 hover:border-indigo-500/50 transition duration-300">
-                    <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center text-2xl mb-6">💰
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Free & Open Source</h3>
-                    <p class="text-slate-400 leading-relaxed">No $99/month subscriptions. You own the code, you control
-                        the API keys. 100% free to deploy.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="border-t border-dark-700 py-12 bg-dark-900 text-center">
-        <p class="text-slate-500 text-sm">© 2025 ScrapeXi. Built for the community.</p>
+    <footer class="border-t border-white/10 py-12 bg-dark-900 text-center">
+        <p class="text-gray-500 text-sm font-mono">© 2025 ScrapeXi. Built for the community.</p>
     </footer>
 
     <script>
@@ -287,7 +312,7 @@
                 // Reset buttons
                 btns.forEach(btn => {
                     if (btn) {
-                        btn.innerText = "Sign In / Continue";
+                        btn.innerText = "System Login"; // Reset text
                         btn.disabled = false;
                         btn.classList.remove('opacity-50', 'cursor-not-allowed');
                     }
