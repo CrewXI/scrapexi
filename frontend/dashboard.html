@@ -1739,19 +1739,19 @@
             try {
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('subscription_tier, data_usage_mb_used, data_usage_mb_limit')
+                    .select('subscription_tier, items_used, items_limit')
                     .eq('id', userId)
                     .single();
                 
                 if (data) {
-                    const limit = parseFloat(data.data_usage_mb_limit || 10);
-                    const used = parseFloat(data.data_usage_mb_used || 0);
+                    const limit = parseInt(data.items_limit || 100);
+                    const used = parseInt(data.items_used || 0);
                     const left = Math.max(0, limit - used);
                     const tier = (data.subscription_tier || 'FREE').toUpperCase();
                     
-                    // Update Stats Bar
-                    document.getElementById('statUsed').innerText = `${used.toFixed(2)} MB`;
-                    document.getElementById('statLeft').innerText = `${left.toFixed(2)} MB`;
+                    // Update Stats Bar with item counts
+                    document.getElementById('statUsed').innerText = `${used.toLocaleString()} items`;
+                    document.getElementById('statLeft').innerText = `${left.toLocaleString()} items`;
                     document.getElementById('statPlan').innerText = tier;
                 }
             } catch (e) {

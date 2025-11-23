@@ -237,14 +237,25 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             resp.raise_for_status()
             result = resp.json()
 
-            # Handle Smart vs Raw response
+            # Handle Smart vs Raw response (with pagination support)
             final_data = None
             message = "Remote Scrape Complete"
-
+            pages_scraped = 1
+            
             if "data" in result:
-                # AI Extraction Success
-                final_data = result["data"]
-                message = "AI Extraction Complete"
+                # AI Extraction Success (could be paginated or single page)
+                data_result = result["data"]
+                
+                # Check if this is paginated data (has 'pages', 'all', 'pagination')
+                if isinstance(data_result, dict) and "all" in data_result:
+                    # Paginated result
+                    final_data = data_result  # Store full structure with pages
+                    pages_scraped = data_result.get("pagination", {}).get("total_pages", 1)
+                    message = f"AI Extraction Complete ({pages_scraped} pages)"
+                else:
+                    # Single page result
+                    final_data = data_result
+                    message = "AI Extraction Complete"
             elif "html" in result:
                 # Raw HTML fallback
                 final_data = {"raw_html_preview": str(result["html"])[:500] + "..."}
@@ -256,25 +267,29 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                 if isinstance(final_data, list):
                     item_count = len(final_data)
                 elif isinstance(final_data, dict):
-                    # Find the first array in the dict
-                    for value in final_data.values():
-                        if isinstance(value, list):
-                            item_count = len(value)
-                            break
+                    # Check for 'all' array (paginated results)
+                    if "all" in final_data and isinstance(final_data["all"], list):
+                        item_count = len(final_data["all"])
+                    else:
+                        # Find the first array in the dict
+                        for value in final_data.values():
+                            if isinstance(value, list):
+                                item_count = len(value)
+                                break
 
             if request.user_id and item_count > 0:
                 update_data_usage(request.user_id, item_count)
 
             # Update Job Status in DB (Completion)
             try:
-                print(f"✅ Remote job completed - {item_count} items extracted")
+                print(f"✅ Remote job completed - {item_count} items from {pages_scraped} pages")
                 supabase.table("jobs").update(
                     {
                         "status": "completed",
                         "item_count": item_count,
                         "completed_at": "now()",
                         "data": final_data,
-                        "pages_scraped": 1,  # Remote service currently does 1 page
+                        "pages_scraped": pages_scraped,
                     }
                 ).eq("id", job_id).execute()
             except Exception as e:
