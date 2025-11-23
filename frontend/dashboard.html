@@ -1318,8 +1318,11 @@
                 
                 const content = raw.substring(firstBrace + 1, lastBrace);
                 
-                // Split by whitespace/newlines
-                const fields = content.split(/\s+/).filter(s => s.trim().length > 0);
+                // Split by whitespace/newlines and filter out braces
+                const fields = content.split(/\s+/).filter(s => {
+                    const trimmed = s.trim();
+                    return trimmed.length > 0 && !trimmed.includes('{') && !trimmed.includes('}');
+                });
                 
                 // Update UI
                 const select = document.getElementById('schemaEntitySelect');
