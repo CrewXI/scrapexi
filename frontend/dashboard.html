@@ -913,15 +913,23 @@
                 // 2. Fetch User Private Templates
                 let privateTemplates = [];
                 const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    const { data, error: userError } = await supabase
-                        .from('templates')
-                        .select('*')
-                        .eq('user_id', session.user.id)
-                        .order('created_at', { ascending: false });
-                    
-                    if (!userError && data) privateTemplates = data;
+            // Debug Log for Templates
+            console.log("Fetching templates for user:", session ? session.user.id : "No Session");
+
+            if (session) {
+                const { data, error: userError } = await supabase
+                    .from('templates')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false });
+                
+                if (userError) {
+                    console.error("Error fetching user templates:", userError);
+                } else {
+                    console.log("Fetched user templates:", data);
+                    privateTemplates = data || [];
                 }
+            }
 
                 // --- Render System Templates ---
                 container.innerHTML = '';
@@ -1629,7 +1637,7 @@
                 // Check if we already have the data in the row context or fetch fresh
                 const { data, error } = await supabase
                     .from('jobs')
-                    .select('data')
+                    .select('data, config, url, query') // Fetch config too
                     .eq('id', jobId)
                     .single();
 
@@ -1639,8 +1647,69 @@
                     throw new Error("Artifact is empty or corrupted.");
                 }
 
+                // 1. Restore Results
                 currentData = data.data; // Set global for export
                 renderResults(currentData);
+
+                // 2. Restore Configuration (If available)
+                if (data.config) {
+                    const cfg = data.config;
+                    
+                    // URL & Query
+                    if (data.url) document.getElementById('url').value = data.url;
+                    if (data.query) {
+                        if(editor) editor.setValue(data.query);
+                        document.getElementById('query').value = data.query;
+                        // Sync Wizard if possible
+                        syncFormFromJson();
+                    }
+
+                    // Pagination
+                    const pagCheckbox = document.getElementById('pagination');
+                    if (pagCheckbox) {
+                        pagCheckbox.checked = cfg.pagination || false;
+                        pagCheckbox.dispatchEvent(new Event('change'));
+                        // Restore maxPages / range if we had it? 
+                        // Backend only stored maxPages. Let's assume start=1
+                        if (cfg.maxPages) {
+                            document.getElementById('startPage').value = 1;
+                            document.getElementById('endPage').value = cfg.maxPages;
+                        }
+                    }
+
+                    // Stealth
+                    const stealthCheck = document.getElementById('stealthMode');
+                    if (stealthCheck) {
+                        stealthCheck.checked = cfg.stealth || false;
+                        stealthCheck.dispatchEvent(new Event('change'));
+                    }
+                    
+                    // Wait Time
+                    if (cfg.waitTime) {
+                        document.getElementById('waitTime').value = cfg.waitTime;
+                        updateWaitDisplay(cfg.waitTime);
+                    }
+
+                    // Auth
+                    const loginCheck = document.getElementById('loginEnabled');
+                    const sessionCheck = document.getElementById('sessionEnabled');
+                    
+                    if (loginCheck) {
+                        loginCheck.checked = cfg.loginEnabled || false;
+                        loginCheck.dispatchEvent(new Event('change'));
+                        if (cfg.loginEnabled && cfg.username) {
+                            document.getElementById('username').value = cfg.username;
+                            // Password is not stored for security, user must re-enter
+                        }
+                    }
+                    
+                    if (sessionCheck) {
+                        sessionCheck.checked = cfg.sessionEnabled || false;
+                        sessionCheck.dispatchEvent(new Event('change'));
+                    }
+                    
+                    updateSummary();
+                }
                 
                 // Close modal to show results
                 closeAllModals();

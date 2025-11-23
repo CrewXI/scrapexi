@@ -117,6 +117,7 @@ class JobStatusResponse(BaseModel):
     message: Optional[str] = None
     pages_scraped: int = 0
     error: Optional[str] = None
+    config: Optional[Dict[str, Any]] = None # Add config to response
 
 
 @app.get("/config")
@@ -507,6 +508,24 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
 
     # INITIAL INSERT: Create "running" job in DB immediately
     try:
+        # Store full configuration in the job record
+        job_config = {
+            "pagination": request.pagination_enabled,
+            "maxPages": request.max_pages, # Frontend uses maxPages, backend uses max_pages
+            "stealth": request.stealth_mode,
+            "auth": "cookie" if request.session_json else ("creds" if request.login_enabled else "none"),
+            "loginEnabled": request.login_enabled,
+            "sessionEnabled": bool(request.session_json),
+            "username": request.username,
+            # Do not store password in plain text config if possible, but for history restoration it might be expected?
+            # For security, let's NOT store the password in the config column.
+            # The user will have to re-enter it if they reload history.
+            "waitTime": request.wait_time,
+            # "startPage": 1, # Backend doesn't receive start/end page distinct from max_pages logic yet?
+            # Actually frontend sends max_pages calculated from start/end.
+            # If we want to restore exactly start/end, we might need to accept them in request.
+        }
+
         supabase.table("jobs").insert(
             {
                 "id": job_id,
@@ -515,7 +534,7 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
                 "query": request.query,
                 "status": "running",
                 "created_at": "now()",
-                # "pages_scraped": 0 # Optional if default is 0
+                "config": job_config # Save config
             }
         ).execute()
     except Exception as e:
@@ -541,6 +560,7 @@ def get_job_status(job_id: str):
                 message=f"Status: {job['status']}",
                 pages_scraped=job.get("pages_scraped", 0),
                 error=job.get("error"),
+                config=job.get("config")
             )
     except Exception as e:
         # Only print if it's a real error, not just not found
