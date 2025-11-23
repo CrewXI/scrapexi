@@ -13,11 +13,15 @@ WORKDIR /app
 # Copy requirements first for caching
 COPY requirements.txt .
 
+# Force rebuild of dependencies
+ENV REFRESH_DEPENDENCIES=2025-11-23_v1
+
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright Browsers (System-wide)
-RUN playwright install --with-deps chromium
+# Use module syntax to ensure we use the installed package's version manager
+RUN python -m playwright install --with-deps chromium
 
 # Copy application code
 COPY . .
