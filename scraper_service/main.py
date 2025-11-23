@@ -52,6 +52,11 @@ def clean_html(html_content):
     for script in soup(["script", "style", "svg", "path", "noscript"]):
         script.extract()
 
+    # Preserve Links: Append (Link: URL) to anchor text
+    for a in soup.find_all("a", href=True):
+        if a.get_text(strip=True):
+            a.replace_with(f"{a.get_text(strip=True)} (Link: {a['href']}) ")
+
     # Get text
     text = soup.get_text(separator=" ", strip=True)
     return text
@@ -118,8 +123,8 @@ def scrape(request: ScrapeRequest):
                     elif val.lower() == "none":
                         cookie["sameSite"] = "None"
                     elif val not in ["Strict", "Lax", "None"]:
-                         # Unknown value, remove it to avoid crash
-                         del cookie["sameSite"]
+                        # Unknown value, remove it to avoid crash
+                        del cookie["sameSite"]
 
     try:
         with sync_playwright() as p:
