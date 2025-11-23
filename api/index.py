@@ -115,7 +115,7 @@ class ScrapeResponse(BaseModel):
 
 class JobStatusResponse(BaseModel):
     status: str
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Any] = None  # Can be Dict, List, or any JSON-serializable data
     message: Optional[str] = None
     pages_scraped: int = 0
     error: Optional[str] = None
@@ -492,6 +492,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
     except Exception as e:
         print(f"❌ ERROR in job {job_id}: {e}")
         import traceback
+
         print(f"❌ Traceback: {traceback.format_exc()}")
         # Update DB Failure
         try:
