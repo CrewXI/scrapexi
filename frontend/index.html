@@ -140,18 +140,23 @@
             border-radius: 1rem; /* Explicitly set on img too */
         }
 
-        /* FAQ Accordion Transitions */
-        .faq-content {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows 0.3s ease-out;
+        /* FAQ Accordion - Robust JS Method */
+        .faq-answer {
+            max-height: 0;
             overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .faq-content.open {
-            grid-template-rows: 1fr;
+        .faq-trigger.active {
+            border-color: rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.05);
         }
-        .faq-inner {
-            min-height: 0;
+        .faq-trigger.active .faq-icon {
+            transform: rotate(45deg);
+            color: #00FFFF;
+            text-shadow: 0 0 8px #00FFFF;
+        }
+        .faq-icon {
+            transition: transform 0.3s ease;
         }
     </style>
     <script>
@@ -467,116 +472,116 @@
 
     <!-- FAQ Section -->
     <section class="py-32 hero-glow border-t border-white/10 relative overflow-hidden">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center mb-16 reveal-on-scroll slide-up">
                 <h3 class="text-4xl font-cyber font-bold text-white">SYSTEM FAQ</h3>
             </div>
 
             <div class="space-y-4 reveal-on-scroll slide-up">
                 <!-- Q1 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">Is coding knowledge required?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is coding knowledge required?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>No. ScrapeXi uses AI to understand plain English instructions. However, for advanced integrations, we provide a robust API.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            No. ScrapeXi uses AI to understand plain English instructions. However, for advanced integrations, we provide a robust API.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q2 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">How do you handle CAPTCHAs?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">How do you handle CAPTCHAs?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>We utilize a stealth browsing layer and integrated CAPTCHA solving services to ensure high success rates, even on difficult sites.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            We utilize a stealth browsing layer and integrated CAPTCHA solving services to ensure high success rates, even on difficult sites.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q3 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">Can I scrape dynamic Single Page Apps (SPAs)?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Can I scrape dynamic Single Page Apps (SPAs)?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>Yes. ScrapeXi runs a full headless browser that renders JavaScript, allowing it to scrape modern React, Vue, and Angular applications seamlessly.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Yes. ScrapeXi runs a full headless browser that renders JavaScript, allowing it to scrape modern React, Vue, and Angular applications seamlessly.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q4 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">Does it work with LinkedIn or Instagram?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Does it work with LinkedIn or Instagram?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>Yes, but you must use our <strong>Stealth Mode</strong>. For authenticated sites, we support session state injection (cookies) to bypass login screens securely.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Yes, but you must use our <strong>Stealth Mode</strong>. For authenticated sites, we support session state injection (cookies) to bypass login screens securely.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q5 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">What is the pricing model?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">What is the pricing model?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>We offer a generous free tier (10MB data/month). Paid plans start at $29/mo for higher concurrency and unlimited data retention.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            We offer a generous free tier (10MB data/month). Paid plans start at $29/mo for higher concurrency and unlimited data retention.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q6 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">Is my data secure?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is my data secure?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>Absolutely. All data is encrypted at rest and in transit. We do not store your credentials; they are used transiently for the active session only.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Absolutely. All data is encrypted at rest and in transit. We do not store your credentials; they are used transiently for the active session only.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q7 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">Can I export to Google Sheets?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Can I export to Google Sheets?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>Currently, we support JSON and CSV exports which can be imported into Sheets. Direct integration is coming in Q2 2025.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Currently, we support JSON and CSV exports which can be imported into Sheets. Direct integration is coming in Q2 2025.
                         </div>
                     </div>
                 </div>
+
                 <!-- Q8 -->
-                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden hover:border-neonBlue/30 transition">
-                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" 
-                            onclick="this.parentElement.querySelector('.faq-content').classList.toggle('open'); const icon = this.querySelectorAll('span')[1]; icon.innerText = icon.innerText === '+' ? '−' : '+';">
-                        <span class="font-bold text-lg text-white">How fast is the extraction?</span>
-                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                <div class="group">
+                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">How fast is the extraction?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
-                    <div class="faq-content">
-                        <div class="faq-inner p-6 pt-2 text-gray-400 border-t border-white/5 leading-relaxed">
-                            <p>Simple pages extract in under 2 seconds. Complex, dynamic sites with AI processing typically take 5-10 seconds depending on the page size.</p>
+                    <div class="faq-answer">
+                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Simple pages extract in under 2 seconds. Complex, dynamic sites with AI processing typically take 5-10 seconds depending on the page size.
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -621,6 +626,28 @@
                 observer.observe(el);
             });
         });
+
+        function toggleFAQ(button) {
+            const content = button.nextElementSibling;
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+            
+            // Close all others
+            document.querySelectorAll('.faq-answer').forEach(el => {
+                el.style.maxHeight = '0px';
+                // Reset trigger state
+                const trigger = el.previousElementSibling;
+                trigger.classList.remove('active');
+                trigger.querySelector('.faq-icon').innerText = '+';
+                trigger.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+            });
+
+            if (!isOpen) {
+                content.style.maxHeight = content.scrollHeight + "px";
+                button.classList.add('active');
+                button.querySelector('.faq-icon').innerText = '−'; // proper minus sign
+                button.querySelector('.faq-icon').style.transform = 'rotate(180deg)';
+            }
+        }
 
         let supabase;
 
