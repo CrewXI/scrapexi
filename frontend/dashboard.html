@@ -452,12 +452,29 @@
                 </div>
             </div>
             <div id="output" class="flex-1 p-6 overflow-auto font-mono text-base text-gray-400 custom-scrollbar relative">
+                <!-- Placeholder (Initial State) -->
                 <div id="outputPlaceholder" class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
                     <div class="w-24 h-24 border border-dashed border-white/20 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
                         <div class="w-16 h-16 border border-white/10 rounded-full"></div>
                     </div>
                     <p class="tracking-widest text-xs">AWAITING_INPUT_STREAM...</p>
                 </div>
+
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="hidden h-full flex flex-col items-center justify-center space-y-4 font-mono">
+                    <div class="text-neonBlue text-xs animate-pulse">ESTABLISHING UPLINK...</div>
+                    <div class="w-64 h-1 bg-gray-800 rounded overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-neonBlue to-neonPink animate-[shimmer_2s_infinite] w-1/2"></div>
+                    </div>
+                    <div id="loadingText" class="text-xs text-gray-500">Target: ...</div>
+                </div>
+
+                <!-- Status Message (Error/Cancel) -->
+                <div id="statusMessage" class="hidden h-full flex flex-col items-center justify-center space-y-4 font-mono">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Data Views -->
                 <pre id="jsonView" class="text-neonGreen text-xs leading-relaxed hidden"></pre>
                 <div id="tableView" class="hidden w-full"></div>
             </div>
@@ -1424,17 +1441,16 @@
 
         async function runScraper() {
             const btn = document.getElementById('scrapeBtn');
-            const outputDiv = document.getElementById('output');
             
             // Check if cancelling
             if (btn.innerHTML.includes('CANCEL')) {
                 if (currentJobId) {
                     await fetch(`/job/${currentJobId}/cancel`, { method: 'POST' });
                     clearInterval(pollInterval);
-                    outputDiv.innerHTML += `<div class="text-red-500 font-mono text-xs mt-2">>> ABORT SIGNAL SENT.</div>`;
-                    btn.innerHTML = 'Initialize Extraction';
-                    btn.classList.remove('border-red-500', 'text-red-500');
-                    btn.disabled = false;
+                    
+                    // Show Cancelled State
+                    showStatus('cancelled');
+                    resetButton();
                     return;
                 }
             }
@@ -1467,15 +1483,8 @@
             btn.innerHTML = '<span class="animate-pulse">CANCEL OPERATION</span>';
             btn.classList.add('border-red-500', 'text-red-500'); // Style for cancel
             
-            outputDiv.innerHTML = `
-                <div class="h-full flex flex-col items-center justify-center space-y-4 font-mono">
-                    <div class="text-neonBlue text-xs animate-pulse">ESTABLISHING UPLINK...</div>
-                    <div class="w-64 h-1 bg-gray-800 rounded overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-neonBlue to-neonPink animate-[shimmer_2s_infinite] w-1/2"></div>
-                    </div>
-                    <div class="text-xs text-gray-500">Target: ${url}</div>
-                </div>
-            `;
+            // Show Loading
+            showLoading(url);
 
             // Get User ID for billing
             let userId = null;
@@ -1532,7 +1541,7 @@
                             resetButton();
                         } else if (statusData.status === 'cancelled') {
                             clearInterval(pollInterval);
-                            outputDiv.innerHTML = `<div class="text-yellow-500 font-mono text-xs p-4">>> OPERATION CANCELLED BY USER</div>`;
+                            showStatus('cancelled');
                             resetButton();
                         }
                     } catch (e) {
@@ -1553,7 +1562,44 @@
             btn.disabled = false;
         }
 
+        // New Helper Functions for View Management
+        function hideAllOutputs() {
+            ['outputPlaceholder', 'loadingSpinner', 'statusMessage', 'jsonView', 'tableView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        function showLoading(url) {
+            hideAllOutputs();
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.classList.remove('hidden');
+            document.getElementById('loadingText').innerText = `Target: ${url}`;
+        }
+
+        function showStatus(type, msg = '') {
+            hideAllOutputs();
+            const div = document.getElementById('statusMessage');
+            div.classList.remove('hidden');
+            
+            if (type === 'cancelled') {
+                div.innerHTML = `
+                    <div class="text-yellow-500 text-4xl">🛑</div>
+                    <div class="text-yellow-500 text-xs tracking-widest uppercase">OPERATION ABORTED BY USER</div>
+                `;
+            } else if (type === 'error') {
+                div.innerHTML = `
+                    <div class="p-6 border border-red-500/50 bg-red-900/20 text-red-400 font-mono">
+                        <h3 class="font-bold mb-2 text-lg">CRITICAL FAILURE</h3>
+                        <p class="text-xs">${msg}</p>
+                    </div>
+                `;
+            }
+        }
+
         function renderResults(data) {
+            hideAllOutputs();
+            
             // Calculate metrics (same as before)
             let itemCount = 0;
             let targetArray = null;
@@ -1575,69 +1621,73 @@
             }
             
             const jsonString = JSON.stringify(data, null, 2);
-            document.getElementById('resultCount').innerText = `ITEMS: ${itemCount}`;
-            document.getElementById('charCount').innerText = `SIZE: ${formatBytes(jsonString.length)}`;
+            
+            // Safe update of header
+            const rc = document.getElementById('resultCount');
+            const cc = document.getElementById('charCount');
+            if(rc) rc.innerText = `ITEMS: ${itemCount}`;
+            if(cc) cc.innerText = `SIZE: ${formatBytes(jsonString.length)}`;
             
             // Render JSON View
             const jsonView = document.getElementById('jsonView');
-            jsonView.innerText = jsonString;
+            if(jsonView) jsonView.innerText = jsonString;
             
             // Render Table View
             const tableView = document.getElementById('tableView');
-            tableView.innerHTML = '';
+            if(tableView) {
+                tableView.innerHTML = '';
 
-            if (targetArray && targetArray.length > 0) {
-                const table = document.createElement('table');
-                table.className = 'w-full text-left border-collapse text-xs';
-                
-                // Get headers
-                const headers = Object.keys(targetArray[0]);
-                
-                // Create Head
-                const thead = document.createElement('thead');
-                thead.className = 'bg-white/5 text-neonBlue font-mono sticky top-0';
-                const headerRow = document.createElement('tr');
-                headers.forEach(h => {
-                    const th = document.createElement('th');
-                    th.className = 'p-2 border-b border-white/10 uppercase font-bold tracking-wider whitespace-nowrap';
-                    th.innerText = h;
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-
-                // Create Body
-                const tbody = document.createElement('tbody');
-                tbody.className = 'font-mono text-gray-300';
-                targetArray.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'border-b border-white/5 hover:bg-white/5 transition';
+                if (targetArray && targetArray.length > 0) {
+                    const table = document.createElement('table');
+                    table.className = 'w-full text-left border-collapse text-xs';
+                    
+                    // Get headers
+                    const headers = Object.keys(targetArray[0]);
+                    
+                    // Create Head
+                    const thead = document.createElement('thead');
+                    thead.className = 'bg-white/5 text-neonBlue font-mono sticky top-0';
+                    const headerRow = document.createElement('tr');
                     headers.forEach(h => {
-                        const td = document.createElement('td');
-                        td.className = 'p-2 truncate max-w-[200px] align-top';
-                        td.title = typeof row[h] === 'object' ? JSON.stringify(row[h]) : row[h];
-                        
-                        let val = row[h];
-                        if (val === null || val === undefined) val = '-';
-                        else if (typeof val === 'object') val = '[OBJ]';
-                        else if (String(val).startsWith('http')) val = `<a href="${val}" target="_blank" class="text-neonPink hover:underline">LINK</a>`;
-                        
-                        td.innerHTML = val;
-                        tr.appendChild(td);
+                        const th = document.createElement('th');
+                        th.className = 'p-2 border-b border-white/10 uppercase font-bold tracking-wider whitespace-nowrap';
+                        th.innerText = h;
+                        headerRow.appendChild(th);
                     });
-                    tbody.appendChild(tr);
-                });
-                table.appendChild(tbody);
-                tableView.appendChild(table);
-            } else {
-                tableView.innerHTML = '<div class="text-center text-gray-500 p-8">NO TABULAR DATA DETECTED</div>';
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // Create Body
+                    const tbody = document.createElement('tbody');
+                    tbody.className = 'font-mono text-gray-300';
+                    targetArray.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-white/5 hover:bg-white/5 transition';
+                        headers.forEach(h => {
+                            const td = document.createElement('td');
+                            td.className = 'p-2 truncate max-w-[200px] align-top';
+                            td.title = typeof row[h] === 'object' ? JSON.stringify(row[h]) : row[h];
+                            
+                            let val = row[h];
+                            if (val === null || val === undefined) val = '-';
+                            else if (typeof val === 'object') val = '[OBJ]';
+                            else if (String(val).startsWith('http')) val = `<a href="${val}" target="_blank" class="text-neonPink hover:underline">LINK</a>`;
+                            
+                            td.innerHTML = val;
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    });
+                    table.appendChild(tbody);
+                    tableView.appendChild(table);
+                } else {
+                    tableView.innerHTML = '<div class="text-center text-gray-500 p-8">NO TABULAR DATA DETECTED</div>';
+                }
             }
 
-            // Hide Placeholder
-            document.getElementById('outputPlaceholder').classList.add('hidden');
-            
             // Default to JSON view if not already set
-            if (document.getElementById('viewBtnTable').classList.contains('bg-white/10')) {
+            const btnTable = document.getElementById('viewBtnTable');
+            if (btnTable && btnTable.classList.contains('bg-white/10')) {
                 toggleView('table');
             } else {
                 toggleView('json');
@@ -1649,42 +1699,33 @@
             const tableView = document.getElementById('tableView');
             const btnJson = document.getElementById('viewBtnJson');
             const btnTable = document.getElementById('viewBtnTable');
-            const placeholder = document.getElementById('outputPlaceholder');
-
-            if (!placeholder.classList.contains('hidden')) return; // Don't toggle if no data
+            
+            // Only toggle if both exist (data loaded)
+            if (!jsonView || !tableView || jsonView.classList.contains('hidden') && tableView.classList.contains('hidden')) {
+                 // Could be loading or empty, check visibility logic in showLoading/renderResults
+                 // Actually, we rely on hideAllOutputs() to manage visibility state.
+                 // If BOTH are hidden, we shouldn't be toggling (no data).
+                 // But hideAllOutputs hides ALL. renderResults shows ONE.
+                 // So if one is shown, we can toggle.
+            }
 
             if (mode === 'json') {
-                jsonView.classList.remove('hidden');
-                tableView.classList.add('hidden');
+                if(jsonView) jsonView.classList.remove('hidden');
+                if(tableView) tableView.classList.add('hidden');
                 
-                btnJson.classList.add('bg-white/10', 'text-white');
-                btnJson.classList.remove('text-gray-500');
-                
-                btnTable.classList.remove('bg-white/10', 'text-white');
-                btnTable.classList.add('text-gray-500');
+                if(btnJson) { btnJson.classList.add('bg-white/10', 'text-white'); btnJson.classList.remove('text-gray-500'); }
+                if(btnTable) { btnTable.classList.remove('bg-white/10', 'text-white'); btnTable.classList.add('text-gray-500'); }
             } else {
-                jsonView.classList.add('hidden');
-                tableView.classList.remove('hidden');
+                if(jsonView) jsonView.classList.add('hidden');
+                if(tableView) tableView.classList.remove('hidden');
                 
-                btnTable.classList.add('bg-white/10', 'text-white');
-                btnTable.classList.remove('text-gray-500');
-                
-                btnJson.classList.remove('bg-white/10', 'text-white');
-                btnJson.classList.add('text-gray-500');
+                if(btnTable) { btnTable.classList.add('bg-white/10', 'text-white'); btnTable.classList.remove('text-gray-500'); }
+                if(btnJson) { btnJson.classList.remove('bg-white/10', 'text-white'); btnJson.classList.add('text-gray-500'); }
             }
         }
 
         function renderError(msg) {
-            document.getElementById('outputPlaceholder').classList.add('hidden');
-            document.getElementById('jsonView').classList.add('hidden');
-            document.getElementById('tableView').classList.add('hidden');
-            
-            document.getElementById('output').innerHTML += `
-                <div class="p-6 border border-red-500/50 bg-red-900/20 text-red-400 font-mono mt-4">
-                    <h3 class="font-bold mb-2 text-lg">CRITICAL FAILURE</h3>
-                    <p class="text-xs">${msg}</p>
-                </div>
-            `;
+            showStatus('error', msg);
         }
 
         // Helper: Format Bytes
