@@ -12,6 +12,25 @@
 
         body {
             font-family: 'Inter', sans-serif;
+            position: relative;
+        }
+
+        /* Background Overlay Image */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/ScrapeXiLogo1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.05; /* Barely visible */
+            z-index: -1;
+            filter: grayscale(100%) contrast(1.2); /* Optional overlay effect */
+            pointer-events: none;
         }
 
         .gradient-text {
@@ -48,8 +67,10 @@
     <nav class="border-b border-dark-700 backdrop-blur-md bg-dark-900/80 fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center">
-                    <span class="text-2xl mr-2">🕷️</span>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg overflow-hidden border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                        <img src="/static/ScrapeXiLogo1.jpg" alt="ScrapeXi Logo" class="w-full h-full object-cover">
+                    </div>
                     <span class="font-bold text-xl tracking-tight">ScrapeXi</span>
                 </div>
                 <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-300">

@@ -175,8 +175,8 @@
         <div class="flex items-center gap-4">
             <div class="relative group">
                 <div class="absolute -inset-1 bg-gradient-to-r from-neonPink to-neonBlue rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                <div class="relative w-10 h-10 bg-black flex items-center justify-center rounded-lg border border-white/10">
-                    <span class="font-cyber text-xl text-white">S</span>
+                <div class="relative w-10 h-10 bg-black flex items-center justify-center rounded-lg border border-white/10 overflow-hidden">
+                    <img src="/static/ScrapeXiLogo1.jpg" alt="ScrapeXi Logo" class="w-full h-full object-cover">
                 </div>
             </div>
             <div>
@@ -189,11 +189,6 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <div id="userStats" class="hidden md:flex items-center gap-4 text-sm font-mono text-gray-500">
-                <span>DATA USED: <span id="statUsed" class="text-neonBlue">...</span></span>
-                <span>DATA LEFT: <span id="statLeft" class="text-neonPink">...</span></span>
-                <span>PLAN: <span id="statPlan" class="text-neonGreen">...</span></span>
-            </div>
             <div class="flex items-center gap-3 px-4 py-2 glass-card rounded-lg">
                 <img id="userAvatar" src="" class="w-8 h-8 rounded border border-white/20">
                 <div class="text-right hidden sm:block">
@@ -221,6 +216,22 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </a>
             <div class="flex-1"></div>
+            
+            <div id="userStats" class="flex flex-col items-center gap-3 text-[9px] font-mono text-gray-500 w-full text-center border-t border-b border-white/5 py-4 mb-4">
+                <div>
+                    <span class="block text-neonBlue mb-0.5 tracking-wider">USED</span>
+                    <span id="statUsed" class="text-white text-[10px]">...</span>
+                </div>
+                <div>
+                    <span class="block text-neonPink mb-0.5 tracking-wider">LEFT</span>
+                    <span id="statLeft" class="text-white text-[10px]">...</span>
+                </div>
+                <div>
+                    <span class="block text-neonGreen mb-0.5 tracking-wider">PLAN</span>
+                    <span id="statPlan" class="text-white text-[10px]">...</span>
+                </div>
+            </div>
+
             <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </a>
