@@ -2134,16 +2134,16 @@
 
         function renderPaginatedResults(data) {
             // Create page tabs
-            const outputPanel = document.getElementById('outputSection');
-            if (!outputPanel) return;
+            const outputDiv = document.getElementById('output');
+            if (!outputDiv) return;
 
-            // Add pagination tabs before the view toggle
+            // Add pagination tabs at the top of the output div
             let tabsContainer = document.getElementById('paginationTabs');
             if (!tabsContainer) {
                 tabsContainer = document.createElement('div');
                 tabsContainer.id = 'paginationTabs';
-                tabsContainer.className = 'flex items-center gap-2 mb-4 overflow-x-auto';
-                outputPanel.insertBefore(tabsContainer, outputPanel.firstChild);
+                tabsContainer.className = 'flex items-center gap-2 mb-4 overflow-x-auto pb-2 border-b border-white/10';
+                outputDiv.insertBefore(tabsContainer, outputDiv.firstChild);
             }
 
             tabsContainer.innerHTML = '';
