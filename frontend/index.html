@@ -186,20 +186,31 @@
     <nav class="border-b border-white/10 backdrop-blur-md bg-dark-900/80 fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-24 items-center">
+                <!-- Logo -->
                 <div class="flex items-center group cursor-pointer">
                     <span class="text-4xl mr-3 group-hover:rotate-12 transition-transform duration-300">🕷️</span>
-                    <h1 class="font-cyber text-3xl text-white tracking-widest uppercase">
-                        <span class="text-neonBlue text-glow-blue">Scrape</span><span class="text-neonPink text-glow-pink">Xi</span>
+                    <h1 class="font-cyber text-3xl text-white tracking-widest">
+                        <span class="text-neonBlue text-glow-blue">SCRAPE</span><span class="text-neonPink text-glow-pink">Xi</span>
                     </h1>
                 </div>
-                <div class="hidden md:flex space-x-10 text-base font-bold tracking-widest text-gray-400 uppercase">
-                    <a href="#how-it-works" class="hover:text-neonBlue transition duration-300 hover:scale-110 transform">How it Works</a>
-                    <a href="#use-cases" class="hover:text-neonPink transition duration-300 hover:scale-110 transform">Use Cases</a>
-                    <a href="#pricing" class="hover:text-white transition duration-300 hover:scale-110 transform">Pricing</a>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#how-it-works" class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonBlue transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-transparent hover:border-neonBlue/30 rounded-lg">
+                        How it Works
+                    </a>
+                    <a href="#pricing" class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonGreen transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] border border-transparent hover:border-neonGreen/30 rounded-lg">
+                        Pricing
+                    </a>
+                    <a href="#use-cases" class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonPink transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,0,255,0.3)] border border-transparent hover:border-neonPink/30 rounded-lg">
+                        Use Cases
+                    </a>
                 </div>
+
+                <!-- Login -->
                 <div>
                     <button id="loginBtnNav" onclick="signInWithGoogle()"
-                        class="cyber-btn px-8 py-3 font-bold text-sm">
+                        class="cyber-btn px-8 py-3 font-bold text-sm font-cyber tracking-widest">
                         System Login
                     </button>
                 </div>
@@ -594,8 +605,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center mb-8 md:mb-0">
                 <span class="text-3xl mr-3">🕷️</span>
-                <h1 class="font-cyber text-2xl text-white tracking-widest uppercase">
-                    <span class="text-neonBlue">Scrape</span><span class="text-neonPink">Xi</span>
+                <h1 class="font-cyber text-2xl text-white tracking-widest">
+                    <span class="text-neonBlue">SCRAPE</span><span class="text-neonPink">Xi</span>
                 </h1>
             </div>
             <div class="flex space-x-8 font-mono text-sm text-gray-500">
@@ -610,6 +621,42 @@
     </footer>
 
     <script>
+        /* Custom Smooth Scroll with Easing */
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const startPosition = window.pageYOffset;
+                    const targetPosition = targetElement.getBoundingClientRect().top + startPosition;
+                    const distance = targetPosition - startPosition;
+                    const duration = 800; // ms - Adjust for speed
+                    let start = null;
+
+                    function step(timestamp) {
+                        if (!start) start = timestamp;
+                        const progress = timestamp - start;
+                        // Ease Out Cubic: 1 - pow(1 - x, 3) 
+                        // Fast start, slow end
+                        const ease = (t) => 1 - Math.pow(1 - t, 3); 
+                        
+                        const percentage = Math.min(progress / duration, 1);
+                        
+                        window.scrollTo(0, startPosition + distance * ease(percentage));
+
+                        if (progress < duration) {
+                            window.requestAnimationFrame(step);
+                        }
+                    }
+
+                    window.requestAnimationFrame(step);
+                }
+            });
+        });
+
         // Scroll Animation Script
         document.addEventListener('DOMContentLoaded', () => {
             const observerOptions = {
