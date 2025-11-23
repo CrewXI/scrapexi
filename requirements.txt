@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+playwright
+python-dotenv
+beautifulsoup4
+playwright-stealth
+supabase
+stripe
+requests
