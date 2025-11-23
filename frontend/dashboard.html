@@ -289,13 +289,56 @@
 
                 </div>
 
-                <!-- TAB 2: SCHEMA (Default) -->
+                <!-- TAB 2: SCHEMA -->
                 <div id="view-schema" class="absolute inset-0 flex flex-col hidden">
-                    <div class="h-8 bg-black/40 border-b border-white/5 flex items-center justify-between px-4">
-                        <span class="text-[10px] font-mono text-gray-500 uppercase">Extraction Logic</span>
-                        <span class="text-[10px] font-mono text-neonGreen">JSON_MODE</span>
+                    <!-- Sub Tabs -->
+                    <div class="h-10 bg-black/40 border-b border-white/5 flex items-center px-2 gap-2 flex-shrink-0">
+                        <button onclick="switchSchemaMode('form')" id="btn-schema-form" class="px-3 py-1 text-[10px] font-cyber font-bold text-neonBlue bg-white/10 rounded hover:bg-white/20 transition border border-neonBlue/30">WIZARD</button>
+                        <button onclick="switchSchemaMode('json')" id="btn-schema-json" class="px-3 py-1 text-[10px] font-cyber font-bold text-gray-500 hover:text-white transition border border-transparent">JSON EDITOR</button>
                     </div>
-                    <div class="flex-1 relative">
+
+                    <!-- FORM MODE -->
+                    <div id="schema-mode-form" class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
+                        <!-- Root Entity -->
+                        <div>
+                            <label class="text-[10px] text-gray-400 font-mono mb-2 block uppercase">I want to extract a list of...</label>
+                            <div class="flex gap-2">
+                                <select id="schemaEntitySelect" class="cyber-input flex-1 h-10 px-2 text-xs rounded bg-black/60 cursor-pointer" onchange="handleEntityChange()">
+                                    <option value="jobs">Jobs</option>
+                                    <option value="people">People</option>
+                                    <option value="products">Products</option>
+                                    <option value="companies">Companies</option>
+                                    <option value="properties">Real Estate</option>
+                                    <option value="articles">Articles</option>
+                                    <option value="reviews">Reviews</option>
+                                    <option value="events">Events</option>
+                                    <option value="cars">Cars</option>
+                                    <option value="custom">Custom / Other...</option>
+                                </select>
+                                <input type="text" id="schemaEntityCustom" class="cyber-input flex-1 h-10 px-2 text-xs rounded bg-black/60 hidden" placeholder="e.g. pokemon" oninput="updateSchemaFromForm()">
+                            </div>
+                        </div>
+
+                        <!-- Fields -->
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-[10px] text-gray-400 font-mono uppercase">With these details</label>
+                                <button onclick="addFieldRow()" class="text-neonGreen text-xs font-bold hover:text-white transition flex items-center gap-1">
+                                    <span class="text-lg">+</span> ADD FIELD
+                                </button>
+                            </div>
+                            <div id="schemaFieldsContainer" class="space-y-2">
+                                <!-- Rows injected here -->
+                            </div>
+                        </div>
+                        
+                        <div class="text-[10px] text-gray-500 font-mono">
+                            * This wizard automatically generates the extraction query. Switch to "JSON EDITOR" to fine-tune.
+                        </div>
+                    </div>
+
+                    <!-- JSON MODE -->
+                    <div id="schema-mode-json" class="flex-1 relative hidden">
                         <textarea id="query">{
     products[] {
         name
@@ -1150,6 +1193,174 @@
             indentUnit: 4,
             lineWrapping: true
         });
+
+        // --- SCHEMA WIZARD LOGIC ---
+        function switchSchemaMode(mode) {
+            const formView = document.getElementById('schema-mode-form');
+            const jsonView = document.getElementById('schema-mode-json');
+            const btnForm = document.getElementById('btn-schema-form');
+            const btnJson = document.getElementById('btn-schema-json');
+
+            if (mode === 'form') {
+                // Sync JSON to Form first (Best effort)
+                syncFormFromJson();
+                
+                formView.classList.remove('hidden');
+                jsonView.classList.add('hidden');
+                
+                btnForm.classList.add('bg-white/10', 'text-neonBlue', 'border-neonBlue/30');
+                btnForm.classList.remove('text-gray-500', 'border-transparent');
+                btnJson.classList.remove('bg-white/10', 'text-white');
+                btnJson.classList.add('text-gray-500', 'border-transparent');
+            } else {
+                formView.classList.add('hidden');
+                jsonView.classList.remove('hidden');
+                
+                // Refresh editor
+                if(editor) setTimeout(() => editor.refresh(), 50);
+
+                btnJson.classList.add('bg-white/10', 'text-white');
+                btnJson.classList.remove('text-gray-500', 'border-transparent');
+                btnForm.classList.remove('bg-white/10', 'text-neonBlue', 'border-neonBlue/30');
+                btnForm.classList.add('text-gray-500', 'border-transparent');
+            }
+        }
+
+        function handleEntityChange() {
+            const select = document.getElementById('schemaEntitySelect');
+            const custom = document.getElementById('schemaEntityCustom');
+            
+            if (select.value === 'custom') {
+                custom.classList.remove('hidden');
+                custom.focus();
+            } else {
+                custom.classList.add('hidden');
+            }
+            updateSchemaFromForm();
+        }
+
+        function addFieldRow(value = '') {
+            const container = document.getElementById('schemaFieldsContainer');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center group';
+            div.innerHTML = `
+                <input type="text" class="schema-field-input cyber-input w-full h-10 px-3 rounded text-xs font-mono bg-black/60 focus:border-neonGreen transition-colors" 
+                    placeholder="Field name (e.g. title, price)" value="${value}" oninput="updateSchemaFromForm()">
+                <button onclick="removeFieldRow(this)" class="text-gray-600 hover:text-red-500 p-2 transition opacity-0 group-hover:opacity-100">
+                    &times;
+                </button>
+            `;
+            container.appendChild(div);
+            
+            // If adding manual, focus it
+            if (value === '') {
+                div.querySelector('input').focus();
+            }
+            updateSchemaFromForm();
+        }
+
+        function removeFieldRow(btn) {
+            btn.parentElement.remove();
+            updateSchemaFromForm();
+        }
+
+        function updateSchemaFromForm() {
+            const select = document.getElementById('schemaEntitySelect');
+            let entity = select.value;
+            if (entity === 'custom') {
+                entity = document.getElementById('schemaEntityCustom').value.trim() || 'items';
+            }
+            
+            const fields = [];
+            document.querySelectorAll('.schema-field-input').forEach(input => {
+                const val = input.value.trim();
+                if (val) fields.push(val);
+            });
+            
+            if (fields.length === 0) {
+                // Don't update JSON if empty, or set basic default?
+                // Let's set basic default to valid syntax
+                // fields.push('name'); 
+            }
+
+            // Construct AgentQL Query
+            let queryStr = `{\n    ${entity}[] {\n`;
+            fields.forEach(f => queryStr += `        ${f}\n`);
+            queryStr += `    }\n}`;
+            
+            if (editor) {
+                // Only update if content changed significantly or if focused in form?
+                // We update always to keep in sync
+                editor.setValue(queryStr);
+            } else {
+                document.getElementById('query').value = queryStr;
+            }
+        }
+
+        function syncFormFromJson() {
+            const raw = editor ? editor.getValue() : document.getElementById('query').value;
+            
+            // Simple Regex Parser for format: { entity[] { field1 field2 ... } }
+            // This is fragile but works for standard wizard output
+            try {
+                // Extract entity
+                const entityMatch = raw.match(/(\w+)\[\]\s*\{/);
+                if (!entityMatch) return; // Complex or invalid format, keep wizard as is or reset?
+                
+                let entity = entityMatch[1];
+                
+                // Extract Content inside brackets
+                // Find first { and last }
+                const firstBrace = raw.indexOf('{', raw.indexOf(entity));
+                const lastBrace = raw.lastIndexOf('}');
+                
+                if (firstBrace === -1 || lastBrace === -1) return;
+                
+                const content = raw.substring(firstBrace + 1, lastBrace);
+                
+                // Split by whitespace/newlines
+                const fields = content.split(/\s+/).filter(s => s.trim().length > 0);
+                
+                // Update UI
+                const select = document.getElementById('schemaEntitySelect');
+                const custom = document.getElementById('schemaEntityCustom');
+                
+                // Check if entity is in options
+                let found = false;
+                for(let i=0; i<select.options.length; i++) {
+                    if (select.options[i].value === entity) {
+                        select.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) {
+                    select.value = 'custom';
+                    custom.value = entity;
+                    custom.classList.remove('hidden');
+                } else {
+                    custom.classList.add('hidden');
+                }
+                
+                // Update Fields
+                const container = document.getElementById('schemaFieldsContainer');
+                container.innerHTML = '';
+                fields.forEach(f => addFieldRow(f));
+                
+            } catch (e) {
+                console.error("Failed to sync form from JSON", e);
+            }
+        }
+
+        // Initialize Wizard with Defaults
+        setTimeout(() => {
+            addFieldRow('name');
+            addFieldRow('price');
+            addFieldRow('rating');
+            updateSchemaFromForm();
+        }, 500);
+
 
         // Tab Logic
         function switchTab(tabId) {
