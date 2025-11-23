@@ -5,11 +5,8 @@ import random
 from typing import Any, Dict, Optional
 
 import google.generativeai as genai
-from bs4 import BeautifulSoup
-from fastapi import Body, FastAPI, HTTPException
-from playwright.sync_api import sync_playwright
 import playwright
-print(f"DEBUG: Playwright version: {playwright.__version__}")
+# print(f"DEBUG: Playwright version: {playwright.__version__}")
 
 from pydantic import BaseModel
 
