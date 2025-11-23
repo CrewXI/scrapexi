@@ -959,7 +959,25 @@
                  // If both empty, hide
                  if (userContainer.innerHTML === '') userSection.classList.add('hidden');
             }
+        } catch (e) {
+            console.error("Error loading templates:", e);
+            container.innerHTML = `<div class="text-red-500">ERROR_LOADING_DATABASE: ${e.message}</div>`;
+            
+            // Fallback: Try to render at least local templates if DB failed
+            try {
+                const localSaved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+                const localTemplates = Object.values(localSaved);
+                if (localTemplates.length > 0) {
+                    userSection.classList.remove('hidden');
+                    userContainer.innerHTML = '';
+                    userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (LOCAL ONLY)';
+                    localTemplates.forEach(tpl => renderTemplateCard(tpl, userContainer, true, true));
+                }
+            } catch(localErr) {
+                console.error("Local render failed:", localErr);
+            }
         }
+    }
 
         function renderTemplateCard(tpl, container, isUser = false, isLocal = false) {
             LOADED_TEMPLATES[tpl.id] = tpl; // Cache
