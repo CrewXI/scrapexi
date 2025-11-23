@@ -1956,12 +1956,15 @@
                 });
 
                 const startData = await response.json();
+                console.log("🚀 Scrape initiated:", startData);
                 
                 if (!response.ok || !startData.job_id) {
+                    console.error("❌ No job_id returned:", startData);
                     throw new Error(startData.error || "Failed to start job (No ID returned)");
                 }
 
                 currentJobId = startData.job_id;
+                console.log("✅ Job ID:", currentJobId, "- Starting to poll...");
 
                 // 2. Poll Status with Timeout Protection
                 const MAX_POLL_TIME = 5 * 60 * 1000; // 5 minutes max
@@ -2002,20 +2005,26 @@
                         }
 
                         const statusData = await statusRes.json();
+                        console.log("📊 Job status:", statusData.status, "- Pages:", statusData.pages_scraped);
 
                         if (statusData.status === 'completed') {
+                            console.log("✅ Job completed! Rendering results...");
                             clearInterval(pollInterval);
                             currentData = statusData.data; // Store for download
                             renderResults(statusData.data);
                             resetButton();
                         } else if (statusData.status === 'failed') {
+                            console.error("❌ Job failed:", statusData.error);
                             clearInterval(pollInterval);
                             renderError(statusData.error);
                             resetButton();
                         } else if (statusData.status === 'cancelled') {
+                            console.log("⚠️ Job cancelled");
                             clearInterval(pollInterval);
                             showStatus('cancelled');
                             resetButton();
+                        } else {
+                            console.log("⏳ Job still running:", statusData.status);
                         }
                     } catch (e) {
                         console.error("Poll error", e);

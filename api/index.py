@@ -471,6 +471,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
                 # Update DB Completion
                 try:
+                    print(f"✅ Job {job_id} COMPLETED - Updating database...")
                     supabase.table("jobs").update(
                         {
                             "status": "completed",
@@ -480,14 +481,18 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                             "pages_scraped": pages_scraped,
                         }
                     ).eq("id", job_id).execute()
+                    print(f"✅ Job {job_id} database updated successfully")
                 except Exception as e:
-                    print(f"Failed to update job success: {e}")
+                    print(f"❌ Failed to update job success: {e}")
 
                 active_jobs[job_id]["status"] = "completed"
                 active_jobs[job_id]["data"] = result_data
+                print(f"✅ Job {job_id} marked as completed in active_jobs")
 
     except Exception as e:
-        print(f"ERROR in job {job_id}: {e}")
+        print(f"❌ ERROR in job {job_id}: {e}")
+        import traceback
+        print(f"❌ Traceback: {traceback.format_exc()}")
         # Update DB Failure
         try:
             supabase.table("jobs").update(
@@ -497,8 +502,9 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "completed_at": "now()",
                 }
             ).eq("id", job_id).execute()
+            print(f"❌ Job {job_id} marked as failed in database")
         except Exception as log_err:
-            print(f"Failed to update job failure: {log_err}")
+            print(f"❌ Failed to update job failure: {log_err}")
 
 
 @app.post("/scrape", response_model=ScrapeResponse)
@@ -553,6 +559,7 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
         )
 
     background_tasks.add_task(run_scrape_task, job_id, request)
+    print(f"🚀 Job {job_id} queued and starting in background")
     return ScrapeResponse(job_id=job_id, status="queued")
 
 
