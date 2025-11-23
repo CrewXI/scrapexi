@@ -74,14 +74,16 @@ def clean_html(html_content):
     return text
 
 
-def learn_pagination_pattern(page1_url: str, page2_url: str, page3_url: str, target_page: int, model_name: str):
+def learn_pagination_pattern(
+    page1_url: str, page2_url: str, page3_url: str, target_page: int, model_name: str
+):
     """
     Use AI to learn the pagination pattern from example URLs and generate the URL for any page.
     Returns the predicted URL for the target page.
     """
     if not GOOGLE_API_KEY or not page2_url or not page3_url:
         return None
-    
+
     try:
         model = genai.GenerativeModel(model_name)  # type: ignore
         prompt = f"""
@@ -101,13 +103,13 @@ def learn_pagination_pattern(page1_url: str, page2_url: str, page3_url: str, tar
         
         Respond with ONLY the complete URL for Page {target_page}, nothing else.
         """
-        
+
         response = model.generate_content(prompt)
         predicted_url = response.text.strip()
-        
+
         print(f"AI predicted Page {target_page} URL: {predicted_url}")
         return predicted_url
-        
+
     except Exception as e:
         print(f"Error learning pagination pattern: {e}")
         return None
@@ -232,6 +234,26 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
 
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
+    """
+    Main scraping endpoint with 4-minute hard timeout.
+    """
+    import signal
+    import time
+    
+    start_time = time.time()
+    MAX_EXECUTION_TIME = 240  # 4 minutes in seconds
+    
+    # Set a hard timeout (only works on Unix-like systems)
+    def timeout_handler(signum, frame):
+        raise TimeoutError(f"Scrape operation exceeded {MAX_EXECUTION_TIME/60} minute timeout")
+    
+    try:
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(MAX_EXECUTION_TIME)
+    except Exception:
+        # Windows doesn't support SIGALRM, skip timeout on Windows
+        print("WARN: Signal-based timeout not available on this platform")
+    
     print(f"Received scrape request for: {request.url}")
 
     # Normalize session_json
@@ -329,7 +351,7 @@ def scrape(request: ScrapeRequest):
                 if request.pagination_enabled and page_num < pages_to_scrape - 1:
                     next_page_num = page_num + 2  # Next page number
                     next_url = None
-                    
+
                     # Strategy 1: Use AI pattern learning if example URLs provided
                     if request.page2_url and request.page3_url:
                         print(f"Using AI pattern learning for page {next_page_num}...")
@@ -338,9 +360,9 @@ def scrape(request: ScrapeRequest):
                             request.page2_url,
                             request.page3_url,
                             next_page_num,
-                            request.model_name
+                            request.model_name,
                         )
-                        
+
                         if next_url:
                             try:
                                 print(f"Navigating to AI-predicted URL: {next_url}")
@@ -349,7 +371,7 @@ def scrape(request: ScrapeRequest):
                             except Exception as e:
                                 print(f"AI-predicted URL failed: {e}")
                                 next_url = None
-                    
+
                     # Strategy 2: Try to find and click "Next" button
                     if not next_url:
                         print(f"Looking for 'Next' button...")
@@ -363,12 +385,13 @@ def scrape(request: ScrapeRequest):
                                 continue  # Success, move to next iteration
                             except Exception as e:
                                 print(f"Failed to click next button: {e}")
-                    
+
                     # Strategy 3: Fallback to URL pattern guessing
                     print("Trying URL pattern fallback...")
                     import re
+
                     current_url = page.url
-                    
+
                     if "page/" in current_url:
                         next_url = re.sub(r"/page/\d+/?", f"/page/{next_page_num}/", current_url)
                     elif "?" in current_url:
@@ -397,9 +420,22 @@ def scrape(request: ScrapeRequest):
                 query_text = request.query or request.prompt or ""
                 print(f"Processing with Gemini... Query: {query_text}")
                 data = extract_with_gemini(clean_text, query_text, request.model_name)
+                
+                # Cancel timeout alarm (success)
+                try:
+                    signal.alarm(0)
+                except Exception:
+                    pass
+                
                 return {"status": "success", "url": request.url, "data": data}
             else:
                 # Raw HTML mode
+                # Cancel timeout alarm (success)
+                try:
+                    signal.alarm(0)
+                except Exception:
+                    pass
+                
                 return {
                     "status": "success",
                     "url": request.url,
@@ -407,8 +443,22 @@ def scrape(request: ScrapeRequest):
                     "html": content,
                 }
 
+    except TimeoutError as te:
+        print(f"Timeout Error: {te}")
+        # Cancel alarm
+        try:
+            signal.alarm(0)
+        except Exception:
+            pass
+        raise HTTPException(status_code=500, detail=f"Operation timed out: {str(te)}") from te
+    
     except Exception as e:
         print(f"Browser Error: {e}")
+        # Cancel alarm
+        try:
+            signal.alarm(0)
+        except Exception:
+            pass
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 

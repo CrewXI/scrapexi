@@ -1943,9 +1943,30 @@
 
                 currentJobId = startData.job_id;
 
-                // 2. Poll Status
+                // 2. Poll Status with Timeout Protection
+                const MAX_POLL_TIME = 5 * 60 * 1000; // 5 minutes max
+                const pollStartTime = Date.now();
+                
                 pollInterval = setInterval(async () => {
                     try {
+                        // Check if we've exceeded max polling time
+                        const elapsed = Date.now() - pollStartTime;
+                        if (elapsed > MAX_POLL_TIME) {
+                            console.error("Job polling timeout (5 minutes), stopping poll.");
+                            clearInterval(pollInterval);
+                            
+                            // Try to cancel the job on backend
+                            try {
+                                await fetch(`/job/${currentJobId}/cancel`, { method: 'POST' });
+                            } catch (cancelErr) {
+                                console.error("Failed to cancel job:", cancelErr);
+                            }
+                            
+                            renderError("Operation timed out after 5 minutes. The job may still be running in the background.");
+                            resetButton();
+                            return;
+                        }
+                        
                         const statusRes = await fetch(`/job/${currentJobId}`);
                         
                         if (!statusRes.ok) {
