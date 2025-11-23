@@ -311,12 +311,18 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="text-[10px] text-gray-400 block mb-1 uppercase">Start Page</label>
-                                    <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                                    <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="validatePagination()">
                                 </div>
                                 <div>
                                     <label class="text-[10px] text-gray-400 block mb-1 uppercase">End Page</label>
-                                    <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                                    <input type="number" id="endPage" value="4" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="validatePagination()">
                                 </div>
+                            </div>
+                            
+                            <!-- Pagination Warning -->
+                            <div id="paginationWarning" class="hidden mt-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs text-yellow-400">
+                                ⚠️ Maximum 4 pages per search. Range adjusted automatically.
+                            </div>
                             </div>
                             
                             <!-- Example URLs for Pattern Recognition -->
@@ -1545,6 +1551,34 @@
             } else {
                 controls.classList.add('hidden');
             }
+            updateSummary();
+        }
+
+        function validatePagination() {
+            const startPage = parseInt(document.getElementById('startPage').value) || 1;
+            const endPage = parseInt(document.getElementById('endPage').value) || 1;
+            const warning = document.getElementById('paginationWarning');
+            
+            let adjusted = false;
+            let newStart = startPage;
+            let newEnd = endPage;
+            
+            // Max 4 pages rule
+            const MAX_PAGES = 4;
+            
+            if (endPage - startPage + 1 > MAX_PAGES) {
+                // Adjust end page to maintain 4-page max
+                newEnd = startPage + MAX_PAGES - 1;
+                document.getElementById('endPage').value = newEnd;
+                adjusted = true;
+            }
+            
+            // Show/hide warning
+            if (adjusted && warning) {
+                warning.classList.remove('hidden');
+                setTimeout(() => warning.classList.add('hidden'), 3000);
+            }
+            
             updateSummary();
         }
 

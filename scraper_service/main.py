@@ -329,6 +329,14 @@ def scrape(request: ScrapeRequest):
             pages_to_scrape = (
                 request.end_page - request.start_page + 1 if request.pagination_enabled else 1
             )
+            
+            # Enforce max 4 pages limit
+            MAX_PAGES = 4
+            if pages_to_scrape > MAX_PAGES:
+                print(f"⚠️ Requested {pages_to_scrape} pages, limiting to {MAX_PAGES}")
+                pages_to_scrape = MAX_PAGES
+                request.end_page = request.start_page + MAX_PAGES - 1
+            
             current_page_num = request.start_page  # Track the actual page number we're on
 
             # Determine the starting URL
@@ -478,12 +486,12 @@ def scrape(request: ScrapeRequest):
 
             if request.query or request.prompt:
                 query_text = request.query or request.prompt or ""
-                
+
                 # Process each page separately with ThreadPoolExecutor
                 from concurrent.futures import ThreadPoolExecutor, as_completed
-                
+
                 page_results = {}
-                
+
                 def process_single_page(page_index, page_html):
                     """Process a single page with Gemini"""
                     try:
@@ -491,26 +499,28 @@ def scrape(request: ScrapeRequest):
                         print(f"🔄 Processing Page {page_num} with Gemini...")
                         clean_text = clean_html(page_html)
                         result = extract_with_gemini(clean_text, query_text, request.model_name)
-                        print(f"✅ Page {page_num} completed - {len(result) if isinstance(result, list) else 'N/A'} items")
+                        print(
+                            f"✅ Page {page_num} completed - {len(result) if isinstance(result, list) else 'N/A'} items"
+                        )
                         return page_num, result
                     except Exception as e:
                         print(f"❌ Page {page_num} failed: {e}")
                         return page_num, {"error": str(e)}
-                
+
                 # Process up to 4 pages in parallel
                 with ThreadPoolExecutor(max_workers=min(4, len(all_content))) as executor:
                     futures = {
-                        executor.submit(process_single_page, idx, content): idx 
+                        executor.submit(process_single_page, idx, content): idx
                         for idx, content in enumerate(all_content)
                     }
-                    
+
                     for future in as_completed(futures):
                         page_num, result = future.result()
                         page_results[f"page_{page_num}"] = result
-                
+
                 # Combine all results for "All" view
                 combined_data = []
-                for page_key in sorted(page_results.keys(), key=lambda x: int(x.split('_')[1])):
+                for page_key in sorted(page_results.keys(), key=lambda x: int(x.split("_")[1])):
                     page_data = page_results[page_key]
                     if isinstance(page_data, list):
                         combined_data.extend(page_data)
@@ -520,16 +530,16 @@ def scrape(request: ScrapeRequest):
                             if isinstance(value, list):
                                 combined_data.extend(value)
                                 break
-                
+
                 # Return paginated results
                 final_result = {
                     "pages": page_results,  # Individual page results
-                    "all": combined_data,   # Combined results
+                    "all": combined_data,  # Combined results
                     "pagination": {
                         "start_page": request.start_page,
                         "end_page": request.end_page,
-                        "total_pages": len(all_content)
-                    }
+                        "total_pages": len(all_content),
+                    },
                 }
 
                 # Cancel timeout alarm (success)
