@@ -52,6 +52,13 @@ def clean_html(html_content):
     for script in soup(["script", "style", "svg", "path", "noscript"]):
         script.extract()
 
+    # Preserve Images: Replace img tags with (Image: URL)
+    for img in soup.find_all("img"):
+        src = img.get("src") or img.get("data-src") or ""
+        alt = img.get("alt", "")
+        if src:
+            img.replace_with(f"{alt} (Image: {src}) ")
+
     # Preserve Links: Append (Link: URL) to anchor text
     for a in soup.find_all("a", href=True):
         if a.get_text(strip=True):
