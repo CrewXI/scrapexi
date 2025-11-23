@@ -935,29 +935,39 @@
                 container.innerHTML = '';
                 systemTemplates.forEach(tpl => renderTemplateCard(tpl, container));
 
-                // --- Render Private Templates ---
-                if (privateTemplates.length > 0) {
-                    userSection.classList.remove('hidden');
-                    userContainer.innerHTML = '';
-                    // Rename header to reflect cloud status
-                    userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (CLOUD)';
-                    
-                    privateTemplates.forEach(tpl => renderTemplateCard(tpl, userContainer, true));
-                }
-
-            } catch (e) {
-                console.error("Error loading templates:", e);
-                container.innerHTML = `<div class="text-red-500">ERROR_LOADING_DATABASE: ${e.message}</div>`;
-            }
-            
             // Also render local ones if any exist (legacy support)
-            renderUserTemplates(); 
+            const localSaved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+            const localTemplates = Object.values(localSaved);
+            
+            const allUserTemplates = [...privateTemplates, ...localTemplates];
+
+            // --- Render Combined User Templates ---
+            if (allUserTemplates.length > 0) {
+                userSection.classList.remove('hidden');
+                userContainer.innerHTML = '';
+                // Rename header to reflect cloud status
+                userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (CLOUD + LOCAL)';
+                
+                allUserTemplates.forEach(tpl => {
+                    // Distinguish source if needed, or just render
+                    // Local templates have 'id' usually starting with 'user_' or timestamp
+                    // DB templates have UUID
+                    const isLocal = !tpl.user_id; 
+                    renderTemplateCard(tpl, userContainer, true, isLocal);
+                });
+            } else {
+                 // If both empty, hide
+                 if (userContainer.innerHTML === '') userSection.classList.add('hidden');
+            }
         }
 
-        function renderTemplateCard(tpl, container, isUser = false) {
+        function renderTemplateCard(tpl, container, isUser = false, isLocal = false) {
             LOADED_TEMPLATES[tpl.id] = tpl; // Cache
             
-            const config = typeof tpl.config === 'string' ? JSON.parse(tpl.config) : tpl.config;
+            let config = tpl.config || {};
+            if (typeof config === 'string') {
+                try { config = JSON.parse(config); } catch(e) {}
+            }
             
             const card = document.createElement('div');
             card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
@@ -967,17 +977,22 @@
             else if (config.loginEnabled) badges += `<div class="absolute top-0 right-0 bg-neonPink/10 px-2 py-1 rounded-bl text-[10px] text-neonPink font-mono border-l border-b border-neonPink/20">CREDS</div>`;
             
             if (isUser) {
-                 badges += `<div class="absolute top-0 right-0 bg-green-500/10 px-2 py-1 rounded-bl text-[10px] text-green-400 font-mono border-l border-b border-green-500/20" style="right: ${config.sessionEnabled || config.loginEnabled ? '60px' : '0'}">PRIVATE</div>`;
+                 let type = isLocal ? 'LOCAL' : 'CLOUD';
+                 let color = isLocal ? 'text-gray-400 border-gray-500/20' : 'text-green-400 border-green-500/20 bg-green-500/10';
+                 // Adjust position if other badge exists
+                 let style = (config.sessionEnabled || config.loginEnabled) ? 'right: 60px;' : 'right: 0;';
+                 
+                 badges += `<div class="absolute top-0 border-l border-b px-2 py-1 rounded-bl text-[10px] font-mono ${color}" style="${style}">${type}</div>`;
             }
 
             card.innerHTML = `
                 ${badges}
                 <h4 class="text-white font-bold text-lg mb-1">${tpl.name}</h4>
-                <p class="text-gray-500 text-xs font-mono mb-4 h-8 overflow-hidden">${tpl.description || tpl.url}</p>
+                <p class="text-gray-500 text-xs font-mono mb-4 h-8 overflow-hidden text-ellipsis whitespace-nowrap">${tpl.description || tpl.url}</p>
                 
                 <div class="space-y-2 mb-6">
                     <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
-                        <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? `ON (${config.maxPages})` : 'OFF'}</span>
+                        <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? `ON (${config.maxPages || config.endPage})` : 'OFF'}</span>
                     </div>
                     <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
                         <span>STEALTH</span> <span class="${config.stealth ? 'text-purple-400' : 'text-gray-600'}">${config.stealth ? 'ACTIVE' : 'OFF'}</span>
@@ -987,9 +1002,33 @@
                     </div>
                 </div>
 
-                <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn w-full py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD_MODULE</button>
+                <div class="flex gap-2">
+                    <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn flex-1 py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD</button>
+                    ${isUser ? `<button onclick="deleteTemplate('${tpl.id}', ${isLocal})" class="text-gray-500 hover:text-red-500 px-2 transition"><span class="text-xl">&times;</span></button>` : ''}
+                </div>
             `;
             container.appendChild(card);
+        }
+
+        async function deleteTemplate(id, isLocal) {
+            if(!confirm("Delete this template?")) return;
+            
+            if (isLocal) {
+                const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+                delete saved[id];
+                localStorage.setItem('user_templates', JSON.stringify(saved));
+                // Re-render
+                fetchAndRenderTemplates();
+            } else {
+                // Delete from DB
+                if (!supabase) return;
+                const { error } = await supabase.from('templates').delete().eq('id', id);
+                if (error) {
+                    alert("Failed to delete: " + error.message);
+                } else {
+                    fetchAndRenderTemplates();
+                }
+            }
         }
 
         function loadTemplate(templateId) {
@@ -1121,60 +1160,6 @@
             localStorage.setItem('user_templates', JSON.stringify(saved));
             
             alert("Template saved locally!");
-        }
-
-        function renderUserTemplates() {
-            // ... (Same as before, but adapted for consistency)
-            const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
-            const container = document.getElementById('userTemplatesGrid');
-            const section = document.getElementById('userTemplatesSection');
-            
-            if (Object.keys(saved).length === 0) {
-                section.classList.add('hidden');
-                return;
-            }
-            
-            section.classList.remove('hidden');
-            container.innerHTML = '';
-
-            Object.values(saved).forEach(tpl => {
-                const config = tpl.config || tpl; // Handle legacy
-                LOADED_TEMPLATES[tpl.id] = tpl;
-
-                const card = document.createElement('div');
-                card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
-                
-                card.innerHTML = `
-                    <div class="absolute top-0 right-0 bg-white/10 px-2 py-1 rounded-bl text-[10px] text-white font-mono border-l border-b border-white/20">CUSTOM</div>
-                    <h4 class="text-white font-bold text-lg mb-1">${tpl.name}</h4>
-                    <p class="text-gray-500 text-xs font-mono mb-4 truncate">${tpl.url}</p>
-                    
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
-                            <span>PAGINATION</span> <span class="${config.pagination ? 'text-neonGreen' : 'text-gray-600'}">${config.pagination ? 'ON' : 'OFF'}</span>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-gray-400 font-mono border-b border-white/5 pb-1">
-                            <span>STEALTH</span> <span class="${config.stealth ? 'text-purple-400' : 'text-gray-600'}">${config.stealth ? 'ACTIVE' : 'OFF'}</span>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2">
-                        <button onclick="loadTemplate('${tpl.id}')" class="cyber-btn flex-1 py-2 text-xs font-bold group-hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">LOAD</button>
-                        <button onclick="deleteTemplate('${tpl.id}')" class="text-gray-500 hover:text-red-500 px-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function deleteTemplate(id) {
-            if(!confirm("Delete this template?")) return;
-            const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
-            delete saved[id];
-            localStorage.setItem('user_templates', JSON.stringify(saved));
-            renderUserTemplates();
         }
 
         function updateBuiltUrl() {
