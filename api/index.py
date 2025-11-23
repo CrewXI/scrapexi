@@ -94,7 +94,7 @@ class ScrapeRequest(BaseModel):
     prompt: Optional[str] = None
     wait_time: int = 2
     use_local_backend: bool = True
-    model_name: str = "gemini-2.0-flash-lite-preview-02-05"
+    model_name: str = "gemini-2.5-flash"
     pagination_enabled: bool = False
     max_pages: int = 3
     login_enabled: bool = False

@@ -34,7 +34,7 @@ class ScrapeRequest(BaseModel):
     url: str
     query: Optional[str] = None
     prompt: Optional[str] = None
-    model_name: str = "gemini-2.0-flash-lite-preview-02-05"
+    model_name: str = "gemini-2.5-flash"
     wait_time: int = 2
     stealth_mode: bool = True
     session_json: Optional[Any] = None
