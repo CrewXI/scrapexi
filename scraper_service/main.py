@@ -10,8 +10,10 @@ from pydantic import BaseModel
 
 # Try to import stealth mode
 STEALTH_AVAILABLE = False
+stealth_sync = None
 try:
-    from playwright_stealth import stealth_sync
+    from playwright_stealth import stealth_sync  # type: ignore
+
     STEALTH_AVAILABLE = True
     print("✓ Stealth mode enabled")
 except ImportError:
@@ -20,7 +22,7 @@ except ImportError:
 # Get API key from environment
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
+    genai.configure(api_key=GOOGLE_API_KEY)  # type: ignore
     print("✓ Google API Key configured")
 else:
     print("WARNING: GOOGLE_API_KEY not set. AI extraction will fail.")
@@ -69,7 +71,7 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
     print(f"DEBUG: Gemini Input Context (First 5000 chars): {text_content[:5000]}")
 
     try:
-        model = genai.GenerativeModel(model_name)
+        model = genai.GenerativeModel(model_name)  # type: ignore
 
         prompt = f"""
         You are a precise data extraction agent.
@@ -158,9 +160,9 @@ def scrape(request: ScrapeRequest):
             page = context.new_page()
 
             # 3. Apply Stealth
-            if request.stealth_mode and STEALTH_AVAILABLE:
+            if request.stealth_mode and STEALTH_AVAILABLE and stealth_sync:
                 try:
-                    stealth_sync(page)
+                    stealth_sync(page)  # type: ignore
                 except Exception as e:
                     print(f"Stealth failed: {e}")
 
@@ -195,9 +197,7 @@ def scrape(request: ScrapeRequest):
             if request.query or request.prompt:
                 query_text = request.query or request.prompt or ""
                 print(f"Processing with Gemini... Query: {query_text}")
-                data = extract_with_gemini(
-                    clean_text, query_text, request.model_name
-                )
+                data = extract_with_gemini(clean_text, query_text, request.model_name)
                 return {"status": "success", "url": request.url, "data": data}
             else:
                 # Raw HTML mode
