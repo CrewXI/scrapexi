@@ -724,8 +724,12 @@
             'custom': { label: 'CUSTOM / DIRECT URL', pattern: '', fields: [] },
             'linkedin_people': { 
                 label: 'LINKEDIN (PEOPLE)', 
-                pattern: 'https://www.linkedin.com/search/results/people/?keywords={keywords}&origin=SWITCH_SEARCH_VERTICAL',
-                fields: [{ key: 'keywords', label: 'KEYWORDS', placeholder: 'e.g. Software Engineer' }]
+                pattern: 'https://www.linkedin.com/search/results/people/?keywords={keywords}%20{occupation}%20{location}&origin=SWITCH_SEARCH_VERTICAL',
+                fields: [
+                    { key: 'keywords', label: 'KEYWORDS', placeholder: 'e.g. Java' },
+                    { key: 'occupation', label: 'OCCUPATION', placeholder: 'e.g. Software Engineer' },
+                    { key: 'location', label: 'LOCATION', placeholder: 'e.g. Austin, TX' }
+                ]
             },
             'linkedin_jobs': { 
                 label: 'LINKEDIN (JOBS)', 
@@ -844,17 +848,21 @@
             if (!config) return;
 
             const container = document.getElementById('urlBuilderFields');
-            if (!container) return;
+            const module = document.getElementById('urlBuilderModule');
+            if (!container || !module) return;
+            
             container.innerHTML = '';
             
             if (key === 'custom') {
                 currentUrlBuilder = null;
+                module.classList.add('hidden');
                 // Restore default placeholder or keep current URL? 
                 // Let's keep current for custom flexibility
                 return;
             }
 
             currentUrlBuilder = config;
+            module.classList.remove('hidden');
             
             config.fields.forEach(field => {
                 const div = document.createElement('div');
