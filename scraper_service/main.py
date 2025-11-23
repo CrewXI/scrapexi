@@ -98,9 +98,28 @@ def scrape(request: ScrapeRequest):
     print(f"Received scrape request for: {request.url}")
 
     # Normalize session_json
-    if request.session_json and isinstance(request.session_json, list):
-        print("DEBUG: detected list for session_json, wrapping in {'cookies': ...}")
-        request.session_json = {"cookies": request.session_json}
+    if request.session_json:
+        if isinstance(request.session_json, list):
+            print("DEBUG: detected list for session_json, wrapping in {'cookies': ...}")
+            request.session_json = {"cookies": request.session_json}
+
+        # Sanitize Cookies (Fix SameSite casing)
+        if "cookies" in request.session_json:
+            for cookie in request.session_json["cookies"]:
+                if "sameSite" in cookie:
+                    val = cookie["sameSite"]
+                    # Map common values to Playwright's strict expectations
+                    if val in ["no_restriction", "unspecified"]:
+                        cookie["sameSite"] = "None"
+                    elif val.lower() == "lax":
+                        cookie["sameSite"] = "Lax"
+                    elif val.lower() == "strict":
+                        cookie["sameSite"] = "Strict"
+                    elif val.lower() == "none":
+                        cookie["sameSite"] = "None"
+                    elif val not in ["Strict", "Lax", "None"]:
+                         # Unknown value, remove it to avoid crash
+                         del cookie["sameSite"]
 
     try:
         with sync_playwright() as p:

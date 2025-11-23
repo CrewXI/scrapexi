@@ -168,11 +168,28 @@ def update_data_usage(user_id: str, amount_mb: float):
 
 def run_scrape_task(job_id: str, request: ScrapeRequest):
     print(f"DEBUG: Starting Job {job_id} for {request.url}")
-    
+
     # Normalize session_json if it's a list (cookie array) -> Dict (storage_state)
-    if request.session_json and isinstance(request.session_json, list):
-        print("DEBUG: detected list for session_json, wrapping in {'cookies': ...}")
-        request.session_json = {"cookies": request.session_json}
+    if request.session_json:
+        if isinstance(request.session_json, list):
+            print("DEBUG: detected list for session_json, wrapping in {'cookies': ...}")
+            request.session_json = {"cookies": request.session_json}
+
+        # Sanitize Cookies (Fix SameSite casing) for local execution
+        if "cookies" in request.session_json:
+            for cookie in request.session_json["cookies"]:
+                if "sameSite" in cookie:
+                    val = cookie["sameSite"]
+                    if val in ["no_restriction", "unspecified"]:
+                        cookie["sameSite"] = "None"
+                    elif val.lower() == "lax":
+                        cookie["sameSite"] = "Lax"
+                    elif val.lower() == "strict":
+                        cookie["sameSite"] = "Strict"
+                    elif val.lower() == "none":
+                        cookie["sameSite"] = "None"
+                    elif val not in ["Strict", "Lax", "None"]:
+                        del cookie["sameSite"]
 
     # Maintain local cache for speed/debugging, but DB is source of truth
     active_jobs[job_id] = {"status": "running", "data": None, "pages_scraped": 0}
