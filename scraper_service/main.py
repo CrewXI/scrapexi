@@ -37,7 +37,7 @@ class ScrapeRequest(BaseModel):
     model_name: str = "gemini-2.0-flash-exp"
     wait_time: int = 2
     stealth_mode: bool = True
-    session_json: Optional[Dict[str, Any]] = None
+    session_json: Optional[Any] = None
 
 
 @app.get("/")
@@ -96,6 +96,11 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
 @app.post("/scrape")
 def scrape(request: ScrapeRequest):
     print(f"Received scrape request for: {request.url}")
+
+    # Normalize session_json
+    if request.session_json and isinstance(request.session_json, list):
+        print("DEBUG: detected list for session_json, wrapping in {'cookies': ...}")
+        request.session_json = {"cookies": request.session_json}
 
     try:
         with sync_playwright() as p:

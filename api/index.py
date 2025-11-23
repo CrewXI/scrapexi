@@ -101,7 +101,7 @@ class ScrapeRequest(BaseModel):
     login_url: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
-    session_json: Optional[Dict[str, Any]] = None
+    session_json: Optional[Any] = None
     stealth_mode: bool = False
     user_id: Optional[str] = None
 
@@ -168,6 +168,12 @@ def update_data_usage(user_id: str, amount_mb: float):
 
 def run_scrape_task(job_id: str, request: ScrapeRequest):
     print(f"DEBUG: Starting Job {job_id} for {request.url}")
+    
+    # Normalize session_json if it's a list (cookie array) -> Dict (storage_state)
+    if request.session_json and isinstance(request.session_json, list):
+        print("DEBUG: detected list for session_json, wrapping in {'cookies': ...}")
+        request.session_json = {"cookies": request.session_json}
+
     # Maintain local cache for speed/debugging, but DB is source of truth
     active_jobs[job_id] = {"status": "running", "data": None, "pages_scraped": 0}
 
@@ -244,7 +250,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
         except Exception as e:
             print(f"CRITICAL ERROR: Remote Browser Failed: {e}")
-            
+
             # Update DB with Failure
             try:
                 supabase.table("jobs").update(
@@ -446,7 +452,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                             "data_usage_mb": size_mb,
                             "completed_at": "now()",
                             "data": result_data,
-                            "pages_scraped": pages_scraped
+                            "pages_scraped": pages_scraped,
                         }
                     ).eq("id", job_id).execute()
                 except Exception as e:
@@ -481,21 +487,25 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
             raise HTTPException(status_code=402, detail=str(e))
 
     job_id = str(uuid.uuid4())
-    
+
     # INITIAL INSERT: Create "running" job in DB immediately
     try:
-        supabase.table("jobs").insert({
-            "id": job_id,
-            "user_id": request.user_id,
-            "url": request.url,
-            "query": request.query,
-            "status": "running", 
-            "created_at": "now()",
-            # "pages_scraped": 0 # Optional if default is 0
-        }).execute()
+        supabase.table("jobs").insert(
+            {
+                "id": job_id,
+                "user_id": request.user_id,
+                "url": request.url,
+                "query": request.query,
+                "status": "running",
+                "created_at": "now()",
+                # "pages_scraped": 0 # Optional if default is 0
+            }
+        ).execute()
     except Exception as e:
         print(f"Failed to initialize job in DB: {e}")
-        raise HTTPException(status_code=500, detail="Failed to initialize job. Database unavailable.")
+        raise HTTPException(
+            status_code=500, detail="Failed to initialize job. Database unavailable."
+        )
 
     background_tasks.add_task(run_scrape_task, job_id, request)
     return ScrapeResponse(job_id=job_id, status="queued")
@@ -530,7 +540,7 @@ def get_job_status(job_id: str):
             pages_scraped=job.get("pages_scraped", 0),
             error=job.get("error"),
         )
-    
+
     raise HTTPException(status_code=404, detail="Job not found")
 
 
@@ -546,7 +556,7 @@ def cancel_job(job_id: str):
     if job_id in active_jobs:
         active_jobs[job_id]["status"] = "cancelled"
         return {"message": "Job cancellation requested"}
-        
+
     # If we updated DB, return success even if not in memory
     return {"message": "Job cancellation requested via DB"}
 
