@@ -611,6 +611,11 @@ async def read_dashboard_html():
     return FileResponse("frontend/dashboard.html")
 
 
+@app.get("/ScrapeXiLogo1.jpg")
+async def read_logo():
+    return FileResponse("frontend/ScrapeXiLogo1.jpg")
+
+
 if __name__ == "__main__":
     import uvicorn
 
