@@ -16,12 +16,8 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set Playwright Browsers Path to a fixed location to ensure persistence and finding
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-
-# Install Playwright Browsers (System-wide)
-# Force reinstall to ensure we get the correct version matching the pinned requirements
-RUN python -m playwright install --with-deps chromium
+# Install Playwright Browsers (System-wide) - Default Location
+RUN playwright install --with-deps chromium
 
 # Copy application code
 COPY . .

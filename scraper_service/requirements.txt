@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-playwright==1.49.0
+playwright
 bs4
 requests
 playwright-stealth
