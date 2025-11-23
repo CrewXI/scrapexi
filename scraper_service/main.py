@@ -72,6 +72,79 @@ def clean_html(html_content):
     return text
 
 
+def find_next_page_button(page, model_name: str):
+    """
+    Use AI to find the 'Next Page' button/link on the current page.
+    Returns the selector for the next button, or None if not found.
+    """
+    if not GOOGLE_API_KEY:
+        return None
+    
+    try:
+        # Get page HTML
+        html = page.content()
+        soup = BeautifulSoup(html, "html.parser")
+        
+        # Find all links and buttons
+        clickable_elements = []
+        for elem in soup.find_all(['a', 'button', 'div', 'span']):
+            text = elem.get_text(strip=True).lower()
+            href = elem.get('href', '')
+            # Look for pagination-related elements
+            if any(keyword in text for keyword in ['next', 'more', '›', '→', '»']) or 'page' in text or 'pagination' in str(elem.get('class', [])):
+                clickable_elements.append({
+                    'tag': elem.name,
+                    'text': elem.get_text(strip=True)[:50],
+                    'href': href,
+                    'class': ' '.join(elem.get('class', [])),
+                    'id': elem.get('id', '')
+                })
+        
+        if not clickable_elements:
+            return None
+        
+        # Ask Gemini to identify the next button
+        model = genai.GenerativeModel(model_name)  # type: ignore
+        prompt = f"""
+        You are analyzing a webpage to find the "Next Page" button for pagination.
+        
+        Here are the clickable elements that might be the next page button:
+        {clickable_elements[:20]}  
+        
+        Which element is most likely the "Next Page" button?
+        Respond with ONLY the element's index number (0-{len(clickable_elements)-1}), or "NONE" if there's no clear next button.
+        
+        Response format: Just the number, nothing else.
+        """
+        
+        response = model.generate_content(prompt)
+        result = response.text.strip()
+        
+        if result.upper() == "NONE" or not result.isdigit():
+            return None
+        
+        idx = int(result)
+        if idx < 0 or idx >= len(clickable_elements):
+            return None
+        
+        selected = clickable_elements[idx]
+        print(f"AI selected next button: {selected}")
+        
+        # Build a selector for this element
+        if selected['id']:
+            return f"#{selected['id']}"
+        elif selected['class']:
+            return f".{selected['class'].split()[0]}"
+        elif selected['href']:
+            return f"a[href='{selected['href']}']"
+        else:
+            return None
+            
+    except Exception as e:
+        print(f"Error finding next button: {e}")
+        return None
+
+
 def extract_with_gemini(text_content: str, query: str, model_name: str):
     if not GOOGLE_API_KEY:
         return {"error": "Google API Key not configured on Scraper Service"}
@@ -179,36 +252,21 @@ def scrape(request: ScrapeRequest):
             # 4. Multi-Page Scraping
             all_content = []
             pages_to_scrape = (
-                range(request.start_page, request.end_page + 1)
+                request.end_page - request.start_page + 1
                 if request.pagination_enabled
-                else [1]
+                else 1
             )
 
-            for page_num in pages_to_scrape:
-                # Build URL for current page
-                current_url = request.url
-                if request.pagination_enabled and page_num > 1:
-                    # Detect URL pattern and append page number
-                    if "page/" in current_url:
-                        # Replace existing page number
-                        import re
+            # Navigate to the first page
+            print(f"Navigating to starting page: {request.url}...")
+            try:
+                page.goto(request.url, timeout=60000, wait_until="domcontentloaded")
+            except Exception as nav_error:
+                print(f"Navigation Error (continuing anyway): {nav_error}")
 
-                        current_url = re.sub(r"/page/\d+/?", f"/page/{page_num}/", current_url)
-                    elif "?" in current_url:
-                        # Add as query parameter
-                        current_url = f"{current_url}&page={page_num}"
-                    else:
-                        # Append page path
-                        current_url = f"{current_url.rstrip('/')}/page/{page_num}/"
-
-                print(f"Navigating to page {page_num}: {current_url}...")
-                try:
-                    page.goto(current_url, timeout=60000, wait_until="domcontentloaded")
-                except Exception as nav_error:
-                    print(f"Navigation Error on page {page_num} (continuing anyway): {nav_error}")
-
+            for page_num in range(pages_to_scrape):
                 # Wait for content
-                print(f"Waiting for content on page {page_num}...")
+                print(f"Waiting for content on page {page_num + 1}...")
                 try:
                     page.wait_for_load_state("networkidle", timeout=10000)
                 except Exception:
@@ -220,7 +278,39 @@ def scrape(request: ScrapeRequest):
                 # Extract HTML for this page
                 page_content = page.content()
                 all_content.append(page_content)
-                print(f"Page {page_num} scraped ({len(page_content)} bytes)")
+                print(f"Page {page_num + 1} scraped ({len(page_content)} bytes)")
+
+                # If this isn't the last page, find and click "Next"
+                if request.pagination_enabled and page_num < pages_to_scrape - 1:
+                    print(f"Looking for 'Next' button...")
+                    next_selector = find_next_page_button(page, request.model_name)
+                    
+                    if next_selector:
+                        try:
+                            print(f"Clicking next button: {next_selector}")
+                            page.click(next_selector, timeout=5000)
+                            page.wait_for_timeout(2000)  # Wait for navigation
+                        except Exception as e:
+                            print(f"Failed to click next button: {e}")
+                            print("Trying URL pattern fallback...")
+                            # Fallback to URL pattern approach
+                            import re
+                            current_url = page.url
+                            if "page/" in current_url:
+                                new_url = re.sub(r"/page/\d+/?", f"/page/{page_num + 2}/", current_url)
+                            elif "?" in current_url:
+                                new_url = f"{current_url}&page={page_num + 2}"
+                            else:
+                                new_url = f"{current_url.rstrip('/')}/page/{page_num + 2}/"
+                            
+                            try:
+                                page.goto(new_url, timeout=60000, wait_until="domcontentloaded")
+                            except Exception as fallback_error:
+                                print(f"Fallback navigation failed: {fallback_error}")
+                                break  # Stop pagination if we can't navigate
+                    else:
+                        print("No 'Next' button found, stopping pagination")
+                        break
 
             # Combine all pages
             content = "\n\n".join(all_content)
