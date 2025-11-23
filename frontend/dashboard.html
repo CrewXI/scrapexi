@@ -164,6 +164,69 @@
         }
         .chevron { transition: transform 0.3s ease; }
         .chevron.rotate { transform: rotate(180deg); }
+        
+        /* Global Text Size Improvements */
+        p.text-\[10px\], .text-\[10px\] { 
+            font-size: 13px !important; 
+        }
+        .text-\[10px\].text-gray-500,
+        p.text-\[10px\].text-gray-500 { 
+            font-size: 13px !important;
+            color: rgb(229 231 235) !important; /* gray-200 - much brighter white */
+        }
+        .text-\[9px\] { font-size: 12px !important; }
+        label.text-\[10px\] { 
+            font-size: 13px !important;
+            color: rgb(229 231 235) !important;
+        }
+        
+        /* Standardized Toggle Switch */
+        .toggle-switch {
+            width: 48px;
+            height: 24px;
+        }
+        .toggle-thumb {
+            width: 18px;
+            height: 18px;
+            top: 3px;
+            left: 3px;
+        }
+        .toggle-switch.checked .toggle-thumb {
+            transform: translateX(24px);
+        }
+        
+        /* Better Range Slider */
+        input[type="range"] {
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.6));
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a855f7, #c084fc);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), 0 0 5px rgba(168, 85, 247, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.9);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a855f7, #c084fc);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body class="text-gray-300 font-tech h-screen flex flex-col text-base">
@@ -302,8 +365,8 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="pagination" class="sr-only peer" onchange="togglePagination()">
-                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonBlue">
-                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all"></div>
+                                <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonBlue peer-checked:[&>div]:to-cyan-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(0,255,255,0.6)]">
+                                    <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
                                 </div>
                             </label>
                         </div>
@@ -425,17 +488,17 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="stealthMode" class="sr-only peer" onchange="updateSummary()">
-                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-purple-500">
-                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all"></div>
+                                <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-purple-500 peer-checked:[&>div]:to-purple-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(168,85,247,0.6)]">
+                                    <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
                                 </div>
                             </label>
                         </div>
-                        <div id="jitterPanel" class="hidden pt-2 border-t border-white/10 mt-2">
-                            <div class="flex justify-between text-xs text-gray-400 mb-2 mt-2">
-                                <span>WAIT JITTER</span>
-                                <span id="waitDisplay" class="text-purple-400 font-mono">2s</span>
+                        <div id="jitterPanel" class="hidden pt-4 border-t border-white/10 mt-3">
+                            <div class="flex justify-between text-sm text-gray-300 mb-3 mt-2">
+                                <span class="font-semibold tracking-wider">WAIT JITTER</span>
+                                <span id="waitDisplay" class="text-purple-400 font-mono font-bold text-base">2s</span>
                             </div>
-                            <input type="range" id="waitTime" min="1" max="15" value="2" class="w-full accent-purple-500 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateWaitDisplay(this.value)">
+                            <input type="range" id="waitTime" min="1" max="15" value="2" class="w-full cursor-pointer" oninput="updateWaitDisplay(this.value)">
                         </div>
                     </div>
 
@@ -454,8 +517,8 @@
                                 <span class="text-xs text-gray-300">Standard Login</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="loginEnabled" class="sr-only peer" onchange="updateSummary()">
-                                    <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonPink">
-                                        <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+                                    <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonPink peer-checked:[&>div]:to-pink-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(255,0,255,0.6)]">
+                                        <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
                                     </div>
                                 </label>
                             </div>
@@ -472,8 +535,8 @@
                                 <span class="text-xs text-gray-300">Session Cookie</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="sessionEnabled" class="sr-only peer" onchange="updateSummary()">
-                                    <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonGreen">
-                                        <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+                                    <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonGreen peer-checked:[&>div]:to-green-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(0,255,153,0.6)]">
+                                        <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
                                     </div>
                                 </label>
                             </div>
