@@ -178,8 +178,12 @@ def scrape(request: ScrapeRequest):
 
             # 4. Multi-Page Scraping
             all_content = []
-            pages_to_scrape = range(request.start_page, request.end_page + 1) if request.pagination_enabled else [1]
-            
+            pages_to_scrape = (
+                range(request.start_page, request.end_page + 1)
+                if request.pagination_enabled
+                else [1]
+            )
+
             for page_num in pages_to_scrape:
                 # Build URL for current page
                 current_url = request.url
@@ -188,14 +192,15 @@ def scrape(request: ScrapeRequest):
                     if "page/" in current_url:
                         # Replace existing page number
                         import re
-                        current_url = re.sub(r'/page/\d+/?', f'/page/{page_num}/', current_url)
+
+                        current_url = re.sub(r"/page/\d+/?", f"/page/{page_num}/", current_url)
                     elif "?" in current_url:
                         # Add as query parameter
                         current_url = f"{current_url}&page={page_num}"
                     else:
                         # Append page path
                         current_url = f"{current_url.rstrip('/')}/page/{page_num}/"
-                
+
                 print(f"Navigating to page {page_num}: {current_url}...")
                 try:
                     page.goto(current_url, timeout=60000, wait_until="domcontentloaded")
