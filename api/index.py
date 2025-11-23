@@ -30,7 +30,9 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 # Init Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+# Prefer Service Role Key for Backend to bypass RLS for logging/billing
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 except Exception as e:
@@ -240,6 +242,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                             "data_usage_mb": size_mb,
                             "completed_at": "now()",
                             "data": final_data,
+                            # "pages_scraped": 1, # TODO: Add column to DB
                         }
                     ).execute()
                 except Exception as e:

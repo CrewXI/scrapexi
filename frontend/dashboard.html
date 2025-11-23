@@ -575,6 +575,7 @@
                         <tr>
                             <th class="p-4 border-b border-white/10">Status</th>
                             <th class="p-4 border-b border-white/10">Target</th>
+                            <th class="p-4 border-b border-white/10">Items</th>
                             <th class="p-4 border-b border-white/10">Data Usage</th>
                             <th class="p-4 border-b border-white/10">Time</th>
                             <th class="p-4 border-b border-white/10 text-right">Action</th>
@@ -1335,10 +1336,22 @@
 
                     const date = new Date(job.created_at).toLocaleString();
                     const usage = job.data_usage_mb ? parseFloat(job.data_usage_mb).toFixed(4) + ' MB' : '0.00 MB';
+                    
+                    // Calculate items
+                    let itemCount = '-';
+                    if (job.data) {
+                        if (Array.isArray(job.data)) itemCount = job.data.length;
+                        else if (job.data.data && Array.isArray(job.data.data)) itemCount = job.data.data.length;
+                        else if (typeof job.data === 'object') {
+                             const listKey = Object.keys(job.data).find(k => Array.isArray(job.data[k]));
+                             if (listKey) itemCount = job.data[listKey].length;
+                        }
+                    }
 
                     row.innerHTML = `
                         <td class="p-4 ${statusColor} font-bold uppercase text-xs">${job.status}</td>
                         <td class="p-4 truncate max-w-[200px]" title="${job.url}">${job.url}</td>
+                        <td class="p-4 font-mono text-xs text-neonBlue">${itemCount}</td>
                         <td class="p-4 font-mono text-xs">${usage}</td>
                         <td class="p-4 text-xs text-gray-500">${date}</td>
                         <td class="p-4 text-right">
