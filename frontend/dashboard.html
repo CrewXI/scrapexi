@@ -431,6 +431,12 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
+                    <!-- View Toggles -->
+                    <div class="flex bg-black/40 rounded p-0.5 border border-white/10 mr-2">
+                        <button onclick="toggleView('json')" id="viewBtnJson" class="px-2 py-0.5 text-[10px] font-mono rounded bg-white/10 text-white transition-all">JSON</button>
+                        <button onclick="toggleView('table')" id="viewBtnTable" class="px-2 py-0.5 text-[10px] font-mono rounded text-gray-500 hover:text-white transition-all">TABLE</button>
+                    </div>
+
                     <button onclick="saveCurrentAsTemplate()" class="text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors flex items-center gap-1">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                         SAVE_TPL
@@ -445,13 +451,15 @@
                     <button onclick="downloadCsv()" class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[CSV]</button>
                 </div>
             </div>
-            <div id="output" class="flex-1 p-6 overflow-auto font-mono text-base text-gray-400 custom-scrollbar">
-                <div class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
+            <div id="output" class="flex-1 p-6 overflow-auto font-mono text-base text-gray-400 custom-scrollbar relative">
+                <div id="outputPlaceholder" class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
                     <div class="w-24 h-24 border border-dashed border-white/20 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
                         <div class="w-16 h-16 border border-white/10 rounded-full"></div>
                     </div>
                     <p class="tracking-widest text-xs">AWAITING_INPUT_STREAM...</p>
                 </div>
+                <pre id="jsonView" class="text-neonGreen text-xs leading-relaxed hidden"></pre>
+                <div id="tableView" class="hidden w-full"></div>
             </div>
         </div>
     </div>
@@ -1548,24 +1556,131 @@
         function renderResults(data) {
             // Calculate metrics (same as before)
             let itemCount = 0;
-            if (data && typeof data === 'object') {
-                const listKey = Object.keys(data).find(k => Array.isArray(data[k]));
-                if (listKey) itemCount = data[listKey].length;
-                else if (data.data) {
-                        const innerKey = Object.keys(data.data).find(k => Array.isArray(data.data[k]));
-                        if (innerKey) itemCount = data.data[innerKey].length;
+            let targetArray = null;
+
+            if (data) {
+                if (Array.isArray(data)) {
+                    targetArray = data;
+                    itemCount = data.length;
+                } else if (data.data && Array.isArray(data.data)) {
+                    targetArray = data.data;
+                    itemCount = data.data.length;
+                } else if (typeof data === 'object') {
+                    const listKey = Object.keys(data).find(k => Array.isArray(data[k]));
+                    if (listKey) {
+                        targetArray = data[listKey];
+                        itemCount = data[listKey].length;
+                    }
                 }
             }
             
             const jsonString = JSON.stringify(data, null, 2);
             document.getElementById('resultCount').innerText = `ITEMS: ${itemCount}`;
             document.getElementById('charCount').innerText = `SIZE: ${formatBytes(jsonString.length)}`;
-            document.getElementById('output').innerHTML = `<pre class="text-neonGreen text-xs leading-relaxed p-4">${jsonString}</pre>`;
+            
+            // Render JSON View
+            const jsonView = document.getElementById('jsonView');
+            jsonView.innerText = jsonString;
+            
+            // Render Table View
+            const tableView = document.getElementById('tableView');
+            tableView.innerHTML = '';
+
+            if (targetArray && targetArray.length > 0) {
+                const table = document.createElement('table');
+                table.className = 'w-full text-left border-collapse text-xs';
+                
+                // Get headers
+                const headers = Object.keys(targetArray[0]);
+                
+                // Create Head
+                const thead = document.createElement('thead');
+                thead.className = 'bg-white/5 text-neonBlue font-mono sticky top-0';
+                const headerRow = document.createElement('tr');
+                headers.forEach(h => {
+                    const th = document.createElement('th');
+                    th.className = 'p-2 border-b border-white/10 uppercase font-bold tracking-wider whitespace-nowrap';
+                    th.innerText = h;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Create Body
+                const tbody = document.createElement('tbody');
+                tbody.className = 'font-mono text-gray-300';
+                targetArray.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-white/5 hover:bg-white/5 transition';
+                    headers.forEach(h => {
+                        const td = document.createElement('td');
+                        td.className = 'p-2 truncate max-w-[200px] align-top';
+                        td.title = typeof row[h] === 'object' ? JSON.stringify(row[h]) : row[h];
+                        
+                        let val = row[h];
+                        if (val === null || val === undefined) val = '-';
+                        else if (typeof val === 'object') val = '[OBJ]';
+                        else if (String(val).startsWith('http')) val = `<a href="${val}" target="_blank" class="text-neonPink hover:underline">LINK</a>`;
+                        
+                        td.innerHTML = val;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                tableView.appendChild(table);
+            } else {
+                tableView.innerHTML = '<div class="text-center text-gray-500 p-8">NO TABULAR DATA DETECTED</div>';
+            }
+
+            // Hide Placeholder
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            
+            // Default to JSON view if not already set
+            if (document.getElementById('viewBtnTable').classList.contains('bg-white/10')) {
+                toggleView('table');
+            } else {
+                toggleView('json');
+            }
+        }
+
+        function toggleView(mode) {
+            const jsonView = document.getElementById('jsonView');
+            const tableView = document.getElementById('tableView');
+            const btnJson = document.getElementById('viewBtnJson');
+            const btnTable = document.getElementById('viewBtnTable');
+            const placeholder = document.getElementById('outputPlaceholder');
+
+            if (!placeholder.classList.contains('hidden')) return; // Don't toggle if no data
+
+            if (mode === 'json') {
+                jsonView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                
+                btnJson.classList.add('bg-white/10', 'text-white');
+                btnJson.classList.remove('text-gray-500');
+                
+                btnTable.classList.remove('bg-white/10', 'text-white');
+                btnTable.classList.add('text-gray-500');
+            } else {
+                jsonView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                
+                btnTable.classList.add('bg-white/10', 'text-white');
+                btnTable.classList.remove('text-gray-500');
+                
+                btnJson.classList.remove('bg-white/10', 'text-white');
+                btnJson.classList.add('text-gray-500');
+            }
         }
 
         function renderError(msg) {
-            document.getElementById('output').innerHTML = `
-                <div class="p-6 border border-red-500/50 bg-red-900/20 text-red-400 font-mono">
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('jsonView').classList.add('hidden');
+            document.getElementById('tableView').classList.add('hidden');
+            
+            document.getElementById('output').innerHTML += `
+                <div class="p-6 border border-red-500/50 bg-red-900/20 text-red-400 font-mono mt-4">
                     <h3 class="font-bold mb-2 text-lg">CRITICAL FAILURE</h3>
                     <p class="text-xs">${msg}</p>
                 </div>
