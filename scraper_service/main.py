@@ -34,7 +34,7 @@ class ScrapeRequest(BaseModel):
     url: str
     query: Optional[str] = None
     prompt: Optional[str] = None
-    model_name: str = "gemini-2.0-flash-exp"
+    model_name: str = "gemini-2.0-flash-lite-preview-02-05"
     wait_time: int = 2
     stealth_mode: bool = True
     session_json: Optional[Any] = None
@@ -67,6 +67,8 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
         return {"error": "Google API Key not configured on Scraper Service"}
 
     print(f"DEBUG: Sending {len(text_content)} chars to Gemini...")
+    # Log the input text to debug context failures
+    print(f"DEBUG: Gemini Input Context (First 5000 chars): {text_content[:5000]}")
 
     try:
         model = genai.GenerativeModel(model_name)
