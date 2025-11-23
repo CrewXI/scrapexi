@@ -1,15 +1,29 @@
-import asyncio
 import json
 import os
-import random
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import google.generativeai as genai
-import playwright
 from bs4 import BeautifulSoup
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
+
+# Try to import stealth mode
+STEALTH_AVAILABLE = False
+try:
+    from playwright_stealth import stealth_sync
+    STEALTH_AVAILABLE = True
+    print("✓ Stealth mode enabled")
+except ImportError:
+    print("WARNING: playwright-stealth not found or import failed. Stealth mode disabled.")
+
+# Get API key from environment
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+    print("✓ Google API Key configured")
+else:
+    print("WARNING: GOOGLE_API_KEY not set. AI extraction will fail.")
 
 app = FastAPI(title="Dedicated Browser Service")
 
@@ -162,7 +176,7 @@ def scrape(request: ScrapeRequest):
             # Wait for network idle (good for SPAs)
             try:
                 page.wait_for_load_state("networkidle", timeout=10000)
-            except:
+            except Exception:
                 pass  # Ignore timeout if network never idles
 
             # Add explicit wait time
@@ -179,9 +193,10 @@ def scrape(request: ScrapeRequest):
             print(f"DEBUG: Extracted Text Preview: {clean_text[:500]}")
 
             if request.query or request.prompt:
-                print(f"Processing with Gemini... Query: {request.query}")
+                query_text = request.query or request.prompt or ""
+                print(f"Processing with Gemini... Query: {query_text}")
                 data = extract_with_gemini(
-                    clean_text, request.query or request.prompt, request.model_name
+                    clean_text, query_text, request.model_name
                 )
                 return {"status": "success", "url": request.url, "data": data}
             else:
@@ -195,7 +210,7 @@ def scrape(request: ScrapeRequest):
 
     except Exception as e:
         print(f"Browser Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 if __name__ == "__main__":
