@@ -38,6 +38,9 @@ class ScrapeRequest(BaseModel):
     wait_time: int = 2
     stealth_mode: bool = True
     session_json: Optional[Any] = None
+    pagination_enabled: bool = False
+    start_page: int = 1
+    end_page: int = 1
 
 
 @app.get("/")
@@ -173,26 +176,49 @@ def scrape(request: ScrapeRequest):
                 except Exception as e:
                     print(f"Stealth failed: {e}")
 
-            # 4. Navigate
-            print(f"Navigating to {request.url}...")
-            try:
-                page.goto(request.url, timeout=60000, wait_until="domcontentloaded")
-            except Exception as nav_error:
-                print(f"Navigation Error (continuing anyway): {nav_error}")
+            # 4. Multi-Page Scraping
+            all_content = []
+            pages_to_scrape = range(request.start_page, request.end_page + 1) if request.pagination_enabled else [1]
+            
+            for page_num in pages_to_scrape:
+                # Build URL for current page
+                current_url = request.url
+                if request.pagination_enabled and page_num > 1:
+                    # Detect URL pattern and append page number
+                    if "page/" in current_url:
+                        # Replace existing page number
+                        import re
+                        current_url = re.sub(r'/page/\d+/?', f'/page/{page_num}/', current_url)
+                    elif "?" in current_url:
+                        # Add as query parameter
+                        current_url = f"{current_url}&page={page_num}"
+                    else:
+                        # Append page path
+                        current_url = f"{current_url.rstrip('/')}/page/{page_num}/"
+                
+                print(f"Navigating to page {page_num}: {current_url}...")
+                try:
+                    page.goto(current_url, timeout=60000, wait_until="domcontentloaded")
+                except Exception as nav_error:
+                    print(f"Navigation Error on page {page_num} (continuing anyway): {nav_error}")
 
-            # 5. Wait - Robust Waiting
-            print("Waiting for content...")
-            # Wait for network idle (good for SPAs)
-            try:
-                page.wait_for_load_state("networkidle", timeout=10000)
-            except Exception:
-                pass  # Ignore timeout if network never idles
+                # Wait for content
+                print(f"Waiting for content on page {page_num}...")
+                try:
+                    page.wait_for_load_state("networkidle", timeout=10000)
+                except Exception:
+                    pass
 
-            # Add explicit wait time
-            page.wait_for_timeout(request.wait_time * 1000 + 2000)  # Add 2s buffer
+                # Add explicit wait time
+                page.wait_for_timeout(request.wait_time * 1000 + 2000)
 
-            # 6. Extract HTML
-            content = page.content()
+                # Extract HTML for this page
+                page_content = page.content()
+                all_content.append(page_content)
+                print(f"Page {page_num} scraped ({len(page_content)} bytes)")
+
+            # Combine all pages
+            content = "\n\n".join(all_content)
             browser.close()
 
             # 7. AI Processing

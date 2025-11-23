@@ -220,6 +220,9 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "model_name": request.model_name,  # Pass model name
                     "wait_time": request.wait_time,
                     "stealth_mode": request.stealth_mode,
+                    "pagination_enabled": request.pagination_enabled,
+                    "start_page": 1,  # Frontend sends max_pages, convert to start/end
+                    "end_page": request.max_pages if request.pagination_enabled else 1,
                     "session_json": request.session_json,
                 },
                 timeout=120,  # Long timeout for scraping
