@@ -1193,6 +1193,13 @@
             // Fill Fields - SCHEMA TAB
             editor.setValue(tpl.query);
             
+            // Sync JSON to Wizard if Wizard is the active mode
+            const formView = document.getElementById('schema-mode-form');
+            if (!formView.classList.contains('hidden')) {
+                // We're in Wizard mode, sync the JSON we just loaded
+                syncFormFromJson();
+            }
+            
             // Fill Fields - CONFIG TAB
             document.getElementById('stealthMode').checked = config.stealth_mode || config.stealth || false;
             document.getElementById('waitTime').value = config.waitTime || 2;
@@ -1221,6 +1228,13 @@
         async function saveCurrentAsTemplate() {
             const name = prompt("Enter a name for this template (e.g., 'My Custom Scraper'):");
             if (!name) return;
+            
+            // Sync Wizard to JSON editor if in Wizard mode
+            const formView = document.getElementById('schema-mode-form');
+            if (!formView.classList.contains('hidden')) {
+                // We're in Wizard mode, sync it to the JSON editor first
+                updateSchemaFromForm();
+            }
 
             // Get current user
             let userId = null;
