@@ -79,30 +79,36 @@ def find_next_page_button(page, model_name: str):
     """
     if not GOOGLE_API_KEY:
         return None
-    
+
     try:
         # Get page HTML
         html = page.content()
         soup = BeautifulSoup(html, "html.parser")
-        
+
         # Find all links and buttons
         clickable_elements = []
-        for elem in soup.find_all(['a', 'button', 'div', 'span']):
+        for elem in soup.find_all(["a", "button", "div", "span"]):
             text = elem.get_text(strip=True).lower()
-            href = elem.get('href', '')
+            href = elem.get("href", "")
             # Look for pagination-related elements
-            if any(keyword in text for keyword in ['next', 'more', '›', '→', '»']) or 'page' in text or 'pagination' in str(elem.get('class', [])):
-                clickable_elements.append({
-                    'tag': elem.name,
-                    'text': elem.get_text(strip=True)[:50],
-                    'href': href,
-                    'class': ' '.join(elem.get('class', [])),
-                    'id': elem.get('id', '')
-                })
-        
+            if (
+                any(keyword in text for keyword in ["next", "more", "›", "→", "»"])
+                or "page" in text
+                or "pagination" in str(elem.get("class", []))
+            ):
+                clickable_elements.append(
+                    {
+                        "tag": elem.name,
+                        "text": elem.get_text(strip=True)[:50],
+                        "href": href,
+                        "class": " ".join(elem.get("class", [])),
+                        "id": elem.get("id", ""),
+                    }
+                )
+
         if not clickable_elements:
             return None
-        
+
         # Ask Gemini to identify the next button
         model = genai.GenerativeModel(model_name)  # type: ignore
         prompt = f"""
@@ -116,30 +122,30 @@ def find_next_page_button(page, model_name: str):
         
         Response format: Just the number, nothing else.
         """
-        
+
         response = model.generate_content(prompt)
         result = response.text.strip()
-        
+
         if result.upper() == "NONE" or not result.isdigit():
             return None
-        
+
         idx = int(result)
         if idx < 0 or idx >= len(clickable_elements):
             return None
-        
+
         selected = clickable_elements[idx]
         print(f"AI selected next button: {selected}")
-        
+
         # Build a selector for this element
-        if selected['id']:
+        if selected["id"]:
             return f"#{selected['id']}"
-        elif selected['class']:
+        elif selected["class"]:
             return f".{selected['class'].split()[0]}"
-        elif selected['href']:
+        elif selected["href"]:
             return f"a[href='{selected['href']}']"
         else:
             return None
-            
+
     except Exception as e:
         print(f"Error finding next button: {e}")
         return None
@@ -252,9 +258,7 @@ def scrape(request: ScrapeRequest):
             # 4. Multi-Page Scraping
             all_content = []
             pages_to_scrape = (
-                request.end_page - request.start_page + 1
-                if request.pagination_enabled
-                else 1
+                request.end_page - request.start_page + 1 if request.pagination_enabled else 1
             )
 
             # Navigate to the first page
@@ -284,7 +288,7 @@ def scrape(request: ScrapeRequest):
                 if request.pagination_enabled and page_num < pages_to_scrape - 1:
                     print(f"Looking for 'Next' button...")
                     next_selector = find_next_page_button(page, request.model_name)
-                    
+
                     if next_selector:
                         try:
                             print(f"Clicking next button: {next_selector}")
@@ -295,14 +299,17 @@ def scrape(request: ScrapeRequest):
                             print("Trying URL pattern fallback...")
                             # Fallback to URL pattern approach
                             import re
+
                             current_url = page.url
                             if "page/" in current_url:
-                                new_url = re.sub(r"/page/\d+/?", f"/page/{page_num + 2}/", current_url)
+                                new_url = re.sub(
+                                    r"/page/\d+/?", f"/page/{page_num + 2}/", current_url
+                                )
                             elif "?" in current_url:
                                 new_url = f"{current_url}&page={page_num + 2}"
                             else:
                                 new_url = f"{current_url.rstrip('/')}/page/{page_num + 2}/"
-                            
+
                             try:
                                 page.goto(new_url, timeout=60000, wait_until="domcontentloaded")
                             except Exception as fallback_error:
