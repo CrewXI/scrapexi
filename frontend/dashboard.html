@@ -1485,11 +1485,21 @@
 
         // Slider Logic
         function updateWaitDisplay(val) {
-            document.getElementById('waitDisplay').innerText = val + 's';
-            const min = 1, max = 15;
-            const percent = ((val - min) / (max - min)) * 100;
-            document.getElementById('sliderTrack').style.width = percent + '%';
-            document.getElementById('sliderThumb').style.left = percent + '%';
+            const display = document.getElementById('waitDisplay');
+            if (display) {
+                display.innerText = val + 's';
+            }
+            
+            // Legacy slider elements (may not exist in new UI)
+            const sliderTrack = document.getElementById('sliderTrack');
+            const sliderThumb = document.getElementById('sliderThumb');
+            
+            if (sliderTrack && sliderThumb) {
+                const min = 1, max = 15;
+                const percent = ((val - min) / (max - min)) * 100;
+                sliderTrack.style.width = percent + '%';
+                sliderThumb.style.left = percent + '%';
+            }
         }
 
         // Auth & Logic
@@ -1835,7 +1845,7 @@
                         url: url,
                         query: query,
                         use_local_backend: true,
-                        model_name: "gemini-2.0-flash-exp",
+                        model_name: "gemini-2.5-flash",
                         wait_time: 2,
                         pagination_enabled: pagination,
                         max_pages: maxPages,
