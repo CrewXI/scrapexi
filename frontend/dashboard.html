@@ -210,7 +210,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </a>
             <a href="#" onclick="openTemplatesModal()" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Template Library">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/></svg>
             </a>
             <a href="#" onclick="openHistoryModal()" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Search History">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -238,71 +238,79 @@
         </nav>
 
         <!-- Configuration Module -->
-        <div class="w-[450px] flex flex-col gap-4 overflow-hidden">
+        <div class="w-[450px] flex flex-col gap-2 overflow-hidden h-full">
             
-            <!-- Search Parameters Module -->
-            <div id="searchParamsModule" class="glass-card p-5 rounded-2xl flex-shrink-0">
-                <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Search Parameters
-                </h2>
-                
-                <!-- Site Preset Dropdown -->
-                <div class="mb-4 border-b border-white/5 pb-4">
-                    <label class="text-[10px] text-gray-500 font-mono uppercase block mb-2">Target Platform</label>
-                    <select id="sitePreset" class="cyber-input w-full p-2 rounded text-xs font-mono bg-black/50">
-                        <option value="custom">CUSTOM / DIRECT URL</option>
-                    </select>
+            <!-- 1. Target Website Panel -->
+            <div id="panel-target" class="glass-card rounded-2xl flex-shrink-0 flex flex-col overflow-hidden transition-all duration-300 group">
+                <button onclick="activatePanel('panel-target')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
+                    <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Target Website
+                    </h2>
+                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="panel-content px-5 pb-5 hidden">
+                    <input type="text" id="url" value="https://scrapeme.live/shop" 
+                        class="cyber-input w-full p-3 rounded text-sm font-mono"
+                        placeholder="ENTER_TARGET_URL://">
                 </div>
-                
-                <!-- Pagination (Always Visible) -->
-                <div class="mb-4 border-b border-white/5 pb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs text-gray-400 font-mono uppercase">Pagination Range</label>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="pagination" class="sr-only peer">
-                            <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonBlue">
-                                <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+            </div>
+
+            <!-- 2. Search Parameters Panel -->
+            <div id="panel-search" class="glass-card rounded-2xl flex-shrink-0 flex flex-col overflow-hidden transition-all duration-300 group">
+                <button onclick="activatePanel('panel-search')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
+                    <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Search Parameters
+                    </h2>
+                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="panel-content px-5 pb-5 hidden overflow-y-auto custom-scrollbar">
+                    <!-- Site Preset Dropdown -->
+                    <div class="mb-4 border-b border-white/5 pb-4">
+                        <label class="text-[10px] text-gray-500 font-mono uppercase block mb-2">Target Platform</label>
+                        <select id="sitePreset" class="cyber-input w-full p-2 rounded text-xs font-mono bg-black/50">
+                            <option value="custom">CUSTOM / DIRECT URL</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="mb-4 border-b border-white/5 pb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs text-gray-400 font-mono uppercase">Pagination Range</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="pagination" class="sr-only peer">
+                                <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonBlue">
+                                    <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="paginationControls" class="grid grid-cols-2 gap-2 hidden">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">START PAGE</label>
+                                <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
                             </div>
-                        </label>
-                    </div>
-                    <div id="paginationControls" class="grid grid-cols-2 gap-2 hidden">
-                        <div>
-                            <label class="text-[10px] text-gray-500 block mb-1">START PAGE</label>
-                            <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-gray-500 block mb-1">END PAGE</label>
-                            <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
+                            <div>
+                                <label class="text-[10px] text-gray-500 block mb-1">END PAGE</label>
+                                <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="urlBuilderFields" class="space-y-3">
-                    <!-- Dynamic Inputs injected here -->
+                    <div id="urlBuilderFields" class="space-y-3">
+                        <!-- Dynamic Inputs injected here -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Target Input -->
-            <div class="glass-card p-5 rounded-2xl flex-shrink-0">
-                <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Target Website
-                </h2>
-                <input type="text" id="url" value="https://scrapeme.live/shop" 
-                    class="cyber-input w-full p-3 rounded text-sm font-mono"
-                    placeholder="ENTER_TARGET_URL://">
-            </div>
-
-            <!-- Accordion Modules (Collapsible) -->
-            <div class="glass-card rounded-2xl flex-shrink-0 transition-all duration-300" id="optionsCard">
-                <button onclick="toggleAccordion()" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition">
+            <!-- 3. Options Panel -->
+            <div id="panel-options" class="glass-card rounded-2xl flex-shrink-0 flex flex-col overflow-hidden transition-all duration-300 group">
+                <button onclick="activatePanel('panel-options')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
                     <h2 class="text-neonPink font-cyber text-sm uppercase tracking-widest flex items-center gap-2">
                         <span class="w-1.5 h-1.5 bg-neonPink rounded-full"></span> Options
                     </h2>
-                    <svg id="optionsChevron" class="w-4 h-4 text-gray-500 chevron rotate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 
-                <div id="optionsContent" class="accordion-content open px-5 pb-5 space-y-5">
-
+                <div class="panel-content px-5 pb-5 space-y-5 hidden overflow-y-auto custom-scrollbar">
                     <!-- Login -->
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
@@ -383,19 +391,24 @@
                 </div>
             </div>
 
-            <!-- Schema Editor (Expanded) -->
-            <div class="glass-card p-5 rounded-2xl flex-1 flex flex-col min-h-0">
-                <h2 class="text-neonGreen font-cyber text-sm uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-neonGreen rounded-full"></span> Schema Def
-                </h2>
-                <div class="flex-1 rounded overflow-hidden border border-white/10 relative">
-                    <textarea id="query">{
+            <!-- 4. Schema Def Panel -->
+            <div id="panel-schema" class="glass-card rounded-2xl flex-shrink-0 flex flex-col min-h-0 transition-all duration-300 group active-panel flex-1">
+                <button onclick="activatePanel('panel-schema')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
+                    <h2 class="text-neonGreen font-cyber text-sm uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-neonGreen rounded-full"></span> Schema Def
+                    </h2>
+                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300 rotate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="panel-content px-5 pb-5 flex-1 flex flex-col min-h-0">
+                    <div class="flex-1 rounded overflow-hidden border border-white/10 relative">
+                        <textarea id="query">{
     products[] {
         name
         price
         rating
     }
 }</textarea>
+                    </div>
                 </div>
             </div>
 
@@ -1110,18 +1123,34 @@
             lineWrapping: true
         });
 
-        // Accordion Logic
-        function toggleAccordion() {
-            const content = document.getElementById('optionsContent');
-            const chevron = document.getElementById('optionsChevron');
+        // Exclusive Accordion Logic
+        function activatePanel(panelId) {
+            const panels = ['panel-target', 'panel-search', 'panel-options', 'panel-schema'];
             
-            if (content.classList.contains('open')) {
-                content.classList.remove('open');
-                chevron.classList.remove('rotate');
-            } else {
-                content.classList.add('open');
-                chevron.classList.add('rotate');
-            }
+            panels.forEach(id => {
+                const el = document.getElementById(id);
+                if(!el) return;
+
+                const content = el.querySelector('.panel-content');
+                const chevron = el.querySelector('.chevron');
+                
+                if (id === panelId) {
+                    // Activate
+                    el.classList.add('active-panel', 'flex-1');
+                    content.classList.remove('hidden');
+                    if (chevron) chevron.classList.add('rotate');
+                    
+                    // Refresh editor if schema
+                    if (id === 'panel-schema' && editor) {
+                        setTimeout(() => editor.refresh(), 50);
+                    }
+                } else {
+                    // Deactivate
+                    el.classList.remove('active-panel', 'flex-1');
+                    content.classList.add('hidden');
+                    if (chevron) chevron.classList.remove('rotate');
+                }
+            });
         }
 
         // Slider Logic
