@@ -218,7 +218,7 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
         The user wants to extract information based on this query: "{query}"
         
         DATA SOURCE:
-        {text_content[:100000]} 
+        {text_content[:50000]} 
         
         INSTRUCTIONS:
         1. Identify the data matching the query.
@@ -416,31 +416,35 @@ def scrape(request: ScrapeRequest):
                             try:
                                 current_url_before = page.url
                                 content_length_before = len(page.content())
-                                
+
                                 print(f"Clicking next/load-more button: {next_selector}")
                                 page.click(next_selector, timeout=5000)
-                                
+
                                 # Wait for either navigation or AJAX content update
                                 page.wait_for_timeout(3000)  # Initial wait for AJAX
-                                
+
                                 # Check if URL changed (traditional pagination)
                                 if page.url != current_url_before:
                                     print(f"URL changed (traditional pagination): {page.url}")
                                     page.wait_for_load_state("networkidle", timeout=10000)
                                 else:
                                     # URL didn't change - this is AJAX "Load More" pattern
-                                    print("URL unchanged - AJAX 'Load More' detected, waiting for content update...")
-                                    
+                                    print(
+                                        "URL unchanged - AJAX 'Load More' detected, waiting for content update..."
+                                    )
+
                                     # Wait up to 10 seconds for content to change
                                     for attempt in range(10):
                                         page.wait_for_timeout(1000)
                                         current_content_length = len(page.content())
                                         if current_content_length > content_length_before:
-                                            print(f"New content loaded! Size: {content_length_before} -> {current_content_length} bytes")
+                                            print(
+                                                f"New content loaded! Size: {content_length_before} -> {current_content_length} bytes"
+                                            )
                                             break
                                     else:
                                         print("Warning: Content size didn't change after clicking")
-                                
+
                                 current_page_num += 1  # Increment page counter
                                 continue  # Success, move to next iteration
                             except Exception as e:

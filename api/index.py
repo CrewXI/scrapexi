@@ -94,7 +94,7 @@ class ScrapeRequest(BaseModel):
     prompt: Optional[str] = None
     wait_time: int = 2
     use_local_backend: bool = True
-    model_name: str = "gemini-2.5-flash"
+    model_name: str = "gemini-2.5-flash-lite"
     pagination_enabled: bool = False
     max_pages: int = 3
     page2_url: Optional[str] = None
@@ -134,22 +134,24 @@ def get_config():
 
 
 def check_data_usage(user_id: str):
+    """Check if user has exceeded their item/contact limit"""
     if not user_id or not supabase:
         return
     try:
         response = (
             supabase.table("profiles")
-            .select("data_usage_mb_limit, data_usage_mb_used")
+            .select("items_limit, items_used")
             .eq("id", user_id)
             .single()
             .execute()
         )
         if response.data:
-            limit = float(response.data.get("data_usage_mb_limit") or 10.0)
-            used = float(response.data.get("data_usage_mb_used") or 0.0)
+            # Default limits by plan: Free=100, Starter=1500, Pro=4000, Business=100000
+            limit = int(response.data.get("items_limit") or 100)
+            used = int(response.data.get("items_used") or 0)
             if used >= limit:
                 raise Exception(
-                    f"Data usage limit reached ({used:.2f}/{limit:.2f} MB). Please upgrade your plan."
+                    f"Item limit reached ({used:,}/{limit:,} contacts/leads). Please upgrade your plan."
                 )
     except Exception as e:
         print(f"Error checking usage: {e}")
@@ -157,14 +159,15 @@ def check_data_usage(user_id: str):
             raise e
 
 
-def update_data_usage(user_id: str, amount_mb: float):
+def update_data_usage(user_id: str, item_count: int):
+    """Update the number of items/contacts scraped for this user"""
     if not user_id or not supabase:
         return
     try:
         supabase.rpc(
-            "increment_data_usage", {"p_user_id": user_id, "p_amount_mb": amount_mb}
+            "increment_items_usage", {"p_user_id": user_id, "p_item_count": item_count}
         ).execute()
-        print(f"Updated usage for {user_id}: +{amount_mb:.4f} MB")
+        print(f"Updated usage for {user_id}: +{item_count} items")
     except Exception as e:
         print(f"Failed to update usage: {e}")
 
@@ -247,22 +250,28 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                 final_data = {"raw_html_preview": str(result["html"])[:500] + "..."}
                 message = "Raw HTML Extracted"
 
-            # Calculate Size for Billing (Rough estimate)
-            size_mb = 0.0
+            # Count items (rows/contacts/leads)
+            item_count = 0
             if final_data:
-                json_str = json.dumps(final_data)
-                size_bytes = len(json_str.encode("utf-8"))
-                size_mb = size_bytes / (1024 * 1024)
+                if isinstance(final_data, list):
+                    item_count = len(final_data)
+                elif isinstance(final_data, dict):
+                    # Find the first array in the dict
+                    for value in final_data.values():
+                        if isinstance(value, list):
+                            item_count = len(value)
+                            break
 
-            if request.user_id:
-                update_data_usage(request.user_id, size_mb)
+            if request.user_id and item_count > 0:
+                update_data_usage(request.user_id, item_count)
 
             # Update Job Status in DB (Completion)
             try:
+                print(f"✅ Remote job completed - {item_count} items extracted")
                 supabase.table("jobs").update(
                     {
                         "status": "completed",
-                        "data_usage_mb": size_mb,
+                        "item_count": item_count,
                         "completed_at": "now()",
                         "data": final_data,
                         "pages_scraped": 1,  # Remote service currently does 1 page
@@ -459,23 +468,28 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             browser.close()
 
             if active_jobs[job_id].get("status") != "cancelled":
-                # Calculate Size
-                size_mb = 0.0
+                # Count items (rows/contacts/leads)
+                item_count = 0
                 if result_data:
-                    json_str = json.dumps(result_data)
-                    size_bytes = len(json_str.encode("utf-8"))
-                    size_mb = size_bytes / (1024 * 1024)
+                    if isinstance(result_data, list):
+                        item_count = len(result_data)
+                    elif isinstance(result_data, dict):
+                        # Find the first array in the dict (e.g., {"products": [...], "jobs": [...]})
+                        for value in result_data.values():
+                            if isinstance(value, list):
+                                item_count = len(value)
+                                break
 
-                if request.user_id:
-                    update_data_usage(request.user_id, size_mb)
+                if request.user_id and item_count > 0:
+                    update_data_usage(request.user_id, item_count)
 
                 # Update DB Completion
                 try:
-                    print(f"✅ Job {job_id} COMPLETED - Updating database...")
+                    print(f"✅ Job {job_id} COMPLETED - {item_count} items extracted")
                     supabase.table("jobs").update(
                         {
                             "status": "completed",
-                            "data_usage_mb": size_mb,
+                            "item_count": item_count,
                             "completed_at": "now()",
                             "data": result_data,
                             "pages_scraped": pages_scraped,
