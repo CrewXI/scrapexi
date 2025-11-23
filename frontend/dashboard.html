@@ -1265,9 +1265,6 @@
             window.location.href = '/';
         }
 
-    <script>
-        // ... existing scripts ...
-        
         // UI Logic: Toggles
         // Re-bind toggles since IDs moved
         const toggles = [
@@ -1294,8 +1291,6 @@
                 updateSummary(); // Also update summary
             });
         });
-        // ...
-    </script>
 
         function closeAllModals() {
             document.querySelectorAll('[id$="Modal"]').forEach(el => el.classList.add('hidden'));
