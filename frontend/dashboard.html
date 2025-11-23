@@ -291,10 +291,10 @@
 
                 <!-- TAB 2: SCHEMA -->
                 <div id="view-schema" class="absolute inset-0 flex flex-col hidden">
-                    <!-- Sub Tabs -->
-                    <div class="h-10 bg-black/40 border-b border-white/5 flex items-center px-2 gap-2 flex-shrink-0">
-                        <button onclick="switchSchemaMode('form')" id="btn-schema-form" class="px-3 py-1 text-[10px] font-cyber font-bold text-neonBlue bg-white/10 rounded hover:bg-white/20 transition border border-neonBlue/30">WIZARD</button>
-                        <button onclick="switchSchemaMode('json')" id="btn-schema-json" class="px-3 py-1 text-[10px] font-cyber font-bold text-gray-500 hover:text-white transition border border-transparent">JSON EDITOR</button>
+                    <!-- Sub Tabs (Folder Style) -->
+                    <div class="h-10 flex items-center justify-center gap-1 flex-shrink-0">
+                        <button onclick="switchSchemaMode('form')" id="btn-schema-form" class="px-6 py-2 text-[10px] font-cyber font-bold text-neonBlue bg-black/60 rounded-t border-t border-x border-neonBlue/30 hover:bg-black/80 transition">WIZARD</button>
+                        <button onclick="switchSchemaMode('json')" id="btn-schema-json" class="px-6 py-2 text-[10px] font-cyber font-bold text-gray-500 bg-black/20 rounded-t border border-transparent hover:text-white transition">JSON EDITOR</button>
                     </div>
 
                     <!-- FORM MODE -->
@@ -1265,10 +1265,12 @@
                 formView.classList.remove('hidden');
                 jsonView.classList.add('hidden');
                 
-                btnForm.classList.add('bg-white/10', 'text-neonBlue', 'border-neonBlue/30');
-                btnForm.classList.remove('text-gray-500', 'border-transparent');
-                btnJson.classList.remove('bg-white/10', 'text-white');
-                btnJson.classList.add('text-gray-500', 'border-transparent');
+                // Active tab (no bottom border, connected to content)
+                btnForm.classList.add('bg-black/60', 'text-neonBlue', 'border-neonBlue/30', 'border-t', 'border-x', 'border-b-0');
+                btnForm.classList.remove('text-gray-500', 'bg-black/20', 'border-transparent');
+                // Inactive tab
+                btnJson.classList.add('text-gray-500', 'bg-black/20', 'border-transparent');
+                btnJson.classList.remove('bg-black/60', 'text-white', 'border-t', 'border-x', 'border-b-0');
             } else {
                 formView.classList.add('hidden');
                 jsonView.classList.remove('hidden');
@@ -1276,10 +1278,12 @@
                 // Refresh editor
                 if(editor) setTimeout(() => editor.refresh(), 50);
 
-                btnJson.classList.add('bg-white/10', 'text-white');
-                btnJson.classList.remove('text-gray-500', 'border-transparent');
-                btnForm.classList.remove('bg-white/10', 'text-neonBlue', 'border-neonBlue/30');
-                btnForm.classList.add('text-gray-500', 'border-transparent');
+                // Active tab (no bottom border, connected to content)
+                btnJson.classList.add('bg-black/60', 'text-white', 'border-t', 'border-x', 'border-b-0', 'border-white/10');
+                btnJson.classList.remove('text-gray-500', 'bg-black/20', 'border-transparent');
+                // Inactive tab
+                btnForm.classList.add('text-gray-500', 'bg-black/20', 'border-transparent');
+                btnForm.classList.remove('bg-black/60', 'text-neonBlue', 'border-neonBlue/30', 'border-t', 'border-x', 'border-b-0');
             }
         }
 
@@ -1375,10 +1379,9 @@
                 
                 const content = raw.substring(firstBrace + 1, lastBrace);
                 
-                // Split by whitespace/newlines and filter out braces
-                const fields = content.split(/\s+/).filter(s => {
-                    const trimmed = s.trim();
-                    return trimmed.length > 0 && !trimmed.includes('{') && !trimmed.includes('}');
+                // Split by NEWLINES only (not all whitespace) to preserve spaces in field names
+                const fields = content.split(/\r?\n/).map(line => line.trim()).filter(s => {
+                    return s.length > 0 && !s.includes('{') && !s.includes('}');
                 });
                 
                 // Update UI
