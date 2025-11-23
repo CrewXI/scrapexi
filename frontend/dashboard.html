@@ -166,7 +166,7 @@
         .chevron.rotate { transform: rotate(180deg); }
     </style>
 </head>
-<body class="text-gray-300 font-tech h-screen flex flex-col">
+<body class="text-gray-300 font-tech h-screen flex flex-col text-base">
 
     <div class="grid-overlay"></div>
 
@@ -249,7 +249,7 @@
                 <!-- Pagination (Always Visible) -->
                 <div class="mb-4 border-b border-white/5 pb-4">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-[10px] text-gray-400 font-mono uppercase">Pagination Range</label>
+                        <label class="text-xs text-gray-400 font-mono uppercase">Pagination Range</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="pagination" class="sr-only peer">
                             <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonBlue">
@@ -259,12 +259,12 @@
                     </div>
                     <div id="paginationControls" class="grid grid-cols-2 gap-2 hidden">
                         <div>
-                            <label class="text-[9px] text-gray-500 block mb-1">START PAGE</label>
-                            <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-xs font-mono text-center">
+                            <label class="text-[10px] text-gray-500 block mb-1">START PAGE</label>
+                            <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
                         </div>
                         <div>
-                            <label class="text-[9px] text-gray-500 block mb-1">END PAGE</label>
-                            <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-xs font-mono text-center">
+                            <label class="text-[10px] text-gray-500 block mb-1">END PAGE</label>
+                            <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
                         </div>
                     </div>
                 </div>
@@ -280,14 +280,14 @@
                     <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Target Vector
                 </h2>
                 <input type="text" id="url" value="https://scrapeme.live/shop" 
-                    class="cyber-input w-full p-3 rounded text-xs font-mono"
+                    class="cyber-input w-full p-3 rounded text-sm font-mono"
                     placeholder="ENTER_TARGET_URL://">
             </div>
 
             <!-- Accordion Modules (Collapsible) -->
             <div class="glass-card rounded-2xl flex-shrink-0 transition-all duration-300" id="optionsCard">
                 <button onclick="toggleAccordion()" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition">
-                    <h2 class="text-neonPink font-cyber text-xs uppercase tracking-widest flex items-center gap-2">
+                    <h2 class="text-neonPink font-cyber text-sm uppercase tracking-widest flex items-center gap-2">
                         <span class="w-1.5 h-1.5 bg-neonPink rounded-full"></span> Options
                     </h2>
                     <svg id="optionsChevron" class="w-4 h-4 text-gray-500 chevron rotate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -300,7 +300,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <span class="text-white font-bold text-sm tracking-wide">Auth</span>
-                                <p class="text-[10px] text-gray-500 font-mono">CREDENTIALS</p>
+                                <p class="text-xs text-gray-500 font-mono">CREDENTIALS</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="loginEnabled" class="sr-only peer">
@@ -310,10 +310,10 @@
                             </label>
                         </div>
                         <div id="loginParams" class="hidden space-y-2 pt-2 border-t border-white/5">
-                            <input type="text" id="loginUrl" placeholder="Login URL" class="cyber-input w-full p-2 text-[10px] rounded">
+                            <input type="text" id="loginUrl" placeholder="Login URL" class="cyber-input w-full p-2 text-xs rounded">
                             <form class="grid grid-cols-2 gap-2" onsubmit="return false;">
-                                <input type="text" id="username" placeholder="Username" class="cyber-input p-2 text-[10px] rounded">
-                                <input type="password" id="password" placeholder="Password" class="cyber-input p-2 text-[10px] rounded" autocomplete="off">
+                                <input type="text" id="username" placeholder="Username" class="cyber-input p-2 text-xs rounded">
+                                <input type="password" id="password" placeholder="Password" class="cyber-input p-2 text-xs rounded" autocomplete="off">
                             </form>
                         </div>
                     </div>
@@ -336,7 +336,7 @@
                             </div>
                         </div>
                         <div id="sessionParams" class="hidden pt-2 border-t border-white/5">
-                            <textarea id="sessionJson" placeholder='// PASTE AUTH.JSON DATA' class="cyber-input w-full h-20 text-[10px] p-2 rounded font-mono resize-none"></textarea>
+                            <textarea id="sessionJson" placeholder='// PASTE AUTH.JSON DATA' class="cyber-input w-full h-20 text-xs p-2 rounded font-mono resize-none"></textarea>
                         </div>
                     </div>
 
@@ -377,7 +377,7 @@
 
             <!-- Schema Editor (Expanded) -->
             <div class="glass-card p-5 rounded-2xl flex-1 flex flex-col min-h-0">
-                <h2 class="text-neonGreen font-cyber text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h2 class="text-neonGreen font-cyber text-sm uppercase tracking-widest mb-3 flex items-center gap-2">
                     <span class="w-1.5 h-1.5 bg-neonGreen rounded-full"></span> Schema Def
                 </h2>
                 <div class="flex-1 rounded overflow-hidden border border-white/10 relative">
@@ -391,7 +391,7 @@
                 </div>
             </div>
 
-            <button id="scrapeBtn" onclick="runScraper()" class="cyber-btn w-full py-4 font-bold text-lg tracking-widest flex-shrink-0">
+            <button id="scrapeBtn" onclick="runScraper()" class="cyber-btn w-full py-4 font-bold text-xl tracking-widest flex-shrink-0">
                 Initialize Extraction
             </button>
         </div>
@@ -402,29 +402,29 @@
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-neonBlue animate-pulse"></div>
-                        <span class="font-mono text-xs text-neonBlue tracking-widest">DATA_STREAM</span>
+                        <span class="font-mono text-sm text-neonBlue tracking-widest">DATA_STREAM</span>
                     </div>
-                    <div class="text-[10px] font-mono text-gray-500 flex gap-3 border-l border-white/10 pl-3">
+                    <div class="text-xs font-mono text-gray-500 flex gap-3 border-l border-white/10 pl-3">
                         <span id="resultCount">ITEMS: 0</span>
                         <span id="charCount">SIZE: 0B</span>
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="saveCurrentAsTemplate()" class="text-gray-500 hover:text-neonBlue font-mono text-xs transition-colors flex items-center gap-1">
+                    <button onclick="saveCurrentAsTemplate()" class="text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors flex items-center gap-1">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                         SAVE_TPL
                     </button>
-                    <button onclick="openTemplatesModal()" class="text-gray-500 hover:text-neonPink font-mono text-xs transition-colors flex items-center gap-1 mr-4">
+                    <button onclick="openTemplatesModal()" class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors flex items-center gap-1 mr-4">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/></svg>
                         EXPLORE
                     </button>
                     <div class="w-px h-4 bg-white/10 self-center mx-1"></div>
-                    <button onclick="copyToClipboard()" class="text-gray-500 hover:text-neonPink font-mono text-xs transition-colors">[COPY]</button>
-                    <button onclick="downloadRawJson()" class="text-gray-500 hover:text-white font-mono text-xs transition-colors">[RAW]</button>
-                    <button onclick="downloadCsv()" class="text-gray-500 hover:text-white font-mono text-xs transition-colors">[CSV]</button>
+                    <button onclick="copyToClipboard()" class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors">[COPY]</button>
+                    <button onclick="downloadRawJson()" class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[RAW]</button>
+                    <button onclick="downloadCsv()" class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[CSV]</button>
                 </div>
             </div>
-            <div id="output" class="flex-1 p-6 overflow-auto font-mono text-sm text-gray-400 custom-scrollbar">
+            <div id="output" class="flex-1 p-6 overflow-auto font-mono text-base text-gray-400 custom-scrollbar">
                 <div class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
                     <div class="w-24 h-24 border border-dashed border-white/20 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
                         <div class="w-16 h-16 border border-white/10 rounded-full"></div>

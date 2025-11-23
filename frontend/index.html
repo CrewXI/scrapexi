@@ -39,6 +39,19 @@
             pointer-events: none;
         }
 
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.6); }
+        }
+        
         /* Neon Text */
         .text-glow-blue { text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
         .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
@@ -53,13 +66,13 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.1);
-            border-color: rgba(0, 255, 255, 0.3);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 255, 255, 0.15);
+            border-color: rgba(0, 255, 255, 0.4);
         }
 
         /* Neon Borders */
@@ -99,6 +112,28 @@
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
             text-shadow: 0 0 8px #00FFFF;
         }
+
+        /* Scroll Reveal */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Specific fix for Hero Image Hover */
+        .hero-image-container {
+            border-radius: 1rem; /* rounded-2xl */
+            overflow: hidden;
+            transform: translateZ(0); /* Force GPU layer */
+            will-change: transform; /* Optimize */
+        }
+        .hero-image-container img {
+            border-radius: 1rem; /* Explicitly set on img too */
+        }
     </style>
     <script>
         tailwind.config = {
@@ -117,26 +152,26 @@
     </script>
 </head>
 
-<body class="bg-dark-900 text-gray-300 min-h-screen flex flex-col">
+<body class="bg-dark-900 text-gray-200 min-h-screen flex flex-col text-lg">
 
     <!-- Navigation -->
     <nav class="border-b border-white/10 backdrop-blur-md bg-dark-900/80 fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center">
-                    <span class="text-3xl mr-3">🕷️</span>
-                    <h1 class="font-cyber text-2xl text-white tracking-widest uppercase">
+            <div class="flex justify-between h-24 items-center">
+                <div class="flex items-center group cursor-pointer">
+                    <span class="text-4xl mr-3 group-hover:rotate-12 transition-transform duration-300">🕷️</span>
+                    <h1 class="font-cyber text-3xl text-white tracking-widest uppercase">
                         <span class="text-neonBlue text-glow-blue">Scrape</span><span class="text-neonPink text-glow-pink">Xi</span>
                     </h1>
                 </div>
-                <div class="hidden md:flex space-x-8 text-sm font-bold tracking-widest text-gray-400 uppercase">
-                    <a href="#" class="hover:text-neonBlue transition duration-300">Docs</a>
-                    <a href="#" class="hover:text-neonPink transition duration-300">Pricing</a>
-                    <a href="#" class="hover:text-white transition duration-300">Blog</a>
+                <div class="hidden md:flex space-x-10 text-base font-bold tracking-widest text-gray-400 uppercase">
+                    <a href="#how-it-works" class="hover:text-neonBlue transition duration-300 hover:scale-110 transform">How it Works</a>
+                    <a href="#use-cases" class="hover:text-neonPink transition duration-300 hover:scale-110 transform">Use Cases</a>
+                    <a href="#pricing" class="hover:text-white transition duration-300 hover:scale-110 transform">Pricing</a>
                 </div>
                 <div>
                     <button id="loginBtnNav" onclick="signInWithGoogle()"
-                        class="cyber-btn px-6 py-2 font-bold text-xs">
+                        class="cyber-btn px-8 py-3 font-bold text-sm">
                         System Login
                     </button>
                 </div>
@@ -145,31 +180,31 @@
     </nav>
 
     <!-- Hero Section -->
-    <main class="flex-grow pt-32 pb-16 hero-glow relative overflow-hidden">
+    <main class="pt-40 pb-24 hero-glow relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <!-- Left Content -->
-                <div class="text-left">
-                    <div class="inline-flex items-center px-3 py-1 rounded border border-neonBlue/30 bg-neonBlue/10 text-neonBlue text-xs font-mono tracking-widest mb-8">
-                        <span class="w-2 h-2 rounded-full bg-neonBlue animate-pulse mr-2"></span>
+                <div class="text-left reveal-on-scroll">
+                    <div class="inline-flex items-center px-4 py-2 rounded border border-neonBlue/30 bg-neonBlue/10 text-neonBlue text-sm font-mono tracking-widest mb-8 animate-pulse">
+                        <span class="w-2 h-2 rounded-full bg-neonBlue mr-3"></span>
                         POWERED BY GEMINI 2.0 FLASH
                     </div>
 
-                    <h1 class="text-5xl md:text-7xl font-cyber font-bold tracking-wide mb-6 text-white leading-tight">
+                    <h1 class="text-6xl md:text-8xl font-cyber font-bold tracking-wide mb-8 text-white leading-tight">
                         MAKE THE WEB <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPink">AI-COMPATIBLE</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPink text-glow-blue">AI-COMPATIBLE</span>
                     </h1>
 
-                    <p class="text-xl text-gray-400 max-w-xl mb-10 leading-relaxed font-light">
-                        Stop writing fragile selectors. ScrapeXi connects LLMs to the entire web, 
-                        allowing you to extract structured data using natural language queries.
+                    <p class="text-2xl text-gray-400 max-w-xl mb-12 leading-relaxed font-light">
+                        Stop writing fragile selectors. ScrapeXi connects LLMs to the entire internet, 
+                        allowing you to extract structured JSON data using simple natural language queries.
                     </p>
 
-                    <div class="flex flex-col sm:flex-row gap-4 mb-16">
+                    <div class="flex flex-col sm:flex-row gap-6 mb-16">
                         <button id="supabaseLoginBtn" onclick="signInWithGoogle()"
-                            class="px-8 py-4 rounded bg-white text-black font-cyber font-bold tracking-widest hover:bg-gray-200 transition flex items-center justify-center gap-3 clip-path-polygon hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            class="px-10 py-5 rounded bg-white text-black font-cyber font-bold text-lg tracking-widest hover:bg-gray-200 transition flex items-center justify-center gap-3 clip-path-polygon hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] hover:-translate-y-1 transform">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -178,33 +213,36 @@
                             INITIALIZE SESSION
                         </button>
 
-                        <a href="#"
-                            class="px-8 py-4 rounded border border-white/20 text-white font-cyber font-bold tracking-widest hover:bg-white/5 transition flex items-center justify-center gap-2">
-                            READ DOCS <span class="text-neonBlue">→</span>
+                        <a href="#how-it-works"
+                            class="px-10 py-5 rounded border border-white/20 text-white font-cyber font-bold text-lg tracking-widest hover:bg-white/5 transition flex items-center justify-center gap-2 hover:border-neonBlue hover:text-neonBlue">
+                            EXPLORE PROTOCOLS <span class="text-neonBlue">→</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Right Content: Spider Hero Image -->
-                <div class="relative hidden lg:block">
+                <div class="relative hidden lg:block reveal-on-scroll" style="transition-delay: 200ms;">
                     <div class="absolute -inset-1 bg-gradient-to-r from-neonBlue to-neonPink rounded-2xl blur-xl opacity-30 animate-pulse"></div>
-                    <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl transform hover:scale-105 transition duration-500 group">
-                        <img src="ScrapeXiLogo1.jpg" alt="ScrapeXi Spider" class="w-full h-auto object-cover grayscale hover:grayscale-0 transition duration-500">
+                    
+                    <!-- Hero Image Container with Fix -->
+                    <div class="hero-image-container relative border border-white/10 shadow-2xl transform hover:scale-[1.02] transition-all duration-700 ease-out group">
+                        <img src="ScrapeXiLogo1.jpg" alt="ScrapeXi Spider" class="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
                         
                         <!-- Floating Code Card Overlay -->
-                        <div class="absolute -bottom-10 -left-10 w-80 glass-card p-4 rounded-lg transform rotate-3 group-hover:rotate-0 transition duration-500">
-                            <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
-                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                <span class="text-[10px] font-mono text-gray-500 ml-auto">extraction_protocol.json</span>
+                        <div class="absolute -bottom-12 -left-12 w-96 glass-card p-6 rounded-xl transform rotate-3 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500 border-l-4 border-neonGreen z-20 bg-black/90">
+                            <div class="flex items-center gap-3 mb-4 border-b border-white/10 pb-3">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                <span class="text-xs font-mono text-gray-500 ml-auto tracking-wider">LIVE_FEED_MONITOR</span>
                             </div>
-                            <pre class="text-[10px] font-mono text-neonGreen">
+                            <pre class="text-xs font-mono text-neonGreen leading-relaxed">
 {
-  "target": "internet",
-  "mode": "autonomous",
-  "status": "connected",
-  "extraction_rate": "99.9%"
+  "target_vector": "global_net",
+  "ai_model": "gemini-2.0-flash",
+  "stealth_layer": "active",
+  "extraction_rate": "99.9%",
+  "latency": "45ms"
 }</pre>
                         </div>
                     </div>
@@ -212,32 +250,194 @@
             </div>
 
             <!-- Features Grid (Neon Cards) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24">
-                <div class="glass-card p-8 rounded-2xl">
-                    <div class="w-12 h-12 bg-neonBlue/10 border border-neonBlue/30 rounded-lg flex items-center justify-center text-2xl mb-6 shadow-[0_0_15px_rgba(0,255,255,0.2)]">🤖</div>
-                    <h3 class="text-xl font-cyber font-bold mb-3 text-white">Self-Healing Selectors</h3>
-                    <p class="text-gray-400 leading-relaxed text-sm">UI changes won't break your scrapers. Our AI understands the page semantics, not just the DOM structure.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mt-32">
+                <div class="glass-card p-10 rounded-2xl reveal-on-scroll" style="transition-delay: 100ms;">
+                    <div class="w-16 h-16 bg-neonBlue/10 border border-neonBlue/30 rounded-xl flex items-center justify-center text-3xl mb-8 shadow-[0_0_15px_rgba(0,255,255,0.2)] animate-float">🤖</div>
+                    <h3 class="text-2xl font-cyber font-bold mb-4 text-white">Self-Healing Selectors</h3>
+                    <p class="text-gray-400 leading-relaxed">UI changes won't break your scrapers. Our AI understands the page semantics visually, just like a human, ensuring robust data extraction even when DOM structures change.</p>
                 </div>
-                <div class="glass-card p-8 rounded-2xl">
-                    <div class="w-12 h-12 bg-neonPink/10 border border-neonPink/30 rounded-lg flex items-center justify-center text-2xl mb-6 shadow-[0_0_15px_rgba(255,0,255,0.2)]">⚡</div>
-                    <h3 class="text-xl font-cyber font-bold mb-3 text-white">Powered by Gemini 2.0</h3>
-                    <p class="text-gray-400 leading-relaxed text-sm">Leverage the massive context window and reasoning of Gemini Flash 2.0 for complex data extraction.</p>
+                <div class="glass-card p-10 rounded-2xl reveal-on-scroll" style="transition-delay: 200ms;">
+                    <div class="w-16 h-16 bg-neonPink/10 border border-neonPink/30 rounded-xl flex items-center justify-center text-3xl mb-8 shadow-[0_0_15px_rgba(255,0,255,0.2)] animate-float" style="animation-delay: 1s;">⚡</div>
+                    <h3 class="text-2xl font-cyber font-bold mb-4 text-white">Powered by Gemini 2.0</h3>
+                    <p class="text-gray-400 leading-relaxed">Leverage the massive 1M+ token context window and superior reasoning capabilities of Gemini Flash 2.0 for complex, multi-step data extraction tasks.</p>
                 </div>
-                <div class="glass-card p-8 rounded-2xl">
-                    <div class="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center text-2xl mb-6 shadow-[0_0_15px_rgba(0,255,153,0.2)]">💰</div>
-                    <h3 class="text-xl font-cyber font-bold mb-3 text-white">Free & Open Source</h3>
-                    <p class="text-gray-400 leading-relaxed text-sm">No $99/month subscriptions. You own the code, you control the API keys. 100% free to deploy.</p>
+                <div class="glass-card p-10 rounded-2xl reveal-on-scroll" style="transition-delay: 300ms;">
+                    <div class="w-16 h-16 bg-purple-500/10 border border-purple-500/30 rounded-xl flex items-center justify-center text-3xl mb-8 shadow-[0_0_15px_rgba(168,85,247,0.2)] animate-float" style="animation-delay: 2s;">🛡️</div>
+                    <h3 class="text-2xl font-cyber font-bold mb-4 text-white">Enterprise Grade Security</h3>
+                    <p class="text-gray-400 leading-relaxed">Built for scale. Features include advanced anti-bot evasion, rotating residential proxies, automated CAPTCHA solving, and secure data encryption at rest.</p>
                 </div>
             </div>
 
         </div>
     </main>
 
-    <footer class="border-t border-white/10 py-12 bg-dark-900 text-center">
-        <p class="text-gray-500 text-sm font-mono">© 2025 ScrapeXi. Built for the community.</p>
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-32 bg-black relative">
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-24 reveal-on-scroll">
+                <h2 class="text-neonBlue font-mono tracking-widest text-sm mb-4">SYSTEM ARCHITECTURE</h2>
+                <h3 class="text-5xl md:text-6xl font-cyber font-bold text-white">HOW IT WORKS</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Step 1 -->
+                <div class="relative group reveal-on-scroll">
+                    <div class="absolute -inset-0.5 bg-gradient-to-b from-neonBlue to-transparent rounded-2xl opacity-20 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative bg-dark-800 p-10 rounded-2xl border border-white/5 h-full">
+                        <span class="text-8xl font-cyber font-bold text-white/5 absolute top-4 right-6">01</span>
+                        <h4 class="text-2xl font-bold text-white mb-4 mt-8">Connect Vector</h4>
+                        <p class="text-gray-400">Input your target URL or list of domains. Our system initializes a headless browser instance in our secure cloud infrastructure.</p>
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="relative group reveal-on-scroll" style="transition-delay: 150ms;">
+                    <div class="absolute -inset-0.5 bg-gradient-to-b from-neonPink to-transparent rounded-2xl opacity-20 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative bg-dark-800 p-10 rounded-2xl border border-white/5 h-full">
+                        <span class="text-8xl font-cyber font-bold text-white/5 absolute top-4 right-6">02</span>
+                        <h4 class="text-2xl font-bold text-white mb-4 mt-8">Define Schema</h4>
+                        <p class="text-gray-400">Describe the data you want in plain English or JSON schema. E.g., <em>"Get all product names, prices, and image links."</em></p>
+                    </div>
+                </div>
+                <!-- Step 3 -->
+                <div class="relative group reveal-on-scroll" style="transition-delay: 300ms;">
+                    <div class="absolute -inset-0.5 bg-gradient-to-b from-neonGreen to-transparent rounded-2xl opacity-20 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative bg-dark-800 p-10 rounded-2xl border border-white/5 h-full">
+                        <span class="text-8xl font-cyber font-bold text-white/5 absolute top-4 right-6">03</span>
+                        <h4 class="text-2xl font-bold text-white mb-4 mt-8">Extract & Sync</h4>
+                        <p class="text-gray-400">AI processes the page, extracting structured data. Results are instantly synced to your database or available for JSON/CSV download.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section id="use-cases" class="py-32 bg-dark-900 relative overflow-hidden">
+        <!-- Diagonal decoration -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+            <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[150%] bg-neonBlue/5 transform rotate-12 blur-3xl"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 reveal-on-scroll">
+                <div>
+                    <h2 class="text-neonPink font-mono tracking-widest text-sm mb-4">DEPLOYMENT VECTORS</h2>
+                    <h3 class="text-5xl font-cyber font-bold text-white">USE CASES</h3>
+                </div>
+                <p class="text-xl text-gray-400 max-w-md mt-6 md:mt-0 text-right">
+                    Empowering data-driven decisions across every major industry vertical.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll">
+                    <span class="text-4xl mb-4 block">🛍️</span>
+                    <h4 class="text-xl font-bold text-white mb-2">E-Commerce</h4>
+                    <p class="text-sm text-gray-400">Monitor competitor pricing, track inventory levels, and analyze product trends in real-time.</p>
+                </div>
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll" style="transition-delay: 100ms;">
+                    <span class="text-4xl mb-4 block">🏘️</span>
+                    <h4 class="text-xl font-bold text-white mb-2">Real Estate</h4>
+                    <p class="text-sm text-gray-400">Aggregate listings from multiple sources, track market value changes, and identify investment opportunities.</p>
+                </div>
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll" style="transition-delay: 200ms;">
+                    <span class="text-4xl mb-4 block">💼</span>
+                    <h4 class="text-xl font-bold text-white mb-2">Lead Gen</h4>
+                    <p class="text-sm text-gray-400">Extract contact details from professional networks and directories to fuel your sales pipeline.</p>
+                </div>
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll" style="transition-delay: 300ms;">
+                    <span class="text-4xl mb-4 block">📊</span>
+                    <h4 class="text-xl font-bold text-white mb-2">Finance</h4>
+                    <p class="text-sm text-gray-400">Scrape alternative data, news sentiment, and corporate filings for algorithmic trading models.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-32 bg-black border-t border-white/10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h3 class="text-4xl font-cyber font-bold text-white">SYSTEM FAQ</h3>
+            </div>
+
+            <div class="space-y-4 reveal-on-scroll">
+                <!-- Q1 -->
+                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden">
+                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('span').innerText = this.querySelector('span').innerText === '+' ? '−' : '+'">
+                        <span class="font-bold text-lg text-white">Is coding knowledge required?</span>
+                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                    </button>
+                    <div class="hidden p-6 pt-0 text-gray-400 border-t border-white/5">
+                        <p>No. ScrapeXi uses AI to understand plain English instructions. However, for advanced integrations, we provide a robust API.</p>
+                    </div>
+                </div>
+                <!-- Q2 -->
+                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden">
+                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('span').innerText = this.querySelector('span').innerText === '+' ? '−' : '+'">
+                        <span class="font-bold text-lg text-white">How do you handle CAPTCHAs?</span>
+                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                    </button>
+                    <div class="hidden p-6 pt-0 text-gray-400 border-t border-white/5">
+                        <p>We utilize a stealth browsing layer and integrated CAPTCHA solving services to ensure high success rates, even on difficult sites.</p>
+                    </div>
+                </div>
+                <!-- Q3 -->
+                <div class="border border-white/10 rounded-lg bg-dark-800 overflow-hidden">
+                    <button class="w-full p-6 text-left flex justify-between items-center focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('span').innerText = this.querySelector('span').innerText === '+' ? '−' : '+'">
+                        <span class="font-bold text-lg text-white">Can I scrape dynamic Single Page Apps (SPAs)?</span>
+                        <span class="text-2xl text-neonBlue font-mono">+</span>
+                    </button>
+                    <div class="hidden p-6 pt-0 text-gray-400 border-t border-white/5">
+                        <p>Yes. ScrapeXi runs a full headless browser that renders JavaScript, allowing it to scrape modern React, Vue, and Angular applications seamlessly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-white/10 py-16 bg-dark-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-8 md:mb-0">
+                <span class="text-3xl mr-3">🕷️</span>
+                <h1 class="font-cyber text-2xl text-white tracking-widest uppercase">
+                    <span class="text-neonBlue">Scrape</span><span class="text-neonPink">Xi</span>
+                </h1>
+            </div>
+            <div class="flex space-x-8 font-mono text-sm text-gray-500">
+                <a href="#" class="hover:text-white transition">TERMS</a>
+                <a href="#" class="hover:text-white transition">PRIVACY</a>
+                <a href="#" class="hover:text-white transition">CONTACT</a>
+            </div>
+            <div class="mt-8 md:mt-0 text-gray-600 text-sm">
+                © 2025 ScrapeXi Inc.
+            </div>
+        </div>
     </footer>
 
     <script>
+        // Scroll Animation Script
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
         let supabase;
 
         async function initSupabase() {
@@ -246,78 +446,42 @@
                 : '';
 
             try {
-                const res = await fetch(`${API_BASE}/config`); // Use dynamic path
+                const res = await fetch(`${API_BASE}/config`); 
                 const config = await res.json();
-
-                console.log("Config loaded:", config); // Debug
 
                 if (config.supabase_url && config.supabase_anon_key) {
                     // @ts-ignore
                     supabase = window.supabase.createClient(config.supabase_url, config.supabase_anon_key);
-                    console.log("Supabase initialized");
-
-                    // Check if already logged in
+                    
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
-                        console.log("User already logged in:", session.user);
+                        // Update nav button if logged in
+                        const btn = document.getElementById('loginBtnNav');
+                        btn.innerText = "GO TO DASHBOARD";
+                        btn.onclick = () => window.location.href = '/dashboard';
                     }
-                } else {
-                    console.error("Supabase config missing:", config);
                 }
             } catch (e) {
                 console.error("Failed to load config:", e);
             }
         }
 
-        // Initialize Supabase & Check Auth
         window.onload = initSupabase;
 
         async function signInWithGoogle() {
             if (!supabase) {
-                // Retry init if it failed silently or is slow
                 await initSupabase();
-                if (!supabase) {
-                    const res = await fetch('/config').catch(e => ({ ok: false }));
-                    if (!res.ok) {
-                        alert("Error: Backend API is unreachable. Please check if the server is running on port 8000.");
-                    } else {
-                        alert("Error: System failed to initialize. Check console for 'Config missing' errors.");
-                    }
-                    return;
-                }
+                if (!supabase) return alert("System initialization failed.");
             }
-
-            // Visual Feedback
-            const btns = [document.getElementById('supabaseLoginBtn'), document.getElementById('loginBtnNav')];
-            btns.forEach(btn => {
-                if (btn) {
-                    const originalText = btn.innerHTML;
-                    btn.innerText = "Redirecting...";
-                    btn.disabled = true;
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                }
-            });
 
             try {
                 const { data, error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin + '/dashboard'
-                    }
+                    options: { redirectTo: window.location.origin + '/dashboard' }
                 });
                 if (error) throw error;
             } catch (error) {
-                console.error("Error logging in:", error.message);
                 alert("Login failed: " + error.message);
-                // Reset buttons
-                btns.forEach(btn => {
-                    if (btn) {
-                        btn.innerText = "System Login"; // Reset text
-                        btn.disabled = false;
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    }
-                });
-                window.location.reload();
             }
         }
     </script>
