@@ -246,6 +246,14 @@
                     <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Search Parameters
                 </h2>
                 
+                <!-- Site Preset Dropdown -->
+                <div class="mb-4 border-b border-white/5 pb-4">
+                    <label class="text-[10px] text-gray-500 font-mono uppercase block mb-2">Target Platform</label>
+                    <select id="sitePreset" class="cyber-input w-full p-2 rounded text-xs font-mono bg-black/50">
+                        <option value="custom">CUSTOM / DIRECT URL</option>
+                    </select>
+                </div>
+                
                 <!-- Pagination (Always Visible) -->
                 <div class="mb-4 border-b border-white/5 pb-4">
                     <div class="flex items-center justify-between mb-2">
@@ -358,7 +366,7 @@
                             </div>
                         </div>
                         
-                        <div class="pt-2 border-t border-white/5">
+                        <div id="jitterPanel" class="pt-2 border-t border-white/5 hidden">
                             <div class="flex justify-between text-xs text-gray-400 mb-2">
                                 <span>WAIT_TIME_JITTER</span>
                                 <span id="waitDisplay" class="text-neonBlue font-mono">2s</span>
@@ -627,6 +635,73 @@
     <script>
         var currentData = null;
         
+        // Site Presets Configuration
+        const SITE_PRESETS = {
+            'custom': { label: 'CUSTOM / DIRECT URL', pattern: '', fields: [] },
+            'linkedin_people': { 
+                label: 'LINKEDIN (PEOPLE)', 
+                pattern: 'https://www.linkedin.com/search/results/people/?keywords={keywords}&origin=SWITCH_SEARCH_VERTICAL',
+                fields: [{ key: 'keywords', label: 'KEYWORDS', placeholder: 'e.g. Software Engineer' }]
+            },
+            'linkedin_jobs': { 
+                label: 'LINKEDIN (JOBS)', 
+                pattern: 'https://www.linkedin.com/jobs/search/?keywords={keywords}&location={location}',
+                fields: [
+                    { key: 'keywords', label: 'JOB TITLE', placeholder: 'e.g. Python Developer' },
+                    { key: 'location', label: 'LOCATION', placeholder: 'e.g. Remote' }
+                ]
+            },
+            'google': { 
+                label: 'GOOGLE SEARCH', 
+                pattern: 'https://www.google.com/search?q={query}&num=100',
+                fields: [{ key: 'query', label: 'QUERY', placeholder: 'e.g. best headphones 2025' }]
+            },
+            'amazon': { 
+                label: 'AMAZON PRODUCTS', 
+                pattern: 'https://www.amazon.com/s?k={keyword}',
+                fields: [{ key: 'keyword', label: 'PRODUCT', placeholder: 'e.g. mechanical keyboard' }]
+            },
+            'yelp': { 
+                label: 'YELP BUSINESS', 
+                pattern: 'https://www.yelp.com/search?find_desc={desc}&find_loc={loc}',
+                fields: [
+                    { key: 'desc', label: 'FIND', placeholder: 'e.g. Pizza' },
+                    { key: 'loc', label: 'NEAR', placeholder: 'e.g. New York, NY' }
+                ]
+            },
+            'indeed': { 
+                label: 'INDEED JOBS', 
+                pattern: 'https://www.indeed.com/jobs?q={q}&l={l}',
+                fields: [
+                    { key: 'q', label: 'WHAT', placeholder: 'e.g. Nurse' },
+                    { key: 'l', label: 'WHERE', placeholder: 'e.g. Chicago' }
+                ]
+            },
+            'zillow': { 
+                label: 'ZILLOW HOMES', 
+                pattern: 'https://www.zillow.com/homes/{location}_rb/',
+                fields: [{ key: 'location', label: 'CITY/ZIP', placeholder: 'e.g. 90210' }]
+            },
+            'yellowpages': { 
+                label: 'YELLOW PAGES', 
+                pattern: 'https://www.yellowpages.com/search?search_terms={terms}&geo_location_terms={geo}',
+                fields: [
+                    { key: 'terms', label: 'TERM', placeholder: 'e.g. Plumbers' },
+                    { key: 'geo', label: 'LOCATION', placeholder: 'e.g. Miami' }
+                ]
+            },
+            'booking': { 
+                label: 'BOOKING.COM', 
+                pattern: 'https://www.booking.com/searchresults.html?ss={dest}',
+                fields: [{ key: 'dest', label: 'DESTINATION', placeholder: 'e.g. Tokyo' }]
+            },
+            'tripadvisor': { 
+                label: 'TRIPADVISOR', 
+                pattern: 'https://www.tripadvisor.com/Search?q={query}',
+                fields: [{ key: 'query', label: 'SEARCH', placeholder: 'e.g. Hotels in Rome' }]
+            }
+        };
+
         // Initialize Supabase
         let supabase;
         
@@ -666,6 +741,52 @@
         
         // Call init immediately
         initSupabase();
+
+        // Initialize Dropdown
+        const presetSelect = document.getElementById('sitePreset');
+        if (presetSelect) {
+            presetSelect.innerHTML = '';
+            Object.entries(SITE_PRESETS).forEach(([key, config]) => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = config.label;
+                presetSelect.appendChild(opt);
+            });
+            presetSelect.addEventListener('change', (e) => applySitePreset(e.target.value));
+        }
+
+        function applySitePreset(key) {
+            const config = SITE_PRESETS[key];
+            if (!config) return;
+
+            const container = document.getElementById('urlBuilderFields');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (key === 'custom') {
+                currentUrlBuilder = null;
+                // Restore default placeholder or keep current URL? 
+                // Let's keep current for custom flexibility
+                return;
+            }
+
+            currentUrlBuilder = config;
+            
+            config.fields.forEach(field => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <label class="text-[10px] text-gray-500 font-mono mb-1 block uppercase">${field.label}</label>
+                    <input type="text" data-key="${field.key}" 
+                        class="cyber-input w-full p-2 rounded text-xs font-mono builder-input" 
+                        placeholder="${field.placeholder || ''}"
+                        oninput="updateBuiltUrl()">
+                `;
+                container.appendChild(div);
+            });
+            
+            // Set base pattern
+            document.getElementById('url').value = config.pattern;
+        }
 
         // Cache for loaded templates
         let LOADED_TEMPLATES = {};
@@ -1093,7 +1214,8 @@
         const toggles = [
             { id: 'pagination', panel: 'paginationControls' },
             { id: 'loginEnabled', panel: 'loginParams', conflicts: 'sessionEnabled' },
-            { id: 'sessionEnabled', panel: 'sessionParams', conflicts: 'loginEnabled' }
+            { id: 'sessionEnabled', panel: 'sessionParams', conflicts: 'loginEnabled' },
+            { id: 'stealthMode', panel: 'jitterPanel' }
         ];
 
         toggles.forEach(t => {
