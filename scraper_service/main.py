@@ -239,21 +239,21 @@ def scrape(request: ScrapeRequest):
     """
     import signal
     import time
-    
+
     start_time = time.time()
     MAX_EXECUTION_TIME = 240  # 4 minutes in seconds
-    
+
     # Set a hard timeout (only works on Unix-like systems)
     def timeout_handler(signum, frame):
         raise TimeoutError(f"Scrape operation exceeded {MAX_EXECUTION_TIME/60} minute timeout")
-    
+
     try:
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(MAX_EXECUTION_TIME)
     except Exception:
         # Windows doesn't support SIGALRM, skip timeout on Windows
         print("WARN: Signal-based timeout not available on this platform")
-    
+
     print(f"Received scrape request for: {request.url}")
 
     # Normalize session_json
@@ -323,17 +323,41 @@ def scrape(request: ScrapeRequest):
             pages_to_scrape = (
                 request.end_page - request.start_page + 1 if request.pagination_enabled else 1
             )
+            current_page_num = request.start_page  # Track the actual page number we're on
 
-            # Navigate to the first page
-            print(f"Navigating to starting page: {request.url}...")
+            # Determine the starting URL
+            starting_url = request.url
+            if request.pagination_enabled and request.start_page > 1:
+                # If starting on page > 1, use AI to predict the starting URL
+                if request.page2_url and request.page3_url:
+                    print(f"Predicting starting URL for page {request.start_page}...")
+                    predicted_start = learn_pagination_pattern(
+                        request.url,
+                        request.page2_url,
+                        request.page3_url,
+                        request.start_page,
+                        request.model_name,
+                    )
+                    if predicted_start:
+                        starting_url = predicted_start
+                        print(f"Using AI-predicted start URL: {starting_url}")
+                    else:
+                        print(f"Warning: Could not predict page {request.start_page} URL, starting from page 1")
+                        current_page_num = 1
+                else:
+                    print(f"Warning: No example URLs provided, starting from page 1 instead of page {request.start_page}")
+                    current_page_num = 1
+
+            # Navigate to the starting page
+            print(f"Navigating to starting page {current_page_num}: {starting_url}...")
             try:
-                page.goto(request.url, timeout=60000, wait_until="domcontentloaded")
+                page.goto(starting_url, timeout=60000, wait_until="domcontentloaded")
             except Exception as nav_error:
                 print(f"Navigation Error (continuing anyway): {nav_error}")
 
-            for page_num in range(pages_to_scrape):
+            for i in range(pages_to_scrape):
                 # Wait for content
-                print(f"Waiting for content on page {page_num + 1}...")
+                print(f"Waiting for content on page {current_page_num}...")
                 try:
                     page.wait_for_load_state("networkidle", timeout=10000)
                 except Exception:
@@ -345,11 +369,11 @@ def scrape(request: ScrapeRequest):
                 # Extract HTML for this page
                 page_content = page.content()
                 all_content.append(page_content)
-                print(f"Page {page_num + 1} scraped ({len(page_content)} bytes)")
+                print(f"Page {current_page_num} scraped ({len(page_content)} bytes)")
 
                 # If this isn't the last page, navigate to next
-                if request.pagination_enabled and page_num < pages_to_scrape - 1:
-                    next_page_num = page_num + 2  # Next page number
+                if request.pagination_enabled and i < pages_to_scrape - 1:
+                    next_page_num = current_page_num + 1  # The actual next page number
                     next_url = None
 
                     # Strategy 1: Use AI pattern learning if example URLs provided
@@ -367,6 +391,7 @@ def scrape(request: ScrapeRequest):
                             try:
                                 print(f"Navigating to AI-predicted URL: {next_url}")
                                 page.goto(next_url, timeout=60000, wait_until="domcontentloaded")
+                                current_page_num += 1  # Increment page counter
                                 continue  # Skip other strategies
                             except Exception as e:
                                 print(f"AI-predicted URL failed: {e}")
@@ -382,6 +407,7 @@ def scrape(request: ScrapeRequest):
                                 print(f"Clicking next button: {next_selector}")
                                 page.click(next_selector, timeout=5000)
                                 page.wait_for_timeout(2000)  # Wait for navigation
+                                current_page_num += 1  # Increment page counter
                                 continue  # Success, move to next iteration
                             except Exception as e:
                                 print(f"Failed to click next button: {e}")
@@ -402,6 +428,7 @@ def scrape(request: ScrapeRequest):
                     try:
                         print(f"Navigating to fallback URL: {next_url}")
                         page.goto(next_url, timeout=60000, wait_until="domcontentloaded")
+                        current_page_num += 1  # Increment page counter
                     except Exception as fallback_error:
                         print(f"All pagination strategies failed: {fallback_error}")
                         break  # Stop pagination if we can't navigate
@@ -420,13 +447,13 @@ def scrape(request: ScrapeRequest):
                 query_text = request.query or request.prompt or ""
                 print(f"Processing with Gemini... Query: {query_text}")
                 data = extract_with_gemini(clean_text, query_text, request.model_name)
-                
+
                 # Cancel timeout alarm (success)
                 try:
                     signal.alarm(0)
                 except Exception:
                     pass
-                
+
                 return {"status": "success", "url": request.url, "data": data}
             else:
                 # Raw HTML mode
@@ -435,7 +462,7 @@ def scrape(request: ScrapeRequest):
                     signal.alarm(0)
                 except Exception:
                     pass
-                
+
                 return {
                     "status": "success",
                     "url": request.url,
@@ -451,7 +478,7 @@ def scrape(request: ScrapeRequest):
         except Exception:
             pass
         raise HTTPException(status_code=500, detail=f"Operation timed out: {str(te)}") from te
-    
+
     except Exception as e:
         print(f"Browser Error: {e}")
         # Cancel alarm
