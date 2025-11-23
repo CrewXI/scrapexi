@@ -478,8 +478,8 @@
                 <div class="flex gap-2">
                     <!-- View Toggles -->
                     <div class="flex bg-black/40 rounded p-0.5 border border-white/10 mr-2">
-                        <button onclick="toggleView('json')" id="viewBtnJson" class="px-2 py-0.5 text-[10px] font-mono rounded bg-white/10 text-white transition-all">JSON</button>
-                        <button onclick="toggleView('table')" id="viewBtnTable" class="px-2 py-0.5 text-[10px] font-mono rounded text-gray-500 hover:text-white transition-all">TABLE</button>
+                        <button onclick="toggleView('table')" id="viewBtnTable" class="px-3 py-1 text-[10px] font-bold font-mono rounded transition-all border border-transparent">TABLE</button>
+                        <button onclick="toggleView('json')" id="viewBtnJson" class="px-3 py-1 text-[10px] font-bold font-mono rounded text-gray-500 hover:text-white transition-all border border-transparent">JSON</button>
                     </div>
 
                     <button onclick="saveCurrentAsTemplate()" class="text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors flex items-center gap-1">
@@ -1982,13 +1982,12 @@
                 }
             }
 
-            // Default to JSON view if not already set
-            const btnTable = document.getElementById('viewBtnTable');
-            if (btnTable && btnTable.classList.contains('bg-white/10')) {
-                toggleView('table');
-            } else {
-                toggleView('json');
-            }
+            // Default to Table view
+            const btnJson = document.getElementById('viewBtnJson');
+            // Check if JSON was previously active? For now, user requested default to Table.
+            // But if user switches to JSON, then loads new data (e.g. history), maybe keep JSON?
+            // Let's force Table as requested "default should be Table".
+            toggleView('table');
         }
 
         function toggleView(mode) {
@@ -1997,27 +1996,34 @@
             const btnJson = document.getElementById('viewBtnJson');
             const btnTable = document.getElementById('viewBtnTable');
             
-            // Only toggle if both exist (data loaded)
-            if (!jsonView || !tableView || jsonView.classList.contains('hidden') && tableView.classList.contains('hidden')) {
-                 // Could be loading or empty, check visibility logic in showLoading/renderResults
-                 // Actually, we rely on hideAllOutputs() to manage visibility state.
-                 // If BOTH are hidden, we shouldn't be toggling (no data).
-                 // But hideAllOutputs hides ALL. renderResults shows ONE.
-                 // So if one is shown, we can toggle.
-            }
+            // Active/Inactive Classes
+            const activeClasses = ['bg-neonBlue/20', 'text-neonBlue', 'border-neonBlue/50', 'shadow-[0_0_10px_rgba(0,255,255,0.2)]'];
+            const inactiveClasses = ['text-gray-500', 'border-transparent'];
 
             if (mode === 'json') {
                 if(jsonView) jsonView.classList.remove('hidden');
                 if(tableView) tableView.classList.add('hidden');
                 
-                if(btnJson) { btnJson.classList.add('bg-white/10', 'text-white'); btnJson.classList.remove('text-gray-500'); }
-                if(btnTable) { btnTable.classList.remove('bg-white/10', 'text-white'); btnTable.classList.add('text-gray-500'); }
+                if(btnJson) { 
+                    btnJson.classList.add(...activeClasses); 
+                    btnJson.classList.remove(...inactiveClasses); 
+                }
+                if(btnTable) { 
+                    btnTable.classList.remove(...activeClasses); 
+                    btnTable.classList.add(...inactiveClasses); 
+                }
             } else {
                 if(jsonView) jsonView.classList.add('hidden');
                 if(tableView) tableView.classList.remove('hidden');
                 
-                if(btnTable) { btnTable.classList.add('bg-white/10', 'text-white'); btnTable.classList.remove('text-gray-500'); }
-                if(btnJson) { btnJson.classList.remove('bg-white/10', 'text-white'); btnJson.classList.add('text-gray-500'); }
+                if(btnTable) { 
+                    btnTable.classList.add(...activeClasses); 
+                    btnTable.classList.remove(...inactiveClasses); 
+                }
+                if(btnJson) { 
+                    btnJson.classList.remove(...activeClasses); 
+                    btnJson.classList.add(...inactiveClasses); 
+                }
             }
         }
 
