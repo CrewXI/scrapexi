@@ -6,28 +6,10 @@ from typing import Any, Dict, Optional
 
 import google.generativeai as genai
 import playwright
-# print(f"DEBUG: Playwright version: {playwright.__version__}")
-
+from bs4 import BeautifulSoup
+from fastapi import Body, FastAPI, HTTPException
+from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
-
-# Init Gemini
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
-else:
-    print("WARNING: GOOGLE_API_KEY not set. AI extraction will fail.")
-
-# Stealth Import Logic
-try:
-    # Try the standard import
-    from playwright_stealth import stealth_sync
-
-    STEALTH_AVAILABLE = True
-except ImportError:
-    STEALTH_AVAILABLE = False
-    print("WARNING: playwright-stealth not found or import failed. Stealth mode disabled.")
-
-app = FastAPI(title="Dedicated Browser Service")
 
 
 class ScrapeRequest(BaseModel):
