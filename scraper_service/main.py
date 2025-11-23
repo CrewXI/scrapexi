@@ -155,13 +155,19 @@ def find_next_page_button(page, model_name: str):
         # Ask Gemini to identify the next button
         model = genai.GenerativeModel(model_name)  # type: ignore
         prompt = f"""
-        You are analyzing a webpage to find the "Next Page" button for pagination.
+        You are analyzing a webpage to find pagination buttons.
         
-        Here are the clickable elements that might be the next page button:
+        Here are the clickable elements:
         {clickable_elements[:20]}  
         
-        Which element is most likely the "Next Page" button?
-        Respond with ONLY the element's index number (0-{len(clickable_elements)-1}), or "NONE" if there's no clear next button.
+        Which element is most likely a pagination button? Look for:
+        - "Next" or "Next Page"
+        - "Load More" or "See More"
+        - "Show More" or "View More"
+        - Arrow icons (→, ›, »)
+        - Numbers like "2", "3" (for next page)
+        
+        Respond with ONLY the element's index number (0-{len(clickable_elements)-1}), or "NONE" if there's no clear pagination button.
         
         Response format: Just the number, nothing else.
         """
@@ -342,10 +348,14 @@ def scrape(request: ScrapeRequest):
                         starting_url = predicted_start
                         print(f"Using AI-predicted start URL: {starting_url}")
                     else:
-                        print(f"Warning: Could not predict page {request.start_page} URL, starting from page 1")
+                        print(
+                            f"Warning: Could not predict page {request.start_page} URL, starting from page 1"
+                        )
                         current_page_num = 1
                 else:
-                    print(f"Warning: No example URLs provided, starting from page 1 instead of page {request.start_page}")
+                    print(
+                        f"Warning: No example URLs provided, starting from page 1 instead of page {request.start_page}"
+                    )
                     current_page_num = 1
 
             # Navigate to the starting page
@@ -397,16 +407,40 @@ def scrape(request: ScrapeRequest):
                                 print(f"AI-predicted URL failed: {e}")
                                 next_url = None
 
-                    # Strategy 2: Try to find and click "Next" button
+                    # Strategy 2: Try to find and click "Next" button (or "Load More")
                     if not next_url:
-                        print(f"Looking for 'Next' button...")
+                        print(f"Looking for 'Next' or 'Load More' button...")
                         next_selector = find_next_page_button(page, request.model_name)
 
                         if next_selector:
                             try:
-                                print(f"Clicking next button: {next_selector}")
+                                current_url_before = page.url
+                                content_length_before = len(page.content())
+                                
+                                print(f"Clicking next/load-more button: {next_selector}")
                                 page.click(next_selector, timeout=5000)
-                                page.wait_for_timeout(2000)  # Wait for navigation
+                                
+                                # Wait for either navigation or AJAX content update
+                                page.wait_for_timeout(3000)  # Initial wait for AJAX
+                                
+                                # Check if URL changed (traditional pagination)
+                                if page.url != current_url_before:
+                                    print(f"URL changed (traditional pagination): {page.url}")
+                                    page.wait_for_load_state("networkidle", timeout=10000)
+                                else:
+                                    # URL didn't change - this is AJAX "Load More" pattern
+                                    print("URL unchanged - AJAX 'Load More' detected, waiting for content update...")
+                                    
+                                    # Wait up to 10 seconds for content to change
+                                    for attempt in range(10):
+                                        page.wait_for_timeout(1000)
+                                        current_content_length = len(page.content())
+                                        if current_content_length > content_length_before:
+                                            print(f"New content loaded! Size: {content_length_before} -> {current_content_length} bytes")
+                                            break
+                                    else:
+                                        print("Warning: Content size didn't change after clicking")
+                                
                                 current_page_num += 1  # Increment page counter
                                 continue  # Success, move to next iteration
                             except Exception as e:
