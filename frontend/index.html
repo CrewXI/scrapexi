@@ -117,7 +117,7 @@
         /* Scroll Reveal */
         .reveal-on-scroll {
             opacity: 0;
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1); /* Slowed down from 1s to 2s */
         }
         
         .reveal-on-scroll.slide-up { transform: translateY(50px); }
@@ -679,8 +679,8 @@
         // Scroll Animation Script
         document.addEventListener('DOMContentLoaded', () => {
             const observerOptions = {
-                threshold: 0.1,
-                rootMargin: "0px 0px -50px 0px"
+                threshold: 0.2, /* Increased from 0.1 to require more visibility */
+                rootMargin: "0px 0px -150px 0px" /* Increased negative margin to trigger later */
             };
 
             const observer = new IntersectionObserver((entries) => {
