@@ -238,169 +238,62 @@
         </nav>
 
         <!-- Configuration Module -->
-        <div class="w-[450px] flex flex-col gap-2 overflow-hidden h-full">
+        <div class="w-[500px] flex flex-col gap-0 overflow-hidden h-full glass-card rounded-2xl border border-white/10 flex-shrink-0 relative">
             
-            <!-- 1. Target Website Panel -->
-            <div id="panel-target" class="glass-card rounded-2xl flex-shrink-0 flex flex-col overflow-hidden transition-all duration-300 group">
-                <button onclick="activatePanel('panel-target')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
-                    <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Target Website
-                    </h2>
-                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <!-- Tabs Header -->
+            <div class="flex border-b border-white/10 h-14 bg-black/40">
+                <button onclick="switchTab('setup')" id="tab-setup" class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
+                    <span class="group-hover:text-neonBlue transition">🎯</span> SETUP
                 </button>
-                <div class="panel-content px-5 pb-5 hidden">
-                    <input type="text" id="url" value="https://scrapeme.live/shop" 
-                        class="cyber-input w-full p-3 rounded text-sm font-mono"
-                        placeholder="ENTER_TARGET_URL://">
-                </div>
+                <button onclick="switchTab('schema')" id="tab-schema" class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
+                    <span class="group-hover:text-neonGreen transition">📝</span> SCHEMA
+                </button>
+                <button onclick="switchTab('config')" id="tab-config" class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
+                    <span class="group-hover:text-neonPink transition">⚙️</span> CONFIG
+                </button>
             </div>
 
-            <!-- 2. Search Parameters Panel -->
-            <div id="panel-search" class="glass-card rounded-2xl flex-shrink-0 flex flex-col overflow-hidden transition-all duration-300 group">
-                <button onclick="activatePanel('panel-search')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
-                    <h2 class="text-neonBlue font-cyber text-xs uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> Search Parameters
-                    </h2>
-                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div class="panel-content px-5 pb-5 hidden overflow-y-auto custom-scrollbar">
-                    <!-- Site Preset Dropdown -->
-                    <div class="mb-4 border-b border-white/5 pb-4">
-                        <label class="text-[10px] text-gray-500 font-mono uppercase block mb-2">Target Platform</label>
-                        <select id="sitePreset" class="cyber-input w-full p-2 rounded text-xs font-mono bg-black/50">
+            <!-- Main Content Area -->
+            <div class="flex-1 relative overflow-hidden bg-black/20">
+                
+                <!-- TAB 1: SETUP -->
+                <div id="view-setup" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar space-y-6 hidden">
+                    
+                    <!-- Target URL -->
+                    <div>
+                        <label class="text-xs font-bold text-neonBlue mb-2 block tracking-wide uppercase">Target Website</label>
+                        <div class="relative group">
+                            <input type="text" id="url" value="https://scrapeme.live/shop" 
+                                class="cyber-input w-full h-12 px-4 rounded text-base font-mono bg-black/60 border-white/10 focus:border-neonBlue transition-all shadow-inner"
+                                placeholder="https://example.com" oninput="updateSummary()">
+                            <div class="absolute right-3 top-3 text-gray-500 group-hover:text-white transition cursor-pointer" title="Open in New Tab">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="window.open(document.getElementById('url').value, '_blank')"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platform Preset -->
+                    <div>
+                        <label class="text-xs font-bold text-white mb-2 block tracking-wide uppercase opacity-70">Platform Preset</label>
+                        <select id="sitePreset" class="cyber-input w-full h-12 px-4 rounded text-sm font-mono bg-black/60 border-white/10 focus:border-neonBlue transition-all appearance-none cursor-pointer hover:bg-white/5">
                             <option value="custom">CUSTOM / DIRECT URL</option>
                         </select>
                     </div>
-                    
-                    <!-- Pagination -->
-                    <div class="mb-4 border-b border-white/5 pb-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-xs text-gray-400 font-mono uppercase">Pagination Range</label>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="pagination" class="sr-only peer">
-                                <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonBlue">
-                                    <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="paginationControls" class="grid grid-cols-2 gap-2 hidden">
-                            <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">START PAGE</label>
-                                <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-500 block mb-1">END PAGE</label>
-                                <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-sm font-mono text-center">
-                            </div>
-                        </div>
-                    </div>
 
-                    <div id="urlBuilderFields" class="space-y-3">
+                    <!-- Dynamic Inputs -->
+                    <div id="urlBuilderFields" class="space-y-4 pt-2">
                         <!-- Dynamic Inputs injected here -->
                     </div>
+
                 </div>
-            </div>
 
-            <!-- 3. Options Panel -->
-            <div id="panel-options" class="glass-card rounded-2xl flex-shrink-0 flex flex-col overflow-hidden transition-all duration-300 group">
-                <button onclick="activatePanel('panel-options')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
-                    <h2 class="text-neonPink font-cyber text-sm uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-neonPink rounded-full"></span> Options
-                    </h2>
-                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                
-                <div class="panel-content px-5 pb-5 space-y-5 hidden overflow-y-auto custom-scrollbar">
-                    <!-- Login -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-white font-bold text-sm tracking-wide">Auth</span>
-                                <p class="text-xs text-gray-500 font-mono">CREDENTIALS</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="loginEnabled" class="sr-only peer">
-                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonPink peer-checked:[&>div]:shadow-[0_0_10px_#FF00FF]">
-                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="loginParams" class="hidden space-y-2 pt-2 border-t border-white/5">
-                            <input type="text" id="loginUrl" placeholder="Login URL" class="cyber-input w-full p-2 text-xs rounded">
-                            <form class="grid grid-cols-2 gap-2" onsubmit="return false;">
-                                <input type="text" id="username" placeholder="Username" class="cyber-input p-2 text-xs rounded">
-                                <input type="password" id="password" placeholder="Password" class="cyber-input p-2 text-xs rounded" autocomplete="off">
-                            </form>
-                        </div>
+                <!-- TAB 2: SCHEMA (Default) -->
+                <div id="view-schema" class="absolute inset-0 flex flex-col hidden">
+                    <div class="h-8 bg-black/40 border-b border-white/5 flex items-center justify-between px-4">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase">Extraction Logic</span>
+                        <span class="text-[10px] font-mono text-neonGreen">JSON_MODE</span>
                     </div>
-
-                    <!-- Session -->
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-white font-bold tracking-wide">Session State</span>
-                                <p class="text-xs text-gray-500 font-mono">COOKIE_BYPASS</p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <button onclick="document.getElementById('helpModal').classList.remove('hidden')" class="text-[10px] text-neonGreen hover:text-white underline font-mono">HELP</button>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="sessionEnabled" class="sr-only peer">
-                                    <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonGreen peer-checked:[&>div]:shadow-[0_0_10px_#00FF99]">
-                                        <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div id="sessionParams" class="hidden pt-2 border-t border-white/5">
-                            <textarea id="sessionJson" placeholder='// PASTE AUTH.JSON DATA' class="cyber-input w-full h-20 text-xs p-2 rounded font-mono resize-none"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Stealth & Timing -->
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-white font-bold tracking-wide">Stealth Mode</span>
-                                <p class="text-xs text-gray-500 font-mono">ANTI_DETECTION</p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <button onclick="document.getElementById('stealthHelpModal').classList.remove('hidden')" class="text-[10px] text-purple-400 hover:text-white underline font-mono">HELP</button>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="stealthMode" class="sr-only peer">
-                                    <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-purple-500 peer-checked:[&>div]:shadow-[0_0_10px_#a855f7]">
-                                        <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div id="jitterPanel" class="pt-2 border-t border-white/5 hidden">
-                            <div class="flex justify-between text-xs text-gray-400 mb-2">
-                                <span>WAIT_TIME_JITTER</span>
-                                <span id="waitDisplay" class="text-neonBlue font-mono">2s</span>
-                            </div>
-                            <div class="relative w-full h-2 bg-gray-800 rounded-full">
-                                <input type="range" id="waitTime" min="1" max="15" value="2" 
-                                    class="absolute w-full h-full opacity-0 cursor-pointer z-10"
-                                    oninput="updateWaitDisplay(this.value)">
-                                <div id="sliderTrack" class="absolute top-0 left-0 h-full bg-gradient-to-r from-neonBlue to-purple-500 rounded-full w-[13%]"></div>
-                                <div id="sliderThumb" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-neonBlue rounded-full shadow-[0_0_10px_#00FFFF] pointer-events-none transition-all left-[13%] -ml-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Schema Def Panel -->
-            <div id="panel-schema" class="glass-card rounded-2xl flex-shrink-0 flex flex-col min-h-0 transition-all duration-300 group active-panel flex-1">
-                <button onclick="activatePanel('panel-schema')" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition flex-shrink-0">
-                    <h2 class="text-neonGreen font-cyber text-sm uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-neonGreen rounded-full"></span> Schema Def
-                    </h2>
-                    <svg class="w-4 h-4 text-gray-500 chevron transition-transform duration-300 rotate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div class="panel-content px-5 pb-5 flex-1 flex flex-col min-h-0">
-                    <div class="flex-1 rounded overflow-hidden border border-white/10 relative">
+                    <div class="flex-1 relative">
                         <textarea id="query">{
     products[] {
         name
@@ -410,11 +303,116 @@
 }</textarea>
                     </div>
                 </div>
+
+                <!-- TAB 3: CONFIG -->
+                <div id="view-config" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar space-y-8 hidden">
+                    
+                    <!-- Pagination -->
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Pagination</h3>
+                                <p class="text-[10px] text-gray-500">Auto-traverse multiple pages</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="pagination" class="sr-only peer" onchange="updateSummary()">
+                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-neonBlue">
+                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="paginationControls" class="grid grid-cols-2 gap-4 hidden">
+                            <div>
+                                <label class="text-[10px] text-gray-400 block mb-1 uppercase">Start</label>
+                                <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full p-2 rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 block mb-1 uppercase">End</label>
+                                <input type="number" id="endPage" value="3" min="1" class="cyber-input w-full p-2 rounded text-center font-mono bg-black/50" oninput="updateSummary()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stealth -->
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Stealth Mode</h3>
+                                <p class="text-[10px] text-gray-500">Anti-detection protocols</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="stealthMode" class="sr-only peer" onchange="updateSummary()">
+                                <div class="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-5 peer-checked:[&>div]:bg-purple-500">
+                                    <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-gray-400 rounded-full transition-all"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="jitterPanel" class="hidden pt-2 border-t border-white/10 mt-2">
+                            <div class="flex justify-between text-xs text-gray-400 mb-2 mt-2">
+                                <span>WAIT JITTER</span>
+                                <span id="waitDisplay" class="text-purple-400 font-mono">2s</span>
+                            </div>
+                            <input type="range" id="waitTime" min="1" max="15" value="2" class="w-full accent-purple-500 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateWaitDisplay(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Auth -->
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Authentication</h3>
+                                <p class="text-[10px] text-gray-500">Login credentials or session cookies</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Login Toggle -->
+                            <div class="flex items-center justify-between bg-black/30 p-3 rounded">
+                                <span class="text-xs text-gray-300">Standard Login</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="loginEnabled" class="sr-only peer" onchange="updateSummary()">
+                                    <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonPink">
+                                        <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="loginParams" class="hidden space-y-2">
+                                <input type="text" id="loginUrl" placeholder="Login Page URL" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
+                                <input type="text" id="username" placeholder="Username" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
+                                <input type="password" id="password" placeholder="Password" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
+                            </div>
+
+                            <!-- Session Toggle -->
+                            <div class="flex items-center justify-between bg-black/30 p-3 rounded">
+                                <span class="text-xs text-gray-300">Session Cookie</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="sessionEnabled" class="sr-only peer" onchange="updateSummary()">
+                                    <div class="w-8 h-4 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-4 peer-checked:[&>div]:bg-neonGreen">
+                                        <div class="absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-gray-400 rounded-full transition-all"></div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="sessionParams" class="hidden">
+                                <textarea id="sessionJson" placeholder='Paste cookie JSON here...' class="cyber-input w-full h-20 text-xs p-2 rounded font-mono bg-black/50 resize-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
-            <button id="scrapeBtn" onclick="runScraper()" class="cyber-btn w-full py-4 font-bold text-xl tracking-widest flex-shrink-0">
-                Initialize Extraction
-            </button>
+            <!-- Mission Summary Footer -->
+            <div class="bg-black/40 border-t border-white/10 p-4">
+                <div class="flex items-center justify-between text-[10px] font-mono text-gray-500 mb-3 uppercase tracking-wider">
+                    <span>Mission Config</span>
+                    <span id="configSummary" class="text-neonBlue">READY</span>
+                </div>
+                
+                <button id="scrapeBtn" onclick="runScraper()" class="cyber-btn w-full py-4 font-bold text-lg tracking-[0.2em] bg-neonBlue/5 hover:bg-neonBlue/10 border border-neonBlue/50 text-neonBlue hover:text-white transition-all shadow-[0_0_20px_rgba(0,255,255,0.1)] hover:shadow-[0_0_30px_rgba(0,255,255,0.3)]">
+                    INITIALIZE
+                </button>
+            </div>
         </div>
 
         <!-- Output Panel -->
@@ -1123,35 +1121,63 @@
             lineWrapping: true
         });
 
-        // Exclusive Accordion Logic
-        function activatePanel(panelId) {
-            const panels = ['panel-target', 'panel-search', 'panel-options', 'panel-schema'];
-            
-            panels.forEach(id => {
-                const el = document.getElementById(id);
-                if(!el) return;
-
-                const content = el.querySelector('.panel-content');
-                const chevron = el.querySelector('.chevron');
+        // Tab Logic
+        function switchTab(tabId) {
+            // Hide all views
+            ['setup', 'schema', 'config'].forEach(id => {
+                document.getElementById('view-' + id).classList.add('hidden');
                 
-                if (id === panelId) {
-                    // Activate
-                    el.classList.add('active-panel', 'flex-1');
-                    content.classList.remove('hidden');
-                    if (chevron) chevron.classList.add('rotate');
-                    
-                    // Refresh editor if schema
-                    if (id === 'panel-schema' && editor) {
-                        setTimeout(() => editor.refresh(), 50);
-                    }
-                } else {
-                    // Deactivate
-                    el.classList.remove('active-panel', 'flex-1');
-                    content.classList.add('hidden');
-                    if (chevron) chevron.classList.remove('rotate');
-                }
+                // Reset tab style
+                const tab = document.getElementById('tab-' + id);
+                tab.classList.remove('text-white', 'border-neonBlue', 'border-neonGreen', 'border-neonPink', 'bg-white/5');
+                tab.classList.add('text-gray-500', 'border-transparent');
             });
+
+            // Show selected view
+            const view = document.getElementById('view-' + tabId);
+            view.classList.remove('hidden');
+            if (tabId === 'schema') view.classList.add('flex', 'flex-col'); // Flex fix for schema
+
+            // Style active tab
+            const activeTab = document.getElementById('tab-' + tabId);
+            activeTab.classList.remove('text-gray-500', 'border-transparent');
+            activeTab.classList.add('text-white', 'bg-white/5');
+            
+            if (tabId === 'setup') activeTab.classList.add('border-neonBlue');
+            if (tabId === 'schema') activeTab.classList.add('border-neonGreen');
+            if (tabId === 'config') activeTab.classList.add('border-neonPink');
+
+            // Refresh editor if schema
+            if (tabId === 'schema' && editor) {
+                setTimeout(() => editor.refresh(), 50);
+            }
         }
+
+        // Summary Logic
+        function updateSummary() {
+            const url = document.getElementById('url').value;
+            let site = "CUSTOM";
+            try {
+                if (url) site = new URL(url).hostname.replace('www.', '');
+            } catch(e) {}
+
+            const pages = document.getElementById('pagination').checked 
+                ? `${document.getElementById('startPage').value}-${document.getElementById('endPage').value}` 
+                : '1';
+            
+            const stealth = document.getElementById('stealthMode').checked ? 'STEALTH' : 'STD';
+            const auth = (document.getElementById('loginEnabled').checked || document.getElementById('sessionEnabled').checked) ? 'AUTH' : 'GUEST';
+
+            const summary = `${site} • PGS: ${pages} • ${stealth} • ${auth}`;
+            document.getElementById('configSummary').innerText = summary;
+        }
+
+        // Initial Load
+        switchTab('setup'); // Start on setup
+        updateSummary();
+
+        // Exclusive Accordion Logic (REMOVED in favor of tabs)
+        // ...
 
         // Slider Logic
         function updateWaitDisplay(val) {
@@ -1239,7 +1265,11 @@
             window.location.href = '/';
         }
 
+    <script>
+        // ... existing scripts ...
+        
         // UI Logic: Toggles
+        // Re-bind toggles since IDs moved
         const toggles = [
             { id: 'pagination', panel: 'paginationControls' },
             { id: 'loginEnabled', panel: 'loginParams', conflicts: 'sessionEnabled' },
@@ -1261,8 +1291,11 @@
                 } else {
                     panel.classList.add('hidden');
                 }
+                updateSummary(); // Also update summary
             });
         });
+        // ...
+    </script>
 
         function closeAllModals() {
             document.querySelectorAll('[id$="Modal"]').forEach(el => el.classList.add('hidden'));
