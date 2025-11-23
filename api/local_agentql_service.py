@@ -1,10 +1,12 @@
 
-import os
 import json
+import os
 import re
-from bs4 import BeautifulSoup
+
 import requests
+from bs4 import BeautifulSoup
 from playwright.sync_api import Page
+
 
 def clean_html(html_content: str) -> str:
     """

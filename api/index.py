@@ -528,10 +528,10 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
     MAX_PAGES = 4
     if request.pagination_enabled and request.max_pages > MAX_PAGES:
         raise HTTPException(
-            status_code=400, 
-            detail=f"Maximum {MAX_PAGES} pages per search allowed. Please adjust your range."
+            status_code=400,
+            detail=f"Maximum {MAX_PAGES} pages per search allowed. Please adjust your range.",
         )
-    
+
     # Sync Check usage
     if request.user_id:
         try:
