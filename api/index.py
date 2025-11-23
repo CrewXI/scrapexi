@@ -117,7 +117,7 @@ class JobStatusResponse(BaseModel):
     message: Optional[str] = None
     pages_scraped: int = 0
     error: Optional[str] = None
-    config: Optional[Dict[str, Any]] = None # Add config to response
+    config: Optional[Dict[str, Any]] = None  # Add config to response
 
 
 @app.get("/config")
@@ -511,9 +511,11 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
         # Store full configuration in the job record
         job_config = {
             "pagination": request.pagination_enabled,
-            "maxPages": request.max_pages, # Frontend uses maxPages, backend uses max_pages
+            "maxPages": request.max_pages,  # Frontend uses maxPages, backend uses max_pages
             "stealth": request.stealth_mode,
-            "auth": "cookie" if request.session_json else ("creds" if request.login_enabled else "none"),
+            "auth": (
+                "cookie" if request.session_json else ("creds" if request.login_enabled else "none")
+            ),
             "loginEnabled": request.login_enabled,
             "sessionEnabled": bool(request.session_json),
             "username": request.username,
@@ -534,7 +536,7 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
                 "query": request.query,
                 "status": "running",
                 "created_at": "now()",
-                "config": job_config # Save config
+                "config": job_config,  # Save config
             }
         ).execute()
     except Exception as e:
@@ -560,7 +562,7 @@ def get_job_status(job_id: str):
                 message=f"Status: {job['status']}",
                 pages_scraped=job.get("pages_scraped", 0),
                 error=job.get("error"),
-                config=job.get("config")
+                config=job.get("config"),
             )
     except Exception as e:
         # Only print if it's a real error, not just not found

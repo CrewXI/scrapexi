@@ -11,7 +11,6 @@ from fastapi import Body, FastAPI, HTTPException
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
 
-
 app = FastAPI(title="Dedicated Browser Service")
 
 
