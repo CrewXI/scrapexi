@@ -20,7 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # Install Playwright Browsers (System-wide)
-RUN playwright install --with-deps chromium
+# Force reinstall to ensure we get the correct version matching the pinned requirements
+RUN python -m playwright install --with-deps chromium
 
 # Copy application code
 COPY . .
