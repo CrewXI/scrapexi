@@ -1161,34 +1161,52 @@
                 builderModule.classList.add('hidden');
             }
 
-            // Fill Fields
+            // Fill Fields - SETUP TAB
             document.getElementById('url').value = tpl.url;
-            editor.setValue(tpl.query);
             
-            // Set Toggles & Sliders
-            document.getElementById('pagination').checked = config.pagination;
-            document.getElementById('pagination').dispatchEvent(new Event('change'));
-            
+            // Pagination
+            document.getElementById('pagination').checked = config.pagination || false;
+            togglePagination(); // Show/hide controls
             document.getElementById('startPage').value = config.startPage || 1;
             document.getElementById('endPage').value = config.endPage || config.maxPages || 1;
+            document.getElementById('page2Url').value = config.page2_url || '';
+            document.getElementById('page3Url').value = config.page3_url || '';
             
-            document.getElementById('stealthMode').checked = config.stealth;
+            // Restore URL Builder Values
+            if (config.urlBuilderValues) {
+                document.querySelectorAll('.builder-input').forEach(input => {
+                    const key = input.getAttribute('data-key');
+                    if (key && config.urlBuilderValues[key]) {
+                        input.value = config.urlBuilderValues[key];
+                    }
+                });
+                // Trigger URL update if builder is active
+                if (currentUrlBuilder) updateBuiltUrl();
+            }
             
+            // Fill Fields - SCHEMA TAB
+            editor.setValue(tpl.query);
+            
+            // Fill Fields - CONFIG TAB
+            document.getElementById('stealthMode').checked = config.stealth_mode || config.stealth || false;
             document.getElementById('waitTime').value = config.waitTime || 2;
             updateWaitDisplay(config.waitTime || 2);
 
-            // Auth Logic
+            // Auth Logic (restore flags but NOT credentials for security)
             document.getElementById('loginEnabled').checked = config.loginEnabled || false;
             document.getElementById('loginEnabled').dispatchEvent(new Event('change'));
             
-            if (config.loginEnabled) {
-                document.getElementById('username').value = config.username || '';
-                document.getElementById('password').value = config.password || '';
-                document.getElementById('loginUrl').value = tpl.url; 
-            }
+            // Clear auth fields (user must re-enter credentials)
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginUrl').value = tpl.url;
+            document.getElementById('sessionJson').value = '';
 
             document.getElementById('sessionEnabled').checked = config.sessionEnabled || false;
             document.getElementById('sessionEnabled').dispatchEvent(new Event('change'));
+            
+            // Update summary to reflect loaded template
+            updateSummary();
 
             // Close Modal
             document.getElementById('templatesModal').classList.add('hidden');
@@ -1212,17 +1230,35 @@
                 type: 'private', // Changed from 'user' to 'private' to match DB constraint
                 user_id: userId, // REQUIRED for RLS
                 config: {
+                    // Pagination
                     pagination: document.getElementById('pagination').checked,
                     startPage: parseInt(document.getElementById('startPage').value) || 1,
                     endPage: parseInt(document.getElementById('endPage').value) || 1,
                     maxPages: parseInt(document.getElementById('endPage').value) || 1, // Fallback
-                    stealth: document.getElementById('stealthMode').checked,
-                    loginEnabled: document.getElementById('loginEnabled').checked,
-                    username: document.getElementById('username').value, 
-                    sessionEnabled: document.getElementById('sessionEnabled').checked,
+                    page2_url: document.getElementById('page2Url').value || null,
+                    page3_url: document.getElementById('page3Url').value || null,
+                    
+                    // URL Builder (capture current values)
+                    urlBuilder: currentUrlBuilder, // Save the builder config
+                    urlBuilderValues: {}, // Capture current input values
+                    
+                    // Options
+                    stealth_mode: document.getElementById('stealthMode').checked,
                     waitTime: parseInt(document.getElementById('waitTime').value) || 2,
+                    
+                    // Auth (don't save credentials, just flags)
+                    loginEnabled: document.getElementById('loginEnabled').checked,
+                    sessionEnabled: document.getElementById('sessionEnabled').checked,
                 }
             };
+            
+            // Capture URL builder input values if present
+            if (currentUrlBuilder) {
+                document.querySelectorAll('.builder-input').forEach(input => {
+                    const key = input.getAttribute('data-key');
+                    if (key) tpl.config.urlBuilderValues[key] = input.value;
+                });
+            }
 
             if (supabase) {
                  const { data, error } = await supabase
