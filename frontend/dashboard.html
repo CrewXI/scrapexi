@@ -377,9 +377,11 @@
                                 </label>
                             </div>
                             <div id="loginParams" class="hidden space-y-2">
-                                <input type="text" id="loginUrl" placeholder="Login Page URL" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
-                                <input type="text" id="username" placeholder="Username" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
-                                <input type="password" id="password" placeholder="Password" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
+                                <form onsubmit="return false;" class="contents">
+                                    <input type="text" id="loginUrl" placeholder="Login Page URL" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
+                                    <input type="text" id="username" placeholder="Username" class="cyber-input w-full p-2 text-xs rounded bg-black/50" autocomplete="username">
+                                    <input type="password" id="password" placeholder="Password" class="cyber-input w-full p-2 text-xs rounded bg-black/50" autocomplete="current-password">
+                                </form>
                             </div>
 
                             <!-- Session Toggle -->
@@ -1370,9 +1372,47 @@
         }
 
 
-        // Run Scraper
-        let currentJobId = null;
-        let pollInterval = null;
+        async function loadJobData(jobId) {
+            if (!supabase) return;
+            
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center space-y-4 font-mono opacity-70">
+                    <div class="w-8 h-8 border-2 border-neonBlue border-t-transparent rounded-full animate-spin"></div>
+                    <div class="text-xs text-neonBlue">FETCHING ARTIFACT...</div>
+                </div>
+            `;
+
+            try {
+                // Check if we already have the data in the row context or fetch fresh
+                const { data, error } = await supabase
+                    .from('jobs')
+                    .select('data')
+                    .eq('id', jobId)
+                    .single();
+
+                if (error) throw error;
+
+                if (!data || !data.data) {
+                    throw new Error("Artifact is empty or corrupted.");
+                }
+
+                currentData = data.data; // Set global for export
+                renderResults(currentData);
+                
+                // Close modal to show results
+                closeAllModals();
+
+            } catch (e) {
+                console.error("Load Error:", e);
+                outputDiv.innerHTML = `
+                    <div class="p-6 border border-red-500/50 bg-red-900/20 text-red-400 font-mono">
+                        <h3 class="font-bold mb-2 text-xs">RETRIEVAL FAILED</h3>
+                        <p class="text-[10px]">${e.message}</p>
+                    </div>
+                `;
+            }
+        }
 
         async function runScraper() {
             const btn = document.getElementById('scrapeBtn');
