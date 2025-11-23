@@ -471,20 +471,66 @@ def scrape(request: ScrapeRequest):
                         print(f"All pagination strategies failed: {fallback_error}")
                         break  # Stop pagination if we can't navigate
 
-            # Combine all pages
-            content = "\n\n".join(all_content)
             browser.close()
 
-            # 7. AI Processing
-            print(f"Scrape successful. Content length: {len(content)}")
-
-            clean_text = clean_html(content)
-            print(f"DEBUG: Extracted Text Preview: {clean_text[:500]}")
+            # 7. AI Processing - Process Each Page in Parallel
+            print(f"Scrape successful. Processing {len(all_content)} pages...")
 
             if request.query or request.prompt:
                 query_text = request.query or request.prompt or ""
-                print(f"Processing with Gemini... Query: {query_text}")
-                data = extract_with_gemini(clean_text, query_text, request.model_name)
+                
+                # Process each page separately with ThreadPoolExecutor
+                from concurrent.futures import ThreadPoolExecutor, as_completed
+                
+                page_results = {}
+                
+                def process_single_page(page_index, page_html):
+                    """Process a single page with Gemini"""
+                    try:
+                        page_num = request.start_page + page_index
+                        print(f"🔄 Processing Page {page_num} with Gemini...")
+                        clean_text = clean_html(page_html)
+                        result = extract_with_gemini(clean_text, query_text, request.model_name)
+                        print(f"✅ Page {page_num} completed - {len(result) if isinstance(result, list) else 'N/A'} items")
+                        return page_num, result
+                    except Exception as e:
+                        print(f"❌ Page {page_num} failed: {e}")
+                        return page_num, {"error": str(e)}
+                
+                # Process up to 4 pages in parallel
+                with ThreadPoolExecutor(max_workers=min(4, len(all_content))) as executor:
+                    futures = {
+                        executor.submit(process_single_page, idx, content): idx 
+                        for idx, content in enumerate(all_content)
+                    }
+                    
+                    for future in as_completed(futures):
+                        page_num, result = future.result()
+                        page_results[f"page_{page_num}"] = result
+                
+                # Combine all results for "All" view
+                combined_data = []
+                for page_key in sorted(page_results.keys(), key=lambda x: int(x.split('_')[1])):
+                    page_data = page_results[page_key]
+                    if isinstance(page_data, list):
+                        combined_data.extend(page_data)
+                    elif isinstance(page_data, dict) and not page_data.get("error"):
+                        # Extract first list from dict
+                        for value in page_data.values():
+                            if isinstance(value, list):
+                                combined_data.extend(value)
+                                break
+                
+                # Return paginated results
+                final_result = {
+                    "pages": page_results,  # Individual page results
+                    "all": combined_data,   # Combined results
+                    "pagination": {
+                        "start_page": request.start_page,
+                        "end_page": request.end_page,
+                        "total_pages": len(all_content)
+                    }
+                }
 
                 # Cancel timeout alarm (success)
                 try:
@@ -492,7 +538,7 @@ def scrape(request: ScrapeRequest):
                 except Exception:
                     pass
 
-                return {"status": "success", "url": request.url, "data": data}
+                return {"status": "success", "url": request.url, "data": final_result}
             else:
                 # Raw HTML mode
                 # Cancel timeout alarm (success)

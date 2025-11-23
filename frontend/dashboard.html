@@ -2079,10 +2079,98 @@
             }
         }
 
+        // Global state for paginated results
+        let paginatedData = null;
+        let currentPageView = 'all';
+
         function renderResults(data) {
             hideAllOutputs();
             
-            // Calculate metrics (same as before)
+            // Check if this is paginated data (from parallel processing)
+            if (data && data.pages && data.all !== undefined) {
+                paginatedData = data;
+                renderPaginatedResults(data);
+                return;
+            }
+            
+            // Legacy single-page rendering
+            paginatedData = null;
+            renderSinglePageResults(data);
+        }
+
+        function renderPaginatedResults(data) {
+            // Create page tabs
+            const outputPanel = document.getElementById('outputSection');
+            if (!outputPanel) return;
+
+            // Add pagination tabs before the view toggle
+            let tabsContainer = document.getElementById('paginationTabs');
+            if (!tabsContainer) {
+                tabsContainer = document.createElement('div');
+                tabsContainer.id = 'paginationTabs';
+                tabsContainer.className = 'flex items-center gap-2 mb-4 overflow-x-auto';
+                outputPanel.insertBefore(tabsContainer, outputPanel.firstChild);
+            }
+
+            tabsContainer.innerHTML = '';
+
+            // Create tab buttons
+            const pages = Object.keys(data.pages).sort((a, b) => {
+                const numA = parseInt(a.split('_')[1]);
+                const numB = parseInt(b.split('_')[1]);
+                return numA - numB;
+            });
+
+            // Individual page tabs
+            pages.forEach(pageKey => {
+                const pageNum = pageKey.split('_')[1];
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 text-xs font-bold rounded transition ${
+                    currentPageView === pageKey 
+                        ? 'bg-neonBlue/20 text-neonBlue border border-neonBlue' 
+                        : 'bg-black/40 text-gray-400 border border-white/10 hover:text-white'
+                }`;
+                btn.innerText = `Page ${pageNum}`;
+                btn.onclick = () => {
+                    currentPageView = pageKey;
+                    renderCurrentPage();
+                };
+                tabsContainer.appendChild(btn);
+            });
+
+            // "All" tab
+            const allBtn = document.createElement('button');
+            allBtn.className = `px-4 py-2 text-xs font-bold rounded transition ${
+                currentPageView === 'all' 
+                    ? 'bg-neonGreen/20 text-neonGreen border border-neonGreen' 
+                    : 'bg-black/40 text-gray-400 border border-white/10 hover:text-white'
+            }`;
+            allBtn.innerText = 'ALL';
+            allBtn.onclick = () => {
+                currentPageView = 'all';
+                renderCurrentPage();
+            };
+            tabsContainer.appendChild(allBtn);
+
+            // Render current page
+            renderCurrentPage();
+        }
+
+        function renderCurrentPage() {
+            if (!paginatedData) return;
+
+            let targetData;
+            if (currentPageView === 'all') {
+                targetData = paginatedData.all;
+            } else {
+                targetData = paginatedData.pages[currentPageView];
+            }
+
+            renderSinglePageResults(targetData);
+        }
+
+        function renderSinglePageResults(data) {
+            // Calculate metrics
             let itemCount = 0;
             let targetArray = null;
 
