@@ -168,6 +168,7 @@ def update_data_usage(user_id: str, amount_mb: float):
 
 def run_scrape_task(job_id: str, request: ScrapeRequest):
     print(f"DEBUG: Starting Job {job_id} for {request.url}")
+    # Maintain local cache for speed/debugging, but DB is source of truth
     active_jobs[job_id] = {"status": "running", "data": None, "pages_scraped": 0}
 
     # ENTERPRISE MODE: Delegate to External Browser Service if configured
@@ -184,7 +185,6 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             # Forward the request to the microservice
             # Ensure we hit the /scrape endpoint
             target_url = f"{browser_service_url.rstrip('/')}/scrape"
-
             print(f"DEBUG: POSTing to {target_url}")
 
             resp = requests.post(
@@ -216,11 +216,6 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                 final_data = {"raw_html_preview": str(result["html"])[:500] + "..."}
                 message = "Raw HTML Extracted"
 
-            # Update Job
-            active_jobs[job_id]["status"] = "completed"
-            active_jobs[job_id]["data"] = final_data
-            active_jobs[job_id]["message"] = message
-
             # Calculate Size for Billing (Rough estimate)
             size_mb = 0.0
             if final_data:
@@ -230,49 +225,37 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
             if request.user_id:
                 update_data_usage(request.user_id, size_mb)
-                # Log to History (Jobs Table)
-                try:
-                    supabase.table("jobs").insert(
-                        {
-                            "id": job_id,
-                            "user_id": request.user_id,
-                            "url": request.url,
-                            "query": request.query,
-                            "status": "completed",
-                            "data_usage_mb": size_mb,
-                            "completed_at": "now()",
-                            "data": final_data,
-                            # "pages_scraped": 1, # TODO: Add column to DB
-                        }
-                    ).execute()
-                except Exception as e:
-                    print(f"Failed to log job history: {e}")
+
+            # Update Job Status in DB (Completion)
+            try:
+                supabase.table("jobs").update(
+                    {
+                        "status": "completed",
+                        "data_usage_mb": size_mb,
+                        "completed_at": "now()",
+                        "data": final_data,
+                        "pages_scraped": 1,  # Remote service currently does 1 page
+                    }
+                ).eq("id", job_id).execute()
+            except Exception as e:
+                print(f"Failed to update job history: {e}")
 
             return
 
         except Exception as e:
             print(f"CRITICAL ERROR: Remote Browser Failed: {e}")
-            # DO NOT FALLBACK. Show the real error.
-            active_jobs[job_id]["status"] = "failed"
-            active_jobs[job_id]["error"] = f"Remote Service Configured but Failed: {str(e)}"
-
-            # Log Failure to History
-            if request.user_id:
-                try:
-                    supabase.table("jobs").insert(
-                        {
-                            "id": job_id,
-                            "user_id": request.user_id,
-                            "url": request.url,
-                            "query": request.query,
-                            "status": "failed",
-                            "error": str(e),
-                            "data_usage_mb": 0,
-                            "completed_at": "now()",
-                        }
-                    ).execute()
-                except Exception as log_err:
-                    print(f"Failed to log job failure: {log_err}")
+            
+            # Update DB with Failure
+            try:
+                supabase.table("jobs").update(
+                    {
+                        "status": "failed",
+                        "error": f"Remote Service Failed: {str(e)}",
+                        "completed_at": "now()",
+                    }
+                ).eq("id", job_id).execute()
+            except Exception as log_err:
+                print(f"Failed to log job failure: {log_err}")
 
             return
 
@@ -289,8 +272,8 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                 raise e
 
         with sync_playwright() as playwright:
-            if active_jobs[job_id].get("status") == "cancelled":
-                return
+            # Check DB for cancellation (optional but good)
+            # ...
 
             print("DEBUG: Launching browser...")
             # Stealth arguments to mimic real Chrome
@@ -353,19 +336,16 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                             'input[type="email"], input[name="email"], input[name="username"]',
                             request.username,
                         )
-
                         if request.stealth_mode:
                             page.wait_for_timeout(random.randint(500, 1500))
                         page.fill(
                             'input[type="password"], input[name="password"]', request.password
                         )
-
                         if request.stealth_mode:
                             page.wait_for_timeout(random.randint(500, 1500))
                         page.click(
                             'button[type="submit"], input[type="submit"], button:has-text("Log in"), button:has-text("Sign in")'
                         )
-
                         page.wait_for_load_state("networkidle")
                         page.wait_for_timeout(3000)
                     except Exception as e:
@@ -391,6 +371,7 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             if request.pagination_enabled and request.use_local_backend:
                 aggregated_results = {}
                 for i in range(request.max_pages):
+                    # Basic Check
                     if active_jobs[job_id].get("status") == "cancelled":
                         browser.close()
                         return
@@ -456,49 +437,37 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
                 if request.user_id:
                     update_data_usage(request.user_id, size_mb)
-                    # Log to History
-                    try:
-                        supabase.table("jobs").insert(
-                            {
-                                "id": job_id,
-                                "user_id": request.user_id,
-                                "url": request.url,
-                                "query": request.query,
-                                "status": "completed",
-                                "data_usage_mb": size_mb,
-                                "completed_at": "now()",
-                                "data": result_data,
-                            }
-                        ).execute()
-                    except Exception as e:
-                        print(f"Failed to log job history: {e}")
+
+                # Update DB Completion
+                try:
+                    supabase.table("jobs").update(
+                        {
+                            "status": "completed",
+                            "data_usage_mb": size_mb,
+                            "completed_at": "now()",
+                            "data": result_data,
+                            "pages_scraped": pages_scraped
+                        }
+                    ).eq("id", job_id).execute()
+                except Exception as e:
+                    print(f"Failed to update job success: {e}")
 
                 active_jobs[job_id]["status"] = "completed"
                 active_jobs[job_id]["data"] = result_data
-                active_jobs[job_id]["message"] = f"{message} (Size: {size_mb:.4f} MB)"
-                active_jobs[job_id]["pages_scraped"] = pages_scraped
 
     except Exception as e:
         print(f"ERROR in job {job_id}: {e}")
-        active_jobs[job_id]["status"] = "failed"
-        active_jobs[job_id]["error"] = str(e)
-
-        if request.user_id:
-            try:
-                supabase.table("jobs").insert(
-                    {
-                        "id": job_id,
-                        "user_id": request.user_id,
-                        "url": request.url,
-                        "query": request.query,
-                        "status": "failed",
-                        "error": str(e),
-                        "data_usage_mb": 0,
-                        "completed_at": "now()",
-                    }
-                ).execute()
-            except Exception as log_err:
-                print(f"Failed to log job failure: {log_err}")
+        # Update DB Failure
+        try:
+            supabase.table("jobs").update(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "completed_at": "now()",
+                }
+            ).eq("id", job_id).execute()
+        except Exception as log_err:
+            print(f"Failed to update job failure: {log_err}")
 
 
 @app.post("/scrape", response_model=ScrapeResponse)
@@ -512,30 +481,74 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
             raise HTTPException(status_code=402, detail=str(e))
 
     job_id = str(uuid.uuid4())
+    
+    # INITIAL INSERT: Create "running" job in DB immediately
+    try:
+        supabase.table("jobs").insert({
+            "id": job_id,
+            "user_id": request.user_id,
+            "url": request.url,
+            "query": request.query,
+            "status": "running", 
+            "created_at": "now()",
+            # "pages_scraped": 0 # Optional if default is 0
+        }).execute()
+    except Exception as e:
+        print(f"Failed to initialize job in DB: {e}")
+        raise HTTPException(status_code=500, detail="Failed to initialize job. Database unavailable.")
+
     background_tasks.add_task(run_scrape_task, job_id, request)
     return ScrapeResponse(job_id=job_id, status="queued")
 
 
 @app.get("/job/{job_id}", response_model=JobStatusResponse)
 def get_job_status(job_id: str):
-    if job_id not in active_jobs:
-        raise HTTPException(status_code=404, detail="Job not found")
-    job = active_jobs[job_id]
-    return JobStatusResponse(
-        status=job["status"],
-        data=job.get("data"),
-        message=job.get("message"),
-        pages_scraped=job.get("pages_scraped", 0),
-        error=job.get("error"),
-    )
+    # 1. Check Database (Source of Truth)
+    try:
+        response = supabase.table("jobs").select("*").eq("id", job_id).single().execute()
+        if response.data:
+            job = response.data
+            return JobStatusResponse(
+                status=job["status"],
+                data=job.get("data"),
+                message=f"Status: {job['status']}",
+                pages_scraped=job.get("pages_scraped", 0),
+                error=job.get("error"),
+            )
+    except Exception as e:
+        # Only print if it's a real error, not just not found
+        if "Results contain 0 rows" not in str(e):
+            print(f"DB Fetch Error for {job_id}: {e}")
+
+    # 2. Check In-Memory (Fallback for local dev without DB sync)
+    if job_id in active_jobs:
+        job = active_jobs[job_id]
+        return JobStatusResponse(
+            status=job["status"],
+            data=job.get("data"),
+            message=job.get("message"),
+            pages_scraped=job.get("pages_scraped", 0),
+            error=job.get("error"),
+        )
+    
+    raise HTTPException(status_code=404, detail="Job not found")
 
 
 @app.post("/job/{job_id}/cancel")
 def cancel_job(job_id: str):
+    # Update DB
+    try:
+        supabase.table("jobs").update({"status": "cancelled"}).eq("id", job_id).execute()
+    except Exception as e:
+        print(f"Cancel DB Update Failed: {e}")
+
+    # Update Memory
     if job_id in active_jobs:
         active_jobs[job_id]["status"] = "cancelled"
         return {"message": "Job cancellation requested"}
-    raise HTTPException(status_code=404, detail="Job not found")
+        
+    # If we updated DB, return success even if not in memory
+    return {"message": "Job cancellation requested via DB"}
 
 
 @app.post("/stripe/webhook")
