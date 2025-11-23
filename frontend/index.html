@@ -386,7 +386,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Starter -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonBlue/50 transition reveal-on-scroll slide-up" style="transition-delay: 0ms;">
+                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonBlue/50 reveal-on-scroll slide-up" style="transition-delay: 0ms;">
                     <div class="text-center mb-6">
                         <h4 class="text-xl font-cyber text-white mb-2">STARTER</h4>
                         <div class="text-4xl font-bold text-neonBlue mb-1">$10<span class="text-sm text-gray-500 font-normal">/mo</span></div>
@@ -410,32 +410,34 @@
                 </div>
 
                 <!-- Pro -->
-                <div class="glass-card p-8 rounded-2xl border border-neonPink/50 shadow-[0_0_20px_rgba(255,0,255,0.1)] hover:border-neonPink transition transform scale-105 reveal-on-scroll slide-up" style="transition-delay: 150ms;">
-                    <div class="absolute top-0 right-0 bg-neonPink text-black text-[10px] font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
-                    <div class="text-center mb-6">
-                        <h4 class="text-xl font-cyber text-white mb-2">PRO</h4>
-                        <div class="text-4xl font-bold text-neonPink mb-1">$30<span class="text-sm text-gray-500 font-normal">/mo</span></div>
-                        <p class="text-xs text-gray-400">For power users and startups</p>
+                <div class="reveal-on-scroll slide-up" style="transition-delay: 150ms;">
+                    <div class="glass-card p-8 rounded-2xl border border-neonPink/50 shadow-[0_0_20px_rgba(255,0,255,0.1)] hover:border-neonPink transform scale-105 h-full">
+                        <div class="absolute top-0 right-0 bg-neonPink text-black text-[10px] font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
+                        <div class="text-center mb-6">
+                            <h4 class="text-xl font-cyber text-white mb-2">PRO</h4>
+                            <div class="text-4xl font-bold text-neonPink mb-1">$30<span class="text-sm text-gray-500 font-normal">/mo</span></div>
+                            <p class="text-xs text-gray-400">For power users and startups</p>
+                        </div>
+                        <div class="space-y-4 font-mono text-sm text-gray-300 mb-8">
+                            <div class="flex justify-between border-b border-white/5 pb-2">
+                                <span>Data Limit</span>
+                                <span class="text-white font-bold">500 MB</span>
+                            </div>
+                            <div class="flex justify-between border-b border-white/5 pb-2">
+                                <span>~ Pages/Contacts</span>
+                                <span class="text-white">~5,000</span>
+                            </div>
+                            <div class="flex justify-between border-b border-white/5 pb-2">
+                                <span>Concurrency</span>
+                                <span class="text-white">10 Threads</span>
+                            </div>
+                        </div>
+                        <button class="cyber-btn w-full py-3 text-sm font-bold border-neonPink text-neonPink hover:shadow-[0_0_15px_rgba(255,0,255,0.3)]">INITIATE</button>
                     </div>
-                    <div class="space-y-4 font-mono text-sm text-gray-300 mb-8">
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span>Data Limit</span>
-                            <span class="text-white font-bold">500 MB</span>
-                        </div>
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span>~ Pages/Contacts</span>
-                            <span class="text-white">~5,000</span>
-                        </div>
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span>Concurrency</span>
-                            <span class="text-white">10 Threads</span>
-                        </div>
-                    </div>
-                    <button class="cyber-btn w-full py-3 text-sm font-bold border-neonPink text-neonPink hover:shadow-[0_0_15px_rgba(255,0,255,0.3)]">INITIATE</button>
                 </div>
 
                 <!-- Business -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonGreen/50 transition reveal-on-scroll slide-up" style="transition-delay: 300ms;">
+                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonGreen/50 reveal-on-scroll slide-up" style="transition-delay: 300ms;">
                     <div class="text-center mb-6">
                         <h4 class="text-xl font-cyber text-white mb-2">BUSINESS</h4>
                         <div class="text-4xl font-bold text-neonGreen mb-1">$50<span class="text-sm text-gray-500 font-normal">/mo</span></div>
@@ -480,22 +482,22 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll slide-left" style="transition-delay: 0ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 0ms;">
                     <span class="text-4xl mb-4 block">🛍️</span>
                     <h4 class="text-xl font-bold text-white mb-2">E-Commerce</h4>
                     <p class="text-sm text-gray-400">Monitor competitor pricing, track inventory levels, and analyze product trends in real-time.</p>
                 </div>
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll slide-left" style="transition-delay: 100ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 100ms;">
                     <span class="text-4xl mb-4 block">🏘️</span>
                     <h4 class="text-xl font-bold text-white mb-2">Real Estate</h4>
                     <p class="text-sm text-gray-400">Aggregate listings from multiple sources, track market value changes, and identify investment opportunities.</p>
                 </div>
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll slide-left" style="transition-delay: 200ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 200ms;">
                     <span class="text-4xl mb-4 block">💼</span>
                     <h4 class="text-xl font-bold text-white mb-2">Lead Gen</h4>
                     <p class="text-sm text-gray-400">Extract contact details from professional networks and directories to fuel your sales pipeline.</p>
                 </div>
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 transition reveal-on-scroll slide-left" style="transition-delay: 300ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 300ms;">
                     <span class="text-4xl mb-4 block">📊</span>
                     <h4 class="text-xl font-bold text-white mb-2">Finance</h4>
                     <p class="text-sm text-gray-400">Scrape alternative data, news sentiment, and corporate filings for algorithmic trading models.</p>
