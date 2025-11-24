@@ -330,8 +330,8 @@ def scrape(request: ScrapeRequest):
                 request.end_page - request.start_page + 1 if request.pagination_enabled else 1
             )
 
-            # Enforce max 4 pages limit
-            MAX_PAGES = 4
+            # Enforce max 10 pages limit
+            MAX_PAGES = 10
             if pages_to_scrape > MAX_PAGES:
                 print(f"⚠️ Requested {pages_to_scrape} pages, limiting to {MAX_PAGES}")
                 pages_to_scrape = MAX_PAGES

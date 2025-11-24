@@ -241,11 +241,11 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             final_data = None
             message = "Remote Scrape Complete"
             pages_scraped = 1
-            
+
             if "data" in result:
                 # AI Extraction Success (could be paginated or single page)
                 data_result = result["data"]
-                
+
                 # Check if this is paginated data (has 'pages', 'all', 'pagination')
                 if isinstance(data_result, dict) and "all" in data_result:
                     # Paginated result
@@ -539,8 +539,8 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
 
 @app.post("/scrape", response_model=ScrapeResponse)
 def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
-    # Validate pagination (max 4 pages)
-    MAX_PAGES = 4
+    # Validate pagination (max 10 pages)
+    MAX_PAGES = 10
     if request.pagination_enabled and request.max_pages > MAX_PAGES:
         raise HTTPException(
             status_code=400,

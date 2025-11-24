@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+
     <!-- CodeMirror -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/midnight.min.css">
@@ -16,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -42,7 +45,7 @@
     <style>
         body {
             background-color: #050510;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.2) 0%, transparent 50%),
                 radial-gradient(circle at 10% 10%, rgba(255, 0, 255, 0.15) 0%, transparent 40%),
                 radial-gradient(circle at 90% 90%, rgba(0, 255, 255, 0.15) 0%, transparent 40%);
@@ -52,18 +55,27 @@
         /* Moving Grid Background */
         .grid-overlay {
             position: fixed;
-            top: 0; left: 0; width: 200%; height: 200%;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
             background-image: linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 40px 40px;
             transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
             animation: grid-move 20s linear infinite;
             z-index: -1;
             pointer-events: none;
         }
+
         @keyframes grid-move {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+            0% {
+                transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
+            }
+
+            100% {
+                transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px);
+            }
         }
 
         /* Glassmorphism Cards */
@@ -76,12 +88,15 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         /* Neon Borders */
         .glass-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             border-radius: inherit;
             padding: 1px;
             background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent, rgba(255, 0, 255, 0.3), transparent);
@@ -92,8 +107,13 @@
         }
 
         /* Glowing Text */
-        .text-glow-blue { text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
-        .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
+        .text-glow-blue {
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        }
+
+        .text-glow-pink {
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
 
         /* Cyber Input */
         .cyber-input {
@@ -103,6 +123,7 @@
             transition: all 0.3s ease;
             clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
         }
+
         .cyber-input:focus {
             border-color: #00FFFF;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
@@ -121,19 +142,24 @@
             transition: 0.3s;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
+
         .cyber-btn:hover {
             background: rgba(0, 255, 255, 0.1);
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
             text-shadow: 0 0 8px #00FFFF;
         }
+
         .cyber-btn::before {
             content: '';
             position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
             transition: 0.5s;
         }
+
         .cyber-btn:hover::before {
             left: 100%;
         }
@@ -147,10 +173,19 @@
             color: #a5b3ce !important;
             font-family: 'Share Tech Mono', monospace !important;
         }
-        .cm-variable { color: #ff79c6 !important; }
-        .cm-string { color: #f1fa8c !important; }
-        .cm-property { color: #8be9fd !important; }
-        
+
+        .cm-variable {
+            color: #ff79c6 !important;
+        }
+
+        .cm-string {
+            color: #f1fa8c !important;
+        }
+
+        .cm-property {
+            color: #8be9fd !important;
+        }
+
         /* Accordion Animation */
         .accordion-content {
             transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease;
@@ -158,43 +193,60 @@
             opacity: 0;
             overflow: hidden;
         }
+
         .accordion-content.open {
-            max-height: 500px; /* Arbitrary large height */
+            max-height: 500px;
+            /* Arbitrary large height */
             opacity: 1;
         }
-        .chevron { transition: transform 0.3s ease; }
-        .chevron.rotate { transform: rotate(180deg); }
-        
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+
+        .chevron.rotate {
+            transform: rotate(180deg);
+        }
+
         /* Global Text Size Improvements */
-        p.text-\[10px\], .text-\[10px\] { 
-            font-size: 13px !important; 
-        }
-        .text-\[10px\].text-gray-500,
-        p.text-\[10px\].text-gray-500 { 
+        p.text-\[10px\],
+        .text-\[10px\] {
             font-size: 13px !important;
-            color: rgb(229 231 235) !important; /* gray-200 - much brighter white */
         }
-        .text-\[9px\] { font-size: 12px !important; }
-        label.text-\[10px\] { 
+
+        .text-\[10px\].text-gray-500,
+        p.text-\[10px\].text-gray-500 {
+            font-size: 13px !important;
+            color: rgb(229 231 235) !important;
+            /* gray-200 - much brighter white */
+        }
+
+        .text-\[9px\] {
+            font-size: 12px !important;
+        }
+
+        label.text-\[10px\] {
             font-size: 13px !important;
             color: rgb(229 231 235) !important;
         }
-        
+
         /* Standardized Toggle Switch */
         .toggle-switch {
             width: 48px;
             height: 24px;
         }
+
         .toggle-thumb {
             width: 18px;
             height: 18px;
             top: 3px;
             left: 3px;
         }
+
         .toggle-switch.checked .toggle-thumb {
             transform: translateX(24px);
         }
-        
+
         /* Better Range Slider */
         input[type="range"] {
             height: 6px;
@@ -202,6 +254,7 @@
             background: linear-gradient(90deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.6));
             outline: none;
         }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -214,10 +267,12 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
             transition: all 0.2s ease;
         }
+
         input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.2);
             box-shadow: 0 0 25px rgba(168, 85, 247, 0.9);
         }
+
         input[type="range"]::-moz-range-thumb {
             width: 18px;
             height: 18px;
@@ -229,21 +284,28 @@
         }
     </style>
 </head>
+
 <body class="text-gray-300 font-tech h-screen flex flex-col text-base">
 
     <div class="grid-overlay"></div>
 
     <!-- Header -->
-    <header class="h-20 flex items-center justify-between px-8 z-10 border-b border-white/5 bg-darkBg/80 backdrop-blur-sm flex-shrink-0">
+    <header
+        class="h-20 flex items-center justify-between px-8 z-10 border-b border-white/5 bg-darkBg/80 backdrop-blur-sm flex-shrink-0">
         <div class="flex items-center gap-4">
             <div class="relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-neonPink to-neonBlue rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                <div class="relative w-10 h-10 bg-black flex items-center justify-center rounded-lg border border-white/10">
+                <div
+                    class="absolute -inset-1 bg-gradient-to-r from-neonPink to-neonBlue rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200">
+                </div>
+                <div
+                    class="relative w-10 h-10 bg-black flex items-center justify-center rounded-lg border border-white/10">
                     <span class="font-cyber text-xl text-white">S</span>
                 </div>
             </div>
             <div>
-                <h1 class="font-cyber text-2xl text-white tracking-widest uppercase"><span class="text-neonBlue text-glow-blue">Scrape</span><span class="text-neonPink text-glow-pink">Xi</span></h1>
+                <h1 class="font-cyber text-2xl text-white tracking-widest uppercase"><span
+                        class="text-neonBlue text-glow-blue">Scrape</span><span
+                        class="text-neonPink text-glow-pink">Xi</span></h1>
                 <div class="flex items-center gap-2">
                     <div class="w-1.5 h-1.5 rounded-full bg-neonGreen animate-pulse shadow-[0_0_10px_#00FF99]"></div>
                     <span class="text-[10px] tracking-[0.2em] text-neonGreen uppercase">System Online</span>
@@ -258,7 +320,10 @@
                     <p id="userName" class="text-xs font-bold text-white tracking-wider uppercase">Operator</p>
                 </div>
                 <button onclick="logout()" class="text-gray-500 hover:text-red-500 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -266,21 +331,36 @@
 
     <!-- Main Interface -->
     <div class="flex-1 flex overflow-hidden p-6 gap-6 z-10">
-        
+
         <!-- Sidebar Nav -->
         <nav class="w-16 lg:w-20 glass-card rounded-2xl flex flex-col items-center py-8 gap-8 flex-shrink-0">
-            <a href="#" onclick="closeAllModals()" class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <a href="#" onclick="closeAllModals()"
+                class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
             </a>
-            <a href="#" onclick="openTemplatesModal()" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Template Library">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/></svg>
+            <a href="#" onclick="openTemplatesModal()"
+                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                title="Template Library">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                </svg>
             </a>
-            <a href="#" onclick="openHistoryModal()" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Search History">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <a href="#" onclick="openHistoryModal()"
+                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                title="Search History">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </a>
             <div class="flex-1"></div>
-            
-            <div id="userStats" class="flex flex-col items-center gap-3 text-[9px] font-mono text-gray-500 w-full text-center border-t border-b border-white/5 py-4 mb-4">
+
+            <div id="userStats"
+                class="flex flex-col items-center gap-3 text-[9px] font-mono text-gray-500 w-full text-center border-t border-b border-white/5 py-4 mb-4">
                 <div>
                     <span class="block text-neonBlue mb-0.5 tracking-wider">USED</span>
                     <span id="statUsed" class="text-white text-[10px]">...</span>
@@ -296,32 +376,41 @@
             </div>
 
             <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
             </a>
         </nav>
 
         <!-- Configuration Module -->
-        <div class="w-[500px] flex flex-col gap-0 overflow-hidden h-full glass-card rounded-2xl border border-white/10 flex-shrink-0 relative">
-            
+        <div
+            class="w-[500px] flex flex-col gap-0 overflow-hidden h-full glass-card rounded-2xl border border-white/10 flex-shrink-0 relative">
+
             <!-- Tabs Header -->
             <div class="flex border-b border-white/10 h-14 bg-black/40">
-                <button onclick="switchTab('setup')" id="tab-setup" class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
+                <button onclick="switchTab('setup')" id="tab-setup"
+                    class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
                     <span class="group-hover:text-neonBlue transition">🎯</span> SETUP
                 </button>
-                <button onclick="switchTab('schema')" id="tab-schema" class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
+                <button onclick="switchTab('schema')" id="tab-schema"
+                    class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
                     <span class="group-hover:text-neonGreen transition">📝</span> SCHEMA
                 </button>
-                <button onclick="switchTab('config')" id="tab-config" class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
+                <button onclick="switchTab('config')" id="tab-config"
+                    class="flex-1 font-cyber font-bold text-xs tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition border-b-2 border-transparent flex items-center justify-center gap-2 group">
                     <span class="group-hover:text-neonPink transition">⚙️</span> CONFIG
                 </button>
             </div>
 
             <!-- Main Content Area -->
             <div class="flex-1 relative overflow-hidden bg-black/20">
-                
+
                 <!-- TAB 1: SETUP -->
                 <div id="view-setup" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar space-y-6 hidden">
-                    
+
                     <!-- Target Website Card -->
                     <div class="bg-white/5 rounded-xl p-5 border border-white/5">
                         <div class="mb-4">
@@ -329,11 +418,16 @@
                             <p class="text-[10px] text-gray-500">Enter the URL to scrape</p>
                         </div>
                         <div class="relative group">
-                            <input type="text" id="url" value="https://scrapeme.live/shop" 
+                            <input type="text" id="url" value="https://scrapeme.live/shop"
                                 class="cyber-input w-full h-12 px-4 rounded text-base font-mono bg-black/50 border-white/10 focus:border-neonBlue transition-all"
                                 placeholder="https://example.com" oninput="updateSummary()">
-                            <div class="absolute right-3 top-3 text-gray-500 group-hover:text-white transition cursor-pointer" title="Open in New Tab">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="window.open(document.getElementById('url').value, '_blank')"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            <div class="absolute right-3 top-3 text-gray-500 group-hover:text-white transition cursor-pointer"
+                                title="Open in New Tab">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    onclick="window.open(document.getElementById('url').value, '_blank')">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
                             </div>
                         </div>
                     </div>
@@ -344,10 +438,11 @@
                             <h3 class="text-sm font-bold text-white">Platform Preset</h3>
                             <p class="text-[10px] text-gray-500">Quick setup for popular sites</p>
                         </div>
-                        <select id="sitePreset" class="cyber-input w-full h-12 px-4 rounded text-sm font-mono bg-black/50 border-white/10 focus:border-neonBlue transition-all appearance-none cursor-pointer hover:bg-white/5">
+                        <select id="sitePreset"
+                            class="cyber-input w-full h-12 px-4 rounded text-sm font-mono bg-black/50 border-white/10 focus:border-neonBlue transition-all appearance-none cursor-pointer hover:bg-white/5">
                             <option value="custom">CUSTOM / DIRECT URL</option>
                         </select>
-                        
+
                         <!-- Dynamic Inputs -->
                         <div id="urlBuilderModule" class="hidden mt-4 pt-4 border-t border-white/10">
                             <div id="urlBuilderFields" class="space-y-3">
@@ -364,9 +459,13 @@
                                 <p class="text-[10px] text-gray-500">Auto-traverse multiple pages</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="pagination" class="sr-only peer" onchange="togglePagination()">
-                                <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonBlue peer-checked:[&>div]:to-cyan-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(0,255,255,0.6)]">
-                                    <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
+                                <input type="checkbox" id="pagination" class="sr-only peer"
+                                    onchange="togglePagination()">
+                                <div
+                                    class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonBlue/20 border border-gray-600 peer-checked:border-neonBlue transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonBlue peer-checked:[&>div]:to-cyan-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(0,255,255,0.6)]">
+                                    <div
+                                        class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg">
+                                    </div>
                                 </div>
                             </label>
                         </div>
@@ -374,36 +473,47 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="text-[10px] text-gray-400 block mb-1 uppercase">Start Page</label>
-                                    <input type="number" id="startPage" value="1" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="validatePagination()">
+                                    <input type="number" id="startPage" value="1" min="1"
+                                        class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50"
+                                        oninput="validatePagination()">
                                 </div>
                                 <div>
                                     <label class="text-[10px] text-gray-400 block mb-1 uppercase">End Page</label>
-                                    <input type="number" id="endPage" value="4" min="1" class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50" oninput="validatePagination()">
+                                    <input type="number" id="endPage" value="10" min="1"
+                                        class="cyber-input w-full h-10 px-3 text-sm rounded text-center font-mono bg-black/50"
+                                        oninput="validatePagination()">
                                 </div>
                             </div>
-                            
+
                             <!-- Pagination Warning -->
-                            <div id="paginationWarning" class="hidden mt-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs text-yellow-400">
-                                ⚠️ Maximum 4 pages per search. Range adjusted automatically.
+                            <div id="paginationWarning"
+                                class="hidden mt-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs text-yellow-400">
+                                ⚠️ Maximum 10 pages per search. Range adjusted automatically.
                             </div>
-                            
+
                             <!-- Example URLs for Pattern Recognition -->
                             <div class="border-t border-white/10 pt-4">
                                 <div class="flex items-center gap-2 mb-3">
-                                    <svg class="w-4 h-4 text-neonBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    <svg class="w-4 h-4 text-neonBlue" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
-                                    <span class="text-[10px] text-gray-400 font-semibold uppercase">AI Pattern Recognition (Optional)</span>
+                                    <span class="text-[10px] text-gray-400 font-semibold uppercase">AI Pattern
+                                        Recognition (Optional)</span>
                                 </div>
-                                <p class="text-[10px] text-gray-500 mb-3">Provide example URLs for Page 2 & 3 so AI can learn the pagination pattern:</p>
+                                <p class="text-[10px] text-gray-500 mb-3">Provide example URLs for Page 2 & 3 so AI can
+                                    learn the pagination pattern:</p>
                                 <div class="space-y-2">
                                     <div>
                                         <label class="text-[10px] text-gray-400 block mb-1">Page 2 URL (Example)</label>
-                                        <input type="text" id="page2Url" placeholder="https://example.com/page/2" class="cyber-input w-full h-10 px-3 text-xs rounded font-mono bg-black/50">
+                                        <input type="text" id="page2Url" placeholder="https://example.com/page/2"
+                                            class="cyber-input w-full h-10 px-3 text-xs rounded font-mono bg-black/50">
                                     </div>
                                     <div>
                                         <label class="text-[10px] text-gray-400 block mb-1">Page 3 URL (Example)</label>
-                                        <input type="text" id="page3Url" placeholder="https://example.com/page/3" class="cyber-input w-full h-10 px-3 text-xs rounded font-mono bg-black/50">
+                                        <input type="text" id="page3Url" placeholder="https://example.com/page/3"
+                                            class="cyber-input w-full h-10 px-3 text-xs rounded font-mono bg-black/50">
                                     </div>
                                 </div>
                             </div>
@@ -415,11 +525,14 @@
                 <!-- TAB 2: SCHEMA -->
                 <div id="view-schema" class="absolute inset-0 flex flex-col hidden">
                     <!-- Sub Tabs (Folder Style) -->
-                    <div class="h-14 flex items-end justify-center gap-2 flex-shrink-0 mt-4 px-6 border-b border-white/10">
-                        <button onclick="switchSchemaMode('form')" id="btn-schema-form" class="px-8 py-3 text-xs font-cyber font-bold text-neonBlue bg-gradient-to-b from-black/80 to-black/60 rounded-t-lg border-t-2 border-x-2 border-neonBlue/50 shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.3)] transition-all tracking-widest relative -mb-[1px] border-b-2 border-transparent">
+                    <div
+                        class="h-14 flex items-end justify-center gap-2 flex-shrink-0 mt-4 px-6 border-b border-white/10">
+                        <button onclick="switchSchemaMode('form')" id="btn-schema-form"
+                            class="px-8 py-3 text-xs font-cyber font-bold text-neonBlue bg-gradient-to-b from-black/80 to-black/60 rounded-t-lg border-t-2 border-x-2 border-neonBlue/50 shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.3)] transition-all tracking-widest relative -mb-[1px] border-b-2 border-transparent">
                             <span class="drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]">WIZARD</span>
                         </button>
-                        <button onclick="switchSchemaMode('json')" id="btn-schema-json" class="px-8 py-3 text-xs font-cyber font-bold text-gray-500 bg-black/40 rounded-t-lg border-t border-x border-white/10 border-b border-white/10 hover:text-white hover:bg-black/60 transition-all tracking-widest">
+                        <button onclick="switchSchemaMode('json')" id="btn-schema-json"
+                            class="px-8 py-3 text-xs font-cyber font-bold text-gray-500 bg-black/40 rounded-t-lg border-t border-x border-white/10 border-b border-white/10 hover:text-white hover:bg-black/60 transition-all tracking-widest">
                             JSON EDITOR
                         </button>
                     </div>
@@ -428,9 +541,12 @@
                     <div id="schema-mode-form" class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
                         <!-- Root Entity -->
                         <div>
-                            <label class="text-[10px] text-gray-400 font-mono mb-2 block uppercase">I want to extract a list of...</label>
+                            <label class="text-[10px] text-gray-400 font-mono mb-2 block uppercase">I want to extract a
+                                list of...</label>
                             <div class="flex gap-2">
-                                <select id="schemaEntitySelect" class="cyber-input flex-1 h-10 px-2 text-xs rounded bg-black/60 cursor-pointer" onchange="handleEntityChange()">
+                                <select id="schemaEntitySelect"
+                                    class="cyber-input flex-1 h-10 px-2 text-xs rounded bg-black/60 cursor-pointer"
+                                    onchange="handleEntityChange()">
                                     <option value="jobs">Jobs</option>
                                     <option value="people">People</option>
                                     <option value="products">Products</option>
@@ -442,7 +558,9 @@
                                     <option value="cars">Cars</option>
                                     <option value="custom">Custom / Other...</option>
                                 </select>
-                                <input type="text" id="schemaEntityCustom" class="cyber-input flex-1 h-10 px-2 text-xs rounded bg-black/60 hidden" placeholder="e.g. pokemon" oninput="updateSchemaFromForm()">
+                                <input type="text" id="schemaEntityCustom"
+                                    class="cyber-input flex-1 h-10 px-2 text-xs rounded bg-black/60 hidden"
+                                    placeholder="e.g. pokemon" oninput="updateSchemaFromForm()">
                             </div>
                         </div>
 
@@ -450,7 +568,8 @@
                         <div class="bg-white/5 p-4 rounded-xl border border-white/5">
                             <div class="flex justify-between items-center mb-4">
                                 <label class="text-[10px] text-gray-400 font-mono uppercase">With these details</label>
-                                <button onclick="addFieldRow()" class="text-neonGreen text-xs font-bold hover:text-white transition flex items-center gap-1">
+                                <button onclick="addFieldRow()"
+                                    class="text-neonGreen text-xs font-bold hover:text-white transition flex items-center gap-1">
                                     <span class="text-lg">+</span> ADD FIELD
                                 </button>
                             </div>
@@ -458,9 +577,10 @@
                                 <!-- Rows injected here -->
                             </div>
                         </div>
-                        
+
                         <div class="text-[10px] text-gray-500 font-mono">
-                            * This wizard automatically generates the extraction query. Switch to "JSON EDITOR" to fine-tune.
+                            * This wizard automatically generates the extraction query. Switch to "JSON EDITOR" to
+                            fine-tune.
                         </div>
                     </div>
 
@@ -478,7 +598,7 @@
 
                 <!-- TAB 3: CONFIG -->
                 <div id="view-config" class="absolute inset-0 p-6 overflow-y-auto custom-scrollbar space-y-8 hidden">
-                    
+
                     <!-- Stealth -->
                     <div class="bg-white/5 rounded-xl p-5 border border-white/5">
                         <div class="flex items-center justify-between mb-4">
@@ -488,8 +608,11 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="stealthMode" class="sr-only peer" onchange="updateSummary()">
-                                <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-purple-500 peer-checked:[&>div]:to-purple-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(168,85,247,0.6)]">
-                                    <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
+                                <div
+                                    class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-purple-500/20 border border-gray-600 peer-checked:border-purple-500 transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-purple-500 peer-checked:[&>div]:to-purple-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(168,85,247,0.6)]">
+                                    <div
+                                        class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg">
+                                    </div>
                                 </div>
                             </label>
                         </div>
@@ -498,7 +621,8 @@
                                 <span class="font-semibold tracking-wider">WAIT JITTER</span>
                                 <span id="waitDisplay" class="text-purple-400 font-mono font-bold text-base">2s</span>
                             </div>
-                            <input type="range" id="waitTime" min="1" max="15" value="2" class="w-full cursor-pointer" oninput="updateWaitDisplay(this.value)">
+                            <input type="range" id="waitTime" min="1" max="15" value="2" class="w-full cursor-pointer"
+                                oninput="updateWaitDisplay(this.value)">
                         </div>
                     </div>
 
@@ -510,23 +634,32 @@
                                 <p class="text-[10px] text-gray-500">Login credentials or session cookies</p>
                             </div>
                         </div>
-                        
+
                         <div class="space-y-4">
                             <!-- Login Toggle -->
                             <div class="flex items-center justify-between bg-black/30 p-3 rounded">
                                 <span class="text-xs text-gray-300">Standard Login</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="loginEnabled" class="sr-only peer" onchange="updateSummary()">
-                                    <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonPink peer-checked:[&>div]:to-pink-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(255,0,255,0.6)]">
-                                        <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
+                                    <input type="checkbox" id="loginEnabled" class="sr-only peer"
+                                        onchange="updateSummary()">
+                                    <div
+                                        class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonPink/20 border border-gray-600 peer-checked:border-neonPink transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonPink peer-checked:[&>div]:to-pink-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(255,0,255,0.6)]">
+                                        <div
+                                            class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg">
+                                        </div>
                                     </div>
                                 </label>
                             </div>
                             <div id="loginParams" class="hidden space-y-2">
                                 <form onsubmit="return false;" class="contents">
-                                    <input type="text" id="loginUrl" placeholder="Login Page URL" class="cyber-input w-full p-2 text-xs rounded bg-black/50">
-                                    <input type="text" id="username" placeholder="Username" class="cyber-input w-full p-2 text-xs rounded bg-black/50" autocomplete="username">
-                                    <input type="password" id="password" placeholder="Password" class="cyber-input w-full p-2 text-xs rounded bg-black/50" autocomplete="current-password">
+                                    <input type="text" id="loginUrl" placeholder="Login Page URL"
+                                        class="cyber-input w-full p-2 text-xs rounded bg-black/50">
+                                    <input type="text" id="username" placeholder="Username"
+                                        class="cyber-input w-full p-2 text-xs rounded bg-black/50"
+                                        autocomplete="username">
+                                    <input type="password" id="password" placeholder="Password"
+                                        class="cyber-input w-full p-2 text-xs rounded bg-black/50"
+                                        autocomplete="current-password">
                                 </form>
                             </div>
 
@@ -534,38 +667,56 @@
                             <div class="flex items-center justify-between bg-black/30 p-3 rounded">
                                 <span class="text-xs text-gray-300">Session Cookie</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="sessionEnabled" class="sr-only peer" onchange="updateSummary()">
-                                    <div class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonGreen peer-checked:[&>div]:to-green-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(0,255,153,0.6)]">
-                                        <div class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg"></div>
+                                    <input type="checkbox" id="sessionEnabled" class="sr-only peer"
+                                        onchange="updateSummary()">
+                                    <div
+                                        class="w-12 h-6 bg-gray-800 rounded-full peer-checked:bg-neonGreen/20 border border-gray-600 peer-checked:border-neonGreen transition-all relative peer-checked:[&>div]:translate-x-6 peer-checked:[&>div]:bg-gradient-to-br peer-checked:[&>div]:from-neonGreen peer-checked:[&>div]:to-green-400 peer-checked:[&>div]:shadow-[0_0_15px_rgba(0,255,153,0.6)]">
+                                        <div
+                                            class="absolute top-1/2 -translate-y-1/2 left-[2px] w-5 h-5 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full transition-all duration-300 shadow-lg">
+                                        </div>
                                     </div>
                                 </label>
                             </div>
                             <div id="sessionParams" class="hidden">
-                                <textarea id="sessionJson" placeholder='Paste cookie JSON here...' class="cyber-input w-full h-20 text-xs p-2 rounded font-mono bg-black/50 resize-none"></textarea>
+                                <textarea id="sessionJson" placeholder='Paste cookie JSON here...'
+                                    class="cyber-input w-full h-20 text-xs p-2 rounded font-mono bg-black/50 resize-none"></textarea>
                             </div>
-                            
+
                             <!-- Cookie Extension Instructions (Always Visible) -->
                             <div class="mt-3 p-3 bg-black/20 border border-white/10 rounded text-xs text-gray-400">
                                 <div class="flex items-start gap-2">
-                                    <svg class="w-4 h-4 text-neonBlue mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <svg class="w-4 h-4 text-neonBlue mt-0.5 flex-shrink-0" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div class="flex-1">
                                         <p class="text-gray-300 font-semibold mb-1">How to Export Cookies:</p>
                                         <ol class="list-decimal list-inside space-y-1 text-gray-400">
-                                            <li>Install <a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol" target="_blank" class="text-neonBlue hover:text-neonBlue/80 underline">EditThisCookie (V3)</a> extension</li>
+                                            <li>Install <a
+                                                    href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"
+                                                    target="_blank"
+                                                    class="text-neonBlue hover:text-neonBlue/80 underline">EditThisCookie
+                                                    (V3)</a> extension</li>
                                             <li>Navigate to the website you want to scrape</li>
                                             <li><strong>LOGIN</strong> with your credentials</li>
                                             <li>Click the EditThisCookie icon in your Chrome extensions</li>
-                                            <li>Click the <strong>Down Arrow</strong> at the top to copy cookies to clipboard</li>
-                                            <li>Come back here, enable Session Cookie, and paste it in the field above</li>
+                                            <li>Click the <strong>Down Arrow</strong> at the top to copy cookies to
+                                                clipboard</li>
+                                            <li>Come back here, enable Session Cookie, and paste it in the field above
+                                            </li>
                                         </ol>
                                         <div class="mt-3 pt-3 border-t border-white/10 flex items-start gap-2">
-                                            <svg class="w-4 h-4 text-neonGreen mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                            <svg class="w-4 h-4 text-neonGreen mt-0.5 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                                </path>
                                             </svg>
                                             <p class="text-neonGreen/80 text-[11px]">
-                                                <strong>🔒 Security:</strong> These cookies are <strong>not saved</strong> on our end and are only used during the scrape. You will need to refresh them periodically as they expire.
+                                                <strong>🔒 Security:</strong> These cookies are <strong>not
+                                                    saved</strong> on our end and are only used during the scrape. You
+                                                will need to refresh them periodically as they expire.
                                             </p>
                                         </div>
                                     </div>
@@ -580,12 +731,14 @@
 
             <!-- Mission Summary Footer -->
             <div class="bg-black/40 border-t border-white/10 p-4">
-                <div class="flex items-center justify-between text-[10px] font-mono text-gray-500 mb-3 uppercase tracking-wider">
+                <div
+                    class="flex items-center justify-between text-[10px] font-mono text-gray-500 mb-3 uppercase tracking-wider">
                     <span>Mission Config</span>
                     <span id="configSummary" class="text-neonBlue">READY</span>
                 </div>
-                
-                <button id="scrapeBtn" onclick="runScraper()" class="cyber-btn w-full py-4 font-bold text-lg tracking-[0.2em] bg-neonBlue/5 hover:bg-neonBlue/10 border border-neonBlue/50 text-neonBlue hover:text-white transition-all shadow-[0_0_20px_rgba(0,255,255,0.1)] hover:shadow-[0_0_30px_rgba(0,255,255,0.3)]">
+
+                <button id="scrapeBtn" onclick="runScraper()"
+                    class="cyber-btn w-full py-4 font-bold text-lg tracking-[0.2em] bg-neonBlue/5 hover:bg-neonBlue/10 border border-neonBlue/50 text-neonBlue hover:text-white transition-all shadow-[0_0_20px_rgba(0,255,255,0.1)] hover:shadow-[0_0_30px_rgba(0,255,255,0.3)]">
                     INITIALIZE
                 </button>
             </div>
@@ -609,11 +762,13 @@
                 <!-- CENTER: View Toggles (Advanced Buttons) -->
                 <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <div class="flex bg-black/60 rounded-lg p-1 border border-white/10 shadow-inner gap-1">
-                        <button onclick="toggleView('table')" id="viewBtnTable" class="w-24 py-1.5 text-[10px] font-bold font-mono rounded-md transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
+                        <button onclick="toggleView('table')" id="viewBtnTable"
+                            class="w-24 py-1.5 text-[10px] font-bold font-mono rounded-md transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
                             TABLE
                         </button>
                         <div class="w-px bg-white/10 my-1"></div>
-                        <button onclick="toggleView('json')" id="viewBtnJson" class="w-24 py-1.5 text-[10px] font-bold font-mono rounded-md text-gray-500 hover:text-white transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
+                        <button onclick="toggleView('json')" id="viewBtnJson"
+                            class="w-24 py-1.5 text-[10px] font-bold font-mono rounded-md text-gray-500 hover:text-white transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
                             JSON
                         </button>
                     </div>
@@ -621,40 +776,58 @@
 
                 <!-- RIGHT: Actions -->
                 <div class="flex gap-2 ml-auto">
-                    <button onclick="saveCurrentAsTemplate()" class="text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                    <button onclick="saveCurrentAsTemplate()"
+                        class="text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
                         SAVE_TPL
                     </button>
-                    <button onclick="openTemplatesModal()" class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors flex items-center gap-1 mr-4">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/></svg>
+                    <button onclick="openTemplatesModal()"
+                        class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors flex items-center gap-1 mr-4">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                        </svg>
                         EXPLORE
                     </button>
                     <div class="w-px h-4 bg-white/10 self-center mx-1"></div>
-                    <button onclick="copyToClipboard()" class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors">[COPY]</button>
-                    <button onclick="downloadRawJson()" class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[RAW]</button>
-                    <button onclick="downloadCsv()" class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[CSV]</button>
+                    <button onclick="copyToClipboard()"
+                        class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors">[COPY]</button>
+                    <button onclick="downloadRawJson()"
+                        class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[RAW]</button>
+                    <button onclick="downloadCsv()"
+                        class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[CSV]</button>
                 </div>
             </div>
-            <div id="output" class="flex-1 p-6 overflow-auto font-mono text-base text-gray-400 custom-scrollbar relative">
+            <div id="output"
+                class="flex-1 p-6 overflow-auto font-mono text-base text-gray-400 custom-scrollbar relative">
                 <!-- Placeholder (Initial State) -->
-                <div id="outputPlaceholder" class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
-                    <div class="w-24 h-24 border border-dashed border-white/20 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
+                <div id="outputPlaceholder"
+                    class="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
+                    <div
+                        class="w-24 h-24 border border-dashed border-white/20 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
                         <div class="w-16 h-16 border border-white/10 rounded-full"></div>
                     </div>
                     <p class="tracking-widest text-xs">AWAITING_INPUT_STREAM...</p>
                 </div>
 
                 <!-- Loading Spinner -->
-                <div id="loadingSpinner" class="hidden h-full flex flex-col items-center justify-center space-y-4 font-mono">
+                <div id="loadingSpinner"
+                    class="hidden h-full flex flex-col items-center justify-center space-y-4 font-mono">
                     <div class="text-neonBlue text-xs animate-pulse">ESTABLISHING UPLINK...</div>
                     <div class="w-64 h-1 bg-gray-800 rounded overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-neonBlue to-neonPink animate-[shimmer_2s_infinite] w-1/2"></div>
+                        <div
+                            class="h-full bg-gradient-to-r from-neonBlue to-neonPink animate-[shimmer_2s_infinite] w-1/2">
+                        </div>
                     </div>
                     <div id="loadingText" class="text-xs text-gray-500">Target: ...</div>
                 </div>
 
                 <!-- Status Message (Error/Cancel) -->
-                <div id="statusMessage" class="hidden h-full flex flex-col items-center justify-center space-y-4 font-mono">
+                <div id="statusMessage"
+                    class="hidden h-full flex flex-col items-center justify-center space-y-4 font-mono">
                     <!-- Injected via JS -->
                 </div>
 
@@ -666,60 +839,74 @@
     </div>
 
     <!-- Help Modal -->
-    <div id="helpModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
-        <div class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-neonGreen/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onclick="document.getElementById('helpModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl">&times;</button>
-            
+    <div id="helpModal"
+        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        <div
+            class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-neonGreen/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="document.getElementById('helpModal').classList.add('hidden')"
+                class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl">&times;</button>
+
             <h2 class="text-xl font-cyber text-neonGreen mb-6 tracking-wide flex items-center gap-3">
                 <span class="text-2xl">🍪</span> HOW TO BYPASS LOGIN
             </h2>
-            
+
             <div class="space-y-8 font-mono text-sm text-gray-300">
-                
+
                 <div class="bg-black/40 p-5 rounded border-l-4 border-neonBlue">
-                    <h3 class="text-neonBlue font-bold text-base mb-3 uppercase">Method 1: The Easy Way (Chrome Extension)</h3>
+                    <h3 class="text-neonBlue font-bold text-base mb-3 uppercase">Method 1: The Easy Way (Chrome
+                        Extension)</h3>
                     <ol class="list-decimal pl-5 space-y-3 marker:text-neonBlue">
                         <li>Install the <strong>"EditThisCookie"</strong> extension for Chrome/Edge.</li>
-                        <li>Go to the website you want to scrape (e.g., <em>storyxi.com</em>) and <strong>log in manually</strong>.</li>
+                        <li>Go to the website you want to scrape (e.g., <em>storyxi.com</em>) and <strong>log in
+                                manually</strong>.</li>
                         <li>Click the cookie extension icon in your browser toolbar.</li>
-                        <li>Click the <strong>"Export"</strong> button (it looks like an arrow pointing out ➜). This copies the cookies to your clipboard.</li>
-                        <li><strong>Paste</strong> the copied text directly into the "Session State" box on this dashboard.</li>
+                        <li>Click the <strong>"Export"</strong> button (it looks like an arrow pointing out ➜). This
+                            copies the cookies to your clipboard.</li>
+                        <li><strong>Paste</strong> the copied text directly into the "Session State" box on this
+                            dashboard.</li>
                     </ol>
                 </div>
 
                 <div class="bg-black/40 p-5 rounded border-l-4 border-neonPink">
-                    <h3 class="text-neonPink font-bold text-base mb-3 uppercase">Method 2: The Developer Way (Terminal)</h3>
+                    <h3 class="text-neonPink font-bold text-base mb-3 uppercase">Method 2: The Developer Way (Terminal)
+                    </h3>
                     <p class="mb-3 text-xs text-gray-400">Use this if you have Node.js installed on your computer.</p>
                     <ol class="list-decimal pl-5 space-y-3 marker:text-neonPink">
                         <li>Open your computer's <strong>Terminal</strong> or Command Prompt.</li>
                         <li>Copy and paste this command (replace the URL with your target):
                             <div class="mt-2 bg-black p-3 rounded border border-white/10 relative group">
-                                <code class="text-neonPink text-xs break-all">npx playwright codegen --save-storage=auth.json https://www.storyxi.com</code>
+                                <code
+                                    class="text-neonPink text-xs break-all">npx playwright codegen --save-storage=auth.json https://www.storyxi.com</code>
                             </div>
                         </li>
                         <li>A browser window will open. <strong>Log in</strong> to the site inside that window.</li>
                         <li>Once logged in, <strong>close</strong> the browser window.</li>
-                        <li>A new file named <code>auth.json</code> was created in your current folder. Open it with a text editor (Notepad, TextEdit, VS Code).</li>
+                        <li>A new file named <code>auth.json</code> was created in your current folder. Open it with a
+                            text editor (Notepad, TextEdit, VS Code).</li>
                         <li>Copy the <strong>entire content</strong> of that file and paste it into the box here.</li>
                     </ol>
                 </div>
 
                 <div class="text-xs text-gray-500 border-t border-white/10 pt-4">
                     <strong>Why do I need this?</strong> <br>
-                    Automated bots cannot easily click "Login with Google" buttons because Google blocks them. By copying your "Session Cookies", you are effectively telling the bot: <em>"Pretend to be me, I'm already logged in."</em>
+                    Automated bots cannot easily click "Login with Google" buttons because Google blocks them. By
+                    copying your "Session Cookies", you are effectively telling the bot: <em>"Pretend to be me, I'm
+                        already logged in."</em>
                 </div>
             </div>
-            
+
             <div class="mt-8 text-right">
-                <button onclick="document.getElementById('helpModal').classList.add('hidden')" class="cyber-btn px-6 py-2 text-xs font-bold">UNDERSTOOD</button>
+                <button onclick="document.getElementById('helpModal').classList.add('hidden')"
+                    class="cyber-btn px-6 py-2 text-xs font-bold">UNDERSTOOD</button>
             </div>
         </div>
     </div>
 
     <!-- Templates Modal -->
-    <div id="templatesModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+    <div id="templatesModal"
+        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
         <div class="glass-card rounded-xl max-w-6xl w-full h-[90vh] flex flex-col border-neonPink/30">
-            
+
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-6 border-b border-white/5">
                 <h2 class="text-2xl font-cyber text-white tracking-wide flex items-center gap-3">
@@ -727,18 +914,27 @@
                 </h2>
                 <div class="flex items-center gap-4">
                     <div class="relative">
-                        <input type="text" placeholder="SEARCH_MODULES..." class="cyber-input bg-black/50 pl-10 pr-4 py-2 rounded text-xs w-64">
-                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input type="text" placeholder="SEARCH_MODULES..."
+                            class="cyber-input bg-black/50 pl-10 pr-4 py-2 rounded text-xs w-64">
+                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
-                    <button onclick="document.getElementById('templatesModal').classList.add('hidden')" class="text-gray-500 hover:text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <button onclick="document.getElementById('templatesModal').classList.add('hidden')"
+                        class="text-gray-500 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
             </div>
 
             <!-- Modal Body -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-black/20">
-                
+
                 <!-- User Saved Section -->
                 <div id="userTemplatesSection" class="mb-8 hidden">
                     <h3 class="text-neonBlue font-cyber text-sm mb-4 flex items-center gap-2">
@@ -759,22 +955,27 @@
             </div>
         </div>
     </div>
-            </div>
-        </div>
+    </div>
+    </div>
     </div>
 
     <!-- History Modal -->
-    <div id="historyModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+    <div id="historyModal"
+        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
         <div class="glass-card rounded-xl max-w-5xl w-full h-[90vh] flex flex-col border-neonBlue/30">
-            
+
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-6 border-b border-white/5">
                 <h2 class="text-2xl font-cyber text-white tracking-wide flex items-center gap-3">
                     <span class="text-neonBlue">MISSION</span> LOGS
                 </h2>
                 <div class="flex items-center gap-4">
-                    <button onclick="document.getElementById('historyModal').classList.add('hidden')" class="text-gray-500 hover:text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <button onclick="document.getElementById('historyModal').classList.add('hidden')"
+                        class="text-gray-500 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -801,17 +1002,21 @@
     </div>
 
     <!-- Stealth Help Modal -->
-    <div id="stealthHelpModal" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
-        <div class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-purple-500/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl">&times;</button>
-            
+    <div id="stealthHelpModal"
+        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        <div
+            class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-purple-500/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')"
+                class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl">&times;</button>
+
             <h2 class="text-xl font-cyber text-purple-400 mb-6 tracking-wide flex items-center gap-3">
                 <span class="text-2xl">👻</span> STEALTH PROTOCOLS
             </h2>
-            
+
             <div class="space-y-6 font-mono text-sm text-gray-300">
                 <p>
-                    Standard scraping bots are "loud" and easily detected by modern security systems (Cloudflare, Akamai, etc.). 
+                    Standard scraping bots are "loud" and easily detected by modern security systems (Cloudflare,
+                    Akamai, etc.).
                     <strong>Stealth Mode</strong> makes your scraper act more like a human.
                 </p>
 
@@ -845,24 +1050,27 @@
 
                 <div class="text-xs text-gray-500 border-t border-white/10 pt-4">
                     <strong>Wait Time Jitter:</strong> <br>
-                    This slider adds a random delay (e.g., 2s ± 500ms) between actions. Increasing this makes the bot seem "thoughtful" rather than instant, drastically reducing ban rates.
+                    This slider adds a random delay (e.g., 2s ± 500ms) between actions. Increasing this makes the bot
+                    seem "thoughtful" rather than instant, drastically reducing ban rates.
                 </div>
             </div>
-            
+
             <div class="mt-8 text-right">
-                <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')" class="cyber-btn px-6 py-2 text-xs font-bold border-purple-500 text-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">INITIATE PROTOCOL</button>
+                <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')"
+                    class="cyber-btn px-6 py-2 text-xs font-bold border-purple-500 text-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">INITIATE
+                    PROTOCOL</button>
             </div>
         </div>
     </div>
 
     <script>
         var currentData = null;
-        
+
         // Site Presets Configuration
         const SITE_PRESETS = {
             'custom': { label: 'CUSTOM / DIRECT URL', pattern: '', fields: [] },
-            'linkedin_people': { 
-                label: 'LINKEDIN (PEOPLE)', 
+            'linkedin_people': {
+                label: 'LINKEDIN (PEOPLE)',
                 pattern: 'https://www.linkedin.com/search/results/people/?keywords={keywords}%20{occupation}%20{location}&origin=SWITCH_SEARCH_VERTICAL',
                 fields: [
                     { key: 'keywords', label: 'KEYWORDS', placeholder: 'e.g. Java' },
@@ -870,60 +1078,60 @@
                     { key: 'location', label: 'LOCATION', placeholder: 'e.g. Austin, TX' }
                 ]
             },
-            'linkedin_jobs': { 
-                label: 'LINKEDIN (JOBS)', 
+            'linkedin_jobs': {
+                label: 'LINKEDIN (JOBS)',
                 pattern: 'https://www.linkedin.com/jobs/search/?keywords={keywords}&location={location}',
                 fields: [
                     { key: 'keywords', label: 'JOB TITLE', placeholder: 'e.g. Python Developer' },
                     { key: 'location', label: 'LOCATION', placeholder: 'e.g. Remote' }
                 ]
             },
-            'google': { 
-                label: 'GOOGLE SEARCH', 
+            'google': {
+                label: 'GOOGLE SEARCH',
                 pattern: 'https://www.google.com/search?q={query}&num=100',
                 fields: [{ key: 'query', label: 'QUERY', placeholder: 'e.g. best headphones 2025' }]
             },
-            'amazon': { 
-                label: 'AMAZON PRODUCTS', 
+            'amazon': {
+                label: 'AMAZON PRODUCTS',
                 pattern: 'https://www.amazon.com/s?k={keyword}',
                 fields: [{ key: 'keyword', label: 'PRODUCT', placeholder: 'e.g. mechanical keyboard' }]
             },
-            'yelp': { 
-                label: 'YELP BUSINESS', 
+            'yelp': {
+                label: 'YELP BUSINESS',
                 pattern: 'https://www.yelp.com/search?find_desc={desc}&find_loc={loc}',
                 fields: [
                     { key: 'desc', label: 'FIND', placeholder: 'e.g. Pizza' },
                     { key: 'loc', label: 'NEAR', placeholder: 'e.g. New York, NY' }
                 ]
             },
-            'indeed': { 
-                label: 'INDEED JOBS', 
+            'indeed': {
+                label: 'INDEED JOBS',
                 pattern: 'https://www.indeed.com/jobs?q={q}&l={l}',
                 fields: [
                     { key: 'q', label: 'WHAT', placeholder: 'e.g. Nurse' },
                     { key: 'l', label: 'WHERE', placeholder: 'e.g. Chicago' }
                 ]
             },
-            'zillow': { 
-                label: 'ZILLOW HOMES', 
+            'zillow': {
+                label: 'ZILLOW HOMES',
                 pattern: 'https://www.zillow.com/homes/{location}_rb/',
                 fields: [{ key: 'location', label: 'CITY/ZIP', placeholder: 'e.g. 90210' }]
             },
-            'yellowpages': { 
-                label: 'YELLOW PAGES', 
+            'yellowpages': {
+                label: 'YELLOW PAGES',
                 pattern: 'https://www.yellowpages.com/search?search_terms={terms}&geo_location_terms={geo}',
                 fields: [
                     { key: 'terms', label: 'TERM', placeholder: 'e.g. Plumbers' },
                     { key: 'geo', label: 'LOCATION', placeholder: 'e.g. Miami' }
                 ]
             },
-            'booking': { 
-                label: 'BOOKING.COM', 
+            'booking': {
+                label: 'BOOKING.COM',
                 pattern: 'https://www.booking.com/searchresults.html?ss={dest}',
                 fields: [{ key: 'dest', label: 'DESTINATION', placeholder: 'e.g. Tokyo' }]
             },
-            'tripadvisor': { 
-                label: 'TRIPADVISOR', 
+            'tripadvisor': {
+                label: 'TRIPADVISOR',
                 pattern: 'https://www.tripadvisor.com/Search?q={query}',
                 fields: [{ key: 'query', label: 'SEARCH', placeholder: 'e.g. Hotels in Rome' }]
             }
@@ -931,31 +1139,31 @@
 
         // Initialize Supabase
         let supabase;
-        
-        async function initSupabase() {
-            // Determine API Base URL
-            const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'http://localhost:8000' 
-                : ''; 
 
+        // Determine API Base URL (global variable for all API calls)
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : '';
+
+        async function initSupabase() {
             try {
                 // Fetch config from backend to avoid hardcoding keys in frontend source
                 const res = await fetch(`${API_BASE}/config`); // Use dynamic path
                 const config = await res.json();
-                
+
                 if (config.supabase_url && config.supabase_anon_key) {
                     // @ts-ignore
                     // Ensure window.supabase object from CDN exists before using it
                     if (window.supabase && window.supabase.createClient) {
                         supabase = window.supabase.createClient(config.supabase_url, config.supabase_anon_key);
                         console.log("Supabase initialized");
-                        
+
                         // Now check auth
                         await checkAuth();
                     } else {
                         console.error("Supabase SDK not loaded yet");
                         // Retry once after small delay if SDK script is racing
-                        setTimeout(() => initSupabase(), 500); 
+                        setTimeout(() => initSupabase(), 500);
                         return;
                     }
                 } else {
@@ -965,7 +1173,7 @@
                 console.error("Failed to init Supabase:", e);
             }
         }
-        
+
         // Call init immediately
         initSupabase();
 
@@ -989,9 +1197,9 @@
             const container = document.getElementById('urlBuilderFields');
             const module = document.getElementById('urlBuilderModule');
             if (!container || !module) return;
-            
+
             container.innerHTML = '';
-            
+
             if (key === 'custom') {
                 currentUrlBuilder = null;
                 module.classList.add('hidden');
@@ -1002,7 +1210,7 @@
 
             currentUrlBuilder = config;
             module.classList.remove('hidden');
-            
+
             config.fields.forEach(field => {
                 const div = document.createElement('div');
                 div.innerHTML = `
@@ -1014,7 +1222,7 @@
                 `;
                 container.appendChild(div);
             });
-            
+
             // Set base pattern
             document.getElementById('url').value = config.pattern;
         }
@@ -1029,23 +1237,23 @@
         }
 
         async function fetchAndRenderTemplates() {
-            const container = document.getElementById('systemTemplatesGrid'); 
+            const container = document.getElementById('systemTemplatesGrid');
             const userContainer = document.getElementById('userTemplatesGrid');
             const userSection = document.getElementById('userTemplatesSection');
 
-            if(!container) return;
-            
+            if (!container) return;
+
             container.innerHTML = '<div class="text-neonBlue animate-pulse">LOADING_MODULES...</div>';
 
             if (!supabase) {
-                 // Try to use global just in case
-                 if (window.supabase && window.supabase.auth) supabase = window.supabase;
+                // Try to use global just in case
+                if (window.supabase && window.supabase.auth) supabase = window.supabase;
             }
 
             if (!supabase || !supabase.from) {
-                 container.innerHTML = '<div class="text-red-500">DATABASE_CONNECTION_OFFLINE</div>';
-                 renderUserTemplates();
-                 return;
+                container.innerHTML = '<div class="text-red-500">DATABASE_CONNECTION_OFFLINE</div>';
+                renderUserTemplates();
+                return;
             }
 
             try {
@@ -1060,94 +1268,94 @@
                 // 2. Fetch User Private Templates
                 let privateTemplates = [];
                 const { data: { session } } = await supabase.auth.getSession();
-            // Debug Log for Templates
-            console.log("Fetching templates for user:", session ? session.user.id : "No Session");
+                // Debug Log for Templates
+                console.log("Fetching templates for user:", session ? session.user.id : "No Session");
 
-            if (session) {
-                const { data, error: userError } = await supabase
-                    .from('templates')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .order('created_at', { ascending: false });
-                
-                if (userError) {
-                    console.error("Error fetching user templates:", userError);
-                } else {
-                    console.log("Fetched user templates:", data);
-                    privateTemplates = data || [];
+                if (session) {
+                    const { data, error: userError } = await supabase
+                        .from('templates')
+                        .select('*')
+                        .eq('user_id', session.user.id)
+                        .order('created_at', { ascending: false });
+
+                    if (userError) {
+                        console.error("Error fetching user templates:", userError);
+                    } else {
+                        console.log("Fetched user templates:", data);
+                        privateTemplates = data || [];
+                    }
                 }
-            }
 
                 // --- Render System Templates ---
                 container.innerHTML = '';
                 systemTemplates.forEach(tpl => renderTemplateCard(tpl, container));
 
-            // Also render local ones if any exist (legacy support)
-            const localSaved = JSON.parse(localStorage.getItem('user_templates') || '{}');
-            const localTemplates = Object.values(localSaved);
-            
-            const allUserTemplates = [...privateTemplates, ...localTemplates];
-
-            // --- Render Combined User Templates ---
-            if (allUserTemplates.length > 0) {
-                userSection.classList.remove('hidden');
-                userContainer.innerHTML = '';
-                // Rename header to reflect cloud status
-                userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (CLOUD + LOCAL)';
-                
-                allUserTemplates.forEach(tpl => {
-                    // Distinguish source if needed, or just render
-                    // Local templates have 'id' usually starting with 'user_' or timestamp
-                    // DB templates have UUID
-                    const isLocal = !tpl.user_id; 
-                    renderTemplateCard(tpl, userContainer, true, isLocal);
-                });
-            } else {
-                 // If both empty, hide
-                 if (userContainer.innerHTML === '') userSection.classList.add('hidden');
-            }
-        } catch (e) {
-            console.error("Error loading templates:", e);
-            container.innerHTML = `<div class="text-red-500">ERROR_LOADING_DATABASE: ${e.message}</div>`;
-            
-            // Fallback: Try to render at least local templates if DB failed
-            try {
+                // Also render local ones if any exist (legacy support)
                 const localSaved = JSON.parse(localStorage.getItem('user_templates') || '{}');
                 const localTemplates = Object.values(localSaved);
-                if (localTemplates.length > 0) {
+
+                const allUserTemplates = [...privateTemplates, ...localTemplates];
+
+                // --- Render Combined User Templates ---
+                if (allUserTemplates.length > 0) {
                     userSection.classList.remove('hidden');
                     userContainer.innerHTML = '';
-                    userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (LOCAL ONLY)';
-                    localTemplates.forEach(tpl => renderTemplateCard(tpl, userContainer, true, true));
+                    // Rename header to reflect cloud status
+                    userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (CLOUD + LOCAL)';
+
+                    allUserTemplates.forEach(tpl => {
+                        // Distinguish source if needed, or just render
+                        // Local templates have 'id' usually starting with 'user_' or timestamp
+                        // DB templates have UUID
+                        const isLocal = !tpl.user_id;
+                        renderTemplateCard(tpl, userContainer, true, isLocal);
+                    });
+                } else {
+                    // If both empty, hide
+                    if (userContainer.innerHTML === '') userSection.classList.add('hidden');
                 }
-            } catch(localErr) {
-                console.error("Local render failed:", localErr);
+            } catch (e) {
+                console.error("Error loading templates:", e);
+                container.innerHTML = `<div class="text-red-500">ERROR_LOADING_DATABASE: ${e.message}</div>`;
+
+                // Fallback: Try to render at least local templates if DB failed
+                try {
+                    const localSaved = JSON.parse(localStorage.getItem('user_templates') || '{}');
+                    const localTemplates = Object.values(localSaved);
+                    if (localTemplates.length > 0) {
+                        userSection.classList.remove('hidden');
+                        userContainer.innerHTML = '';
+                        userSection.querySelector('h3').innerHTML = '<span class="w-1.5 h-1.5 bg-neonBlue rounded-full"></span> MY TEMPLATES (LOCAL ONLY)';
+                        localTemplates.forEach(tpl => renderTemplateCard(tpl, userContainer, true, true));
+                    }
+                } catch (localErr) {
+                    console.error("Local render failed:", localErr);
+                }
             }
         }
-    }
 
         function renderTemplateCard(tpl, container, isUser = false, isLocal = false) {
             LOADED_TEMPLATES[tpl.id] = tpl; // Cache
-            
+
             let config = tpl.config || {};
             if (typeof config === 'string') {
-                try { config = JSON.parse(config); } catch(e) {}
+                try { config = JSON.parse(config); } catch (e) { }
             }
-            
+
             const card = document.createElement('div');
             card.className = 'glass-card p-5 rounded-xl border border-white/5 hover:border-neonBlue/50 transition-all group relative overflow-hidden';
-            
+
             let badges = '';
-            if (config.sessionEnabled) badges += `<div class="absolute top-0 right-0 bg-neonBlue/10 px-2 py-1 rounded-bl text-[10px] text-neonBlue font-mono border-l border-b border-neonBlue/20">SESSION</div>`;
+            if (config.sessionEnabled) badges += `<div class="absolute top-0 right-0 bg-neonBlue/10 px-2 py-1 rounded-bl text-[10px] text-neonBlue font-mono border-l border-b border-neonBlue/20">COOKIE</div>`;
             else if (config.loginEnabled) badges += `<div class="absolute top-0 right-0 bg-neonPink/10 px-2 py-1 rounded-bl text-[10px] text-neonPink font-mono border-l border-b border-neonPink/20">CREDS</div>`;
-            
+
             if (isUser) {
-                 let type = isLocal ? 'LOCAL' : 'CLOUD';
-                 let color = isLocal ? 'text-gray-400 border-gray-500/20' : 'text-green-400 border-green-500/20 bg-green-500/10';
-                 // Adjust position if other badge exists
-                 let style = (config.sessionEnabled || config.loginEnabled) ? 'right: 60px;' : 'right: 0;';
-                 
-                 badges += `<div class="absolute top-0 border-l border-b px-2 py-1 rounded-bl text-[10px] font-mono ${color}" style="${style}">${type}</div>`;
+                let type = isLocal ? 'LOCAL' : 'CLOUD';
+                let color = isLocal ? 'text-gray-400 border-gray-500/20' : 'text-green-400 border-green-500/20 bg-green-500/10';
+                // Adjust position if other badge exists
+                let style = (config.sessionEnabled || config.loginEnabled) ? 'right: 60px;' : 'right: 0;';
+
+                badges += `<div class="absolute top-0 border-l border-b px-2 py-1 rounded-bl text-[10px] font-mono ${color}" style="${style}">${type}</div>`;
             }
 
             card.innerHTML = `
@@ -1176,8 +1384,8 @@
         }
 
         async function deleteTemplate(id, isLocal) {
-            if(!confirm("Delete this template?")) return;
-            
+            if (!confirm("Delete this template?")) return;
+
             if (isLocal) {
                 const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
                 delete saved[id];
@@ -1198,7 +1406,7 @@
 
         function loadTemplate(templateId) {
             let tpl = LOADED_TEMPLATES[templateId];
-            
+
             // Fallback to local custom templates
             if (!tpl) {
                 const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
@@ -1209,17 +1417,17 @@
 
             // Parse config if needed
             const config = tpl.config || tpl; // Handle DB vs Local structure difference
-            
+
             // Handle URL Builder
             const builder = config.urlBuilder;
             const builderModule = document.getElementById('urlBuilderModule');
             const builderContainer = document.getElementById('urlBuilderFields');
-            
+
             if (builder && builder.pattern && builder.fields) {
                 currentUrlBuilder = builder;
                 builderModule.classList.remove('hidden');
                 builderContainer.innerHTML = '';
-                
+
                 builder.fields.forEach(field => {
                     const div = document.createElement('div');
                     div.innerHTML = `
@@ -1231,7 +1439,7 @@
                     `;
                     builderContainer.appendChild(div);
                 });
-                
+
                 // Trigger initial build (clears URL until typed or keeps default?)
                 // Let's not clear immediately, wait for input
             } else {
@@ -1241,7 +1449,7 @@
 
             // Fill Fields - SETUP TAB
             document.getElementById('url').value = tpl.url;
-            
+
             // Pagination
             document.getElementById('pagination').checked = config.pagination || false;
             togglePagination(); // Show/hide controls
@@ -1249,7 +1457,7 @@
             document.getElementById('endPage').value = config.endPage || config.maxPages || 1;
             document.getElementById('page2Url').value = config.page2_url || '';
             document.getElementById('page3Url').value = config.page3_url || '';
-            
+
             // Restore URL Builder Values
             if (config.urlBuilderValues) {
                 document.querySelectorAll('.builder-input').forEach(input => {
@@ -1261,17 +1469,17 @@
                 // Trigger URL update if builder is active
                 if (currentUrlBuilder) updateBuiltUrl();
             }
-            
+
             // Fill Fields - SCHEMA TAB
             editor.setValue(tpl.query);
-            
+
             // Sync JSON to Wizard if Wizard is the active mode
             const formView = document.getElementById('schema-mode-form');
             if (!formView.classList.contains('hidden')) {
                 // We're in Wizard mode, sync the JSON we just loaded
                 syncFormFromJson();
             }
-            
+
             // Fill Fields - CONFIG TAB
             document.getElementById('stealthMode').checked = config.stealth_mode || config.stealth || false;
             document.getElementById('waitTime').value = config.waitTime || 2;
@@ -1280,7 +1488,7 @@
             // Auth Logic (restore flags but NOT credentials for security)
             document.getElementById('loginEnabled').checked = config.loginEnabled || false;
             document.getElementById('loginEnabled').dispatchEvent(new Event('change'));
-            
+
             // Clear auth fields (user must re-enter credentials)
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
@@ -1289,7 +1497,7 @@
 
             document.getElementById('sessionEnabled').checked = config.sessionEnabled || false;
             document.getElementById('sessionEnabled').dispatchEvent(new Event('change'));
-            
+
             // Update summary to reflect loaded template
             updateSummary();
 
@@ -1300,7 +1508,7 @@
         async function saveCurrentAsTemplate() {
             const name = prompt("Enter a name for this template (e.g., 'My Custom Scraper'):");
             if (!name) return;
-            
+
             // Sync Wizard to JSON editor if in Wizard mode
             const formView = document.getElementById('schema-mode-form');
             if (!formView.classList.contains('hidden')) {
@@ -1329,21 +1537,21 @@
                     maxPages: parseInt(document.getElementById('endPage').value) || 1, // Fallback
                     page2_url: document.getElementById('page2Url').value || null,
                     page3_url: document.getElementById('page3Url').value || null,
-                    
+
                     // URL Builder (capture current values)
                     urlBuilder: currentUrlBuilder, // Save the builder config
                     urlBuilderValues: {}, // Capture current input values
-                    
+
                     // Options
                     stealth_mode: document.getElementById('stealthMode').checked,
                     waitTime: parseInt(document.getElementById('waitTime').value) || 2,
-                    
+
                     // Auth (don't save credentials, just flags)
                     loginEnabled: document.getElementById('loginEnabled').checked,
                     sessionEnabled: document.getElementById('sessionEnabled').checked,
                 }
             };
-            
+
             // Capture URL builder input values if present
             if (currentUrlBuilder) {
                 document.querySelectorAll('.builder-input').forEach(input => {
@@ -1353,19 +1561,19 @@
             }
 
             if (supabase) {
-                 const { data, error } = await supabase
+                const { data, error } = await supabase
                     .from('templates')
                     .insert([tpl])
                     .select();
-                    
-                 if (error) {
-                     console.error("Error saving to DB:", error);
-                     alert("Failed to save to database. Saving locally instead.");
-                     // Fallback
-                 } else {
-                     alert("Template saved to Database!");
-                     return;
-                 }
+
+                if (error) {
+                    console.error("Error saving to DB:", error);
+                    alert("Failed to save to database. Saving locally instead.");
+                    // Fallback
+                } else {
+                    alert("Template saved to Database!");
+                    return;
+                }
             }
 
             // Local Storage Fallback
@@ -1373,23 +1581,23 @@
             const saved = JSON.parse(localStorage.getItem('user_templates') || '{}');
             saved[localTpl.id] = localTpl;
             localStorage.setItem('user_templates', JSON.stringify(saved));
-            
+
             alert("Template saved locally!");
         }
 
         function updateBuiltUrl() {
             if (!currentUrlBuilder) return;
-            
+
             let url = currentUrlBuilder.pattern;
             const inputs = document.querySelectorAll('.builder-input');
-            
+
             inputs.forEach(input => {
                 const key = input.getAttribute('data-key');
-                const value = input.value.trim(); 
+                const value = input.value.trim();
                 // Simple replacement. Ideally we'd handle encoding.
                 url = url.replace(`{${key}}`, encodeURIComponent(value));
             });
-            
+
             document.getElementById('url').value = url;
         }
 
@@ -1412,25 +1620,25 @@
             if (mode === 'form') {
                 // Sync JSON to Form first (Best effort)
                 syncFormFromJson();
-                
+
                 formView.classList.remove('hidden');
                 jsonView.classList.add('hidden');
-                
+
                 // Active WIZARD tab - glowing, no bottom border
                 btnForm.className = 'px-8 py-3 text-xs font-cyber font-bold text-neonBlue bg-gradient-to-b from-black/80 to-black/60 rounded-t-lg border-t-2 border-x-2 border-neonBlue/50 shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,255,255,0.3)] transition-all tracking-widest relative -mb-[1px] border-b-2 border-transparent';
-                
+
                 // Inactive JSON tab - has bottom border
                 btnJson.className = 'px-8 py-3 text-xs font-cyber font-bold text-gray-500 bg-black/40 rounded-t-lg border-t border-x border-white/10 border-b border-white/10 hover:text-white hover:bg-black/60 transition-all tracking-widest';
             } else {
                 formView.classList.add('hidden');
                 jsonView.classList.remove('hidden');
-                
+
                 // Refresh editor
-                if(editor) setTimeout(() => editor.refresh(), 50);
+                if (editor) setTimeout(() => editor.refresh(), 50);
 
                 // Active JSON tab - glowing green, no bottom border
                 btnJson.className = 'px-8 py-3 text-xs font-cyber font-bold text-neonGreen bg-gradient-to-b from-black/80 to-black/60 rounded-t-lg border-t-2 border-x-2 border-neonGreen/50 shadow-[0_0_15px_rgba(0,255,200,0.2)] hover:shadow-[0_0_25px_rgba(0,255,200,0.3)] transition-all tracking-widest relative -mb-[1px] border-b-2 border-transparent';
-                
+
                 // Inactive WIZARD tab - has bottom border
                 btnForm.className = 'px-8 py-3 text-xs font-cyber font-bold text-gray-500 bg-black/40 rounded-t-lg border-t border-x border-white/10 border-b border-white/10 hover:text-white hover:bg-black/60 transition-all tracking-widest';
             }
@@ -1439,7 +1647,7 @@
         function handleEntityChange() {
             const select = document.getElementById('schemaEntitySelect');
             const custom = document.getElementById('schemaEntityCustom');
-            
+
             if (select.value === 'custom') {
                 custom.classList.remove('hidden');
                 custom.focus();
@@ -1461,7 +1669,7 @@
                 </button>
             `;
             container.appendChild(div);
-            
+
             // If adding manual, focus it
             if (value === '') {
                 div.querySelector('input').focus();
@@ -1480,13 +1688,13 @@
             if (entity === 'custom') {
                 entity = document.getElementById('schemaEntityCustom').value.trim() || 'items';
             }
-            
+
             const fields = [];
             document.querySelectorAll('.schema-field-input').forEach(input => {
                 const val = input.value.trim();
                 if (val) fields.push(val);
             });
-            
+
             if (fields.length === 0) {
                 // Don't update JSON if empty, or set basic default?
                 // Let's set basic default to valid syntax
@@ -1497,7 +1705,7 @@
             let queryStr = `{\n    ${entity}[] {\n`;
             fields.forEach(f => queryStr += `        ${f}\n`);
             queryStr += `    }\n}`;
-            
+
             if (editor) {
                 // Only update if content changed significantly or if focused in form?
                 // We update always to keep in sync
@@ -1509,44 +1717,44 @@
 
         function syncFormFromJson() {
             const raw = editor ? editor.getValue() : document.getElementById('query').value;
-            
+
             // Simple Regex Parser for format: { entity[] { field1 field2 ... } }
             // This is fragile but works for standard wizard output
             try {
                 // Extract entity
                 const entityMatch = raw.match(/(\w+)\[\]\s*\{/);
                 if (!entityMatch) return; // Complex or invalid format, keep wizard as is or reset?
-                
+
                 let entity = entityMatch[1];
-                
+
                 // Extract Content inside brackets
                 // Find first { and last }
                 const firstBrace = raw.indexOf('{', raw.indexOf(entity));
                 const lastBrace = raw.lastIndexOf('}');
-                
+
                 if (firstBrace === -1 || lastBrace === -1) return;
-                
+
                 const content = raw.substring(firstBrace + 1, lastBrace);
-                
+
                 // Split by NEWLINES only (not all whitespace) to preserve spaces in field names
                 const fields = content.split(/\r?\n/).map(line => line.trim()).filter(s => {
                     return s.length > 0 && !s.includes('{') && !s.includes('}');
                 });
-                
+
                 // Update UI
                 const select = document.getElementById('schemaEntitySelect');
                 const custom = document.getElementById('schemaEntityCustom');
-                
+
                 // Check if entity is in options
                 let found = false;
-                for(let i=0; i<select.options.length; i++) {
+                for (let i = 0; i < select.options.length; i++) {
                     if (select.options[i].value === entity) {
                         select.selectedIndex = i;
                         found = true;
                         break;
                     }
                 }
-                
+
                 if (!found) {
                     select.value = 'custom';
                     custom.value = entity;
@@ -1554,12 +1762,12 @@
                 } else {
                     custom.classList.add('hidden');
                 }
-                
+
                 // Update Fields
                 const container = document.getElementById('schemaFieldsContainer');
                 container.innerHTML = '';
                 fields.forEach(f => addFieldRow(f));
-                
+
             } catch (e) {
                 console.error("Failed to sync form from JSON", e);
             }
@@ -1579,7 +1787,7 @@
             // Hide all views
             ['setup', 'schema', 'config'].forEach(id => {
                 document.getElementById('view-' + id).classList.add('hidden');
-                
+
                 // Reset tab style
                 const tab = document.getElementById('tab-' + id);
                 tab.classList.remove('text-white', 'border-neonBlue', 'border-neonGreen', 'border-neonPink', 'bg-white/5');
@@ -1595,7 +1803,7 @@
             const activeTab = document.getElementById('tab-' + tabId);
             activeTab.classList.remove('text-gray-500', 'border-transparent');
             activeTab.classList.add('text-white', 'bg-white/5');
-            
+
             if (tabId === 'setup') activeTab.classList.add('border-neonBlue');
             if (tabId === 'schema') activeTab.classList.add('border-neonGreen');
             if (tabId === 'config') activeTab.classList.add('border-neonPink');
@@ -1622,27 +1830,27 @@
             const startPage = parseInt(document.getElementById('startPage').value) || 1;
             const endPage = parseInt(document.getElementById('endPage').value) || 1;
             const warning = document.getElementById('paginationWarning');
-            
+
             let adjusted = false;
             let newStart = startPage;
             let newEnd = endPage;
-            
-            // Max 4 pages rule
-            const MAX_PAGES = 4;
-            
+
+            // Max 10 pages rule
+            const MAX_PAGES = 10;
+
             if (endPage - startPage + 1 > MAX_PAGES) {
-                // Adjust end page to maintain 4-page max
+                // Adjust end page to maintain 10-page max
                 newEnd = startPage + MAX_PAGES - 1;
                 document.getElementById('endPage').value = newEnd;
                 adjusted = true;
             }
-            
+
             // Show/hide warning
             if (adjusted && warning) {
                 warning.classList.remove('hidden');
                 setTimeout(() => warning.classList.add('hidden'), 3000);
             }
-            
+
             updateSummary();
         }
 
@@ -1651,12 +1859,12 @@
             let site = "CUSTOM";
             try {
                 if (url) site = new URL(url).hostname.replace('www.', '');
-            } catch(e) {}
+            } catch (e) { }
 
-            const pages = document.getElementById('pagination').checked 
-                ? `${document.getElementById('startPage').value}-${document.getElementById('endPage').value}` 
+            const pages = document.getElementById('pagination').checked
+                ? `${document.getElementById('startPage').value}-${document.getElementById('endPage').value}`
                 : '1';
-            
+
             const stealth = document.getElementById('stealthMode').checked ? 'STEALTH' : 'STD';
             const auth = (document.getElementById('loginEnabled').checked || document.getElementById('sessionEnabled').checked) ? 'AUTH' : 'GUEST';
 
@@ -1677,11 +1885,11 @@
             if (display) {
                 display.innerText = val + 's';
             }
-            
+
             // Legacy slider elements (may not exist in new UI)
             const sliderTrack = document.getElementById('sliderTrack');
             const sliderThumb = document.getElementById('sliderThumb');
-            
+
             if (sliderTrack && sliderThumb) {
                 const min = 1, max = 15;
                 const percent = ((val - min) / (max - min)) * 100;
@@ -1695,7 +1903,7 @@
             if (!supabase) return; // Should be called after init
 
             const { data: { session } } = await supabase.auth.getSession();
-            
+
             if (!session) {
                 window.location.href = 'index.html';
                 return;
@@ -1742,13 +1950,13 @@
                     .select('subscription_tier, items_used, items_limit')
                     .eq('id', userId)
                     .single();
-                
+
                 if (data) {
                     const limit = parseInt(data.items_limit || 100);
                     const used = parseInt(data.items_used || 0);
                     const left = Math.max(0, limit - used);
                     const tier = (data.subscription_tier || 'FREE').toUpperCase();
-                    
+
                     // Update Stats Bar with item counts
                     document.getElementById('statUsed').innerText = `${used.toLocaleString()} items`;
                     document.getElementById('statLeft').innerText = `${left.toLocaleString()} items`;
@@ -1778,8 +1986,8 @@
 
         toggles.forEach(t => {
             const el = document.getElementById(t.id);
-            if(!el) return;
-            el.addEventListener('change', function() {
+            if (!el) return;
+            el.addEventListener('change', function () {
                 const panel = document.getElementById(t.panel);
                 if (this.checked) {
                     panel.classList.remove('hidden');
@@ -1801,7 +2009,7 @@
         async function openHistoryModal() {
             closeAllModals();
             document.getElementById('historyModal').classList.remove('hidden');
-            
+
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-neonBlue animate-pulse">LOADING LOGS...</td></tr>';
 
@@ -1829,7 +2037,7 @@
                 data.forEach(job => {
                     const row = document.createElement('tr');
                     row.className = 'border-b border-white/5 hover:bg-white/5 transition';
-                    
+
                     let statusColor = 'text-gray-500';
                     if (job.status === 'completed') statusColor = 'text-neonGreen';
                     else if (job.status === 'failed') statusColor = 'text-red-500';
@@ -1837,15 +2045,15 @@
 
                     const date = new Date(job.created_at).toLocaleString();
                     const usage = job.data_usage_mb ? parseFloat(job.data_usage_mb).toFixed(4) + ' MB' : '0.00 MB';
-                    
+
                     // Calculate items
                     let itemCount = '-';
                     if (job.data) {
                         if (Array.isArray(job.data)) itemCount = job.data.length;
                         else if (job.data.data && Array.isArray(job.data.data)) itemCount = job.data.data.length;
                         else if (typeof job.data === 'object') {
-                             const listKey = Object.keys(job.data).find(k => Array.isArray(job.data[k]));
-                             if (listKey) itemCount = job.data[listKey].length;
+                            const listKey = Object.keys(job.data).find(k => Array.isArray(job.data[k]));
+                            if (listKey) itemCount = job.data[listKey].length;
                         }
                     }
 
@@ -1856,9 +2064,9 @@
                         <td class="p-4 font-mono text-xs">${usage}</td>
                         <td class="p-4 text-xs text-gray-500">${date}</td>
                         <td class="p-4 text-right">
-                            ${job.status === 'completed' && job.data ? 
-                                `<button onclick="loadJobData('${job.id}')" class="text-neonBlue hover:text-white text-xs underline">LOAD DATA</button>` : 
-                                '<span class="text-gray-600">-</span>'}
+                            ${job.status === 'completed' && job.data ?
+                            `<button onclick="loadJobData('${job.id}')" class="text-neonBlue hover:text-white text-xs underline">LOAD DATA</button>` :
+                            '<span class="text-gray-600">-</span>'}
                         </td>
                     `;
                     tbody.appendChild(row);
@@ -1873,7 +2081,7 @@
 
         async function loadJobData(jobId) {
             if (!supabase) return;
-            
+
             // Show Loading using new view system
             hideAllOutputs();
             const spinner = document.getElementById('loadingSpinner');
@@ -1904,11 +2112,11 @@
                 // 2. Restore Configuration (If available)
                 if (data.config) {
                     const cfg = data.config;
-                    
+
                     // URL & Query
                     if (data.url) document.getElementById('url').value = data.url;
                     if (data.query) {
-                        if(editor) editor.setValue(data.query);
+                        if (editor) editor.setValue(data.query);
                         document.getElementById('query').value = data.query;
                         // Sync Wizard if possible
                         syncFormFromJson();
@@ -1933,7 +2141,7 @@
                         stealthCheck.checked = cfg.stealth || false;
                         stealthCheck.dispatchEvent(new Event('change'));
                     }
-                    
+
                     // Wait Time
                     if (cfg.waitTime) {
                         document.getElementById('waitTime').value = cfg.waitTime;
@@ -1943,7 +2151,7 @@
                     // Auth
                     const loginCheck = document.getElementById('loginEnabled');
                     const sessionCheck = document.getElementById('sessionEnabled');
-                    
+
                     if (loginCheck) {
                         loginCheck.checked = cfg.loginEnabled || false;
                         loginCheck.dispatchEvent(new Event('change'));
@@ -1952,15 +2160,15 @@
                             // Password is not stored for security, user must re-enter
                         }
                     }
-                    
+
                     if (sessionCheck) {
                         sessionCheck.checked = cfg.sessionEnabled || false;
                         sessionCheck.dispatchEvent(new Event('change'));
                     }
-                    
+
                     updateSummary();
                 }
-                
+
                 // Close modal to show results
                 closeAllModals();
 
@@ -1972,13 +2180,13 @@
 
         async function runScraper() {
             const btn = document.getElementById('scrapeBtn');
-            
+
             // Check if cancelling
             if (btn.innerHTML.includes('CANCEL')) {
                 if (currentJobId) {
-                    await fetch(`/job/${currentJobId}/cancel`, { method: 'POST' });
+                    await fetch(`${API_BASE}/job/${currentJobId}/cancel`, { method: 'POST' });
                     clearInterval(pollInterval);
-                    
+
                     // Show Cancelled State
                     showStatus('cancelled');
                     resetButton();
@@ -1987,12 +2195,12 @@
             }
 
             const url = document.getElementById('url').value;
-            const query = editor.getValue(); 
+            const query = editor.getValue();
             const pagination = document.getElementById('pagination').checked;
             const startPage = parseInt(document.getElementById('startPage').value) || 1;
             const endPage = parseInt(document.getElementById('endPage').value) || 1;
             const maxPages = pagination ? Math.max(1, endPage - startPage + 1) : 1;
-            
+
             // Get example URLs for pattern recognition
             const page2Url = document.getElementById('page2Url').value || null;
             const page3Url = document.getElementById('page3Url').value || null;
@@ -2002,7 +2210,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const sessionEnabled = document.getElementById('sessionEnabled').checked;
-            
+
             let sessionJson = null;
             if (sessionEnabled) {
                 try {
@@ -2017,7 +2225,7 @@
             // Loading State
             btn.innerHTML = '<span class="animate-pulse">CANCEL OPERATION</span>';
             btn.classList.add('border-red-500', 'text-red-500'); // Style for cancel
-            
+
             // Show Loading
             showLoading(url);
 
@@ -2030,7 +2238,7 @@
 
             try {
                 // 1. Start Job
-                const response = await fetch('/scrape', {
+                const response = await fetch(`${API_BASE}/scrape`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2055,7 +2263,7 @@
 
                 const startData = await response.json();
                 console.log("🚀 Scrape initiated:", startData);
-                
+
                 if (!response.ok || !startData.job_id) {
                     console.error("❌ No job_id returned:", startData);
                     throw new Error(startData.error || "Failed to start job (No ID returned)");
@@ -2067,7 +2275,7 @@
                 // 2. Poll Status with Timeout Protection
                 const MAX_POLL_TIME = 5 * 60 * 1000; // 5 minutes max
                 const pollStartTime = Date.now();
-                
+
                 pollInterval = setInterval(async () => {
                     try {
                         // Check if we've exceeded max polling time
@@ -2075,21 +2283,21 @@
                         if (elapsed > MAX_POLL_TIME) {
                             console.error("Job polling timeout (5 minutes), stopping poll.");
                             clearInterval(pollInterval);
-                            
+
                             // Try to cancel the job on backend
                             try {
-                                await fetch(`/job/${currentJobId}/cancel`, { method: 'POST' });
+                                await fetch(`${API_BASE}/job/${currentJobId}/cancel`, { method: 'POST' });
                             } catch (cancelErr) {
                                 console.error("Failed to cancel job:", cancelErr);
                             }
-                            
+
                             renderError("Operation timed out after 5 minutes. The job may still be running in the background.");
                             resetButton();
                             return;
                         }
-                        
-                        const statusRes = await fetch(`/job/${currentJobId}`);
-                        
+
+                        const statusRes = await fetch(`${API_BASE}/job/${currentJobId}`);
+
                         if (!statusRes.ok) {
                             if (statusRes.status === 404) {
                                 console.warn("Job lost (404). stopping poll.");
@@ -2128,7 +2336,7 @@
                         console.error("Poll error", e);
                     }
                 }, 2000); // Poll every 2s
-                
+
             } catch (error) {
                 renderError(error.message);
                 resetButton();
@@ -2161,7 +2369,7 @@
             hideAllOutputs();
             const div = document.getElementById('statusMessage');
             div.classList.remove('hidden');
-            
+
             if (type === 'cancelled') {
                 div.innerHTML = `
                     <div class="text-yellow-500 text-4xl">🛑</div>
@@ -2183,14 +2391,14 @@
 
         function renderResults(data) {
             hideAllOutputs();
-            
+
             // Check if this is paginated data (from parallel processing)
             if (data && data.pages && data.all !== undefined) {
                 paginatedData = data;
                 renderPaginatedResults(data);
                 return;
             }
-            
+
             // Legacy single-page rendering
             paginatedData = null;
             renderSinglePageResults(data);
@@ -2223,11 +2431,10 @@
             pages.forEach(pageKey => {
                 const pageNum = pageKey.split('_')[1];
                 const btn = document.createElement('button');
-                btn.className = `px-4 py-2 text-xs font-bold rounded transition ${
-                    currentPageView === pageKey 
-                        ? 'bg-neonBlue/20 text-neonBlue border border-neonBlue' 
-                        : 'bg-black/40 text-gray-400 border border-white/10 hover:text-white'
-                }`;
+                btn.className = `px-4 py-2 text-xs font-bold rounded transition ${currentPageView === pageKey
+                    ? 'bg-neonBlue/20 text-neonBlue border border-neonBlue'
+                    : 'bg-black/40 text-gray-400 border border-white/10 hover:text-white'
+                    }`;
                 btn.innerText = `Page ${pageNum}`;
                 btn.onclick = () => {
                     currentPageView = pageKey;
@@ -2238,11 +2445,10 @@
 
             // "All" tab
             const allBtn = document.createElement('button');
-            allBtn.className = `px-4 py-2 text-xs font-bold rounded transition ${
-                currentPageView === 'all' 
-                    ? 'bg-neonGreen/20 text-neonGreen border border-neonGreen' 
-                    : 'bg-black/40 text-gray-400 border border-white/10 hover:text-white'
-            }`;
+            allBtn.className = `px-4 py-2 text-xs font-bold rounded transition ${currentPageView === 'all'
+                ? 'bg-neonGreen/20 text-neonGreen border border-neonGreen'
+                : 'bg-black/40 text-gray-400 border border-white/10 hover:text-white'
+                }`;
             allBtn.innerText = 'ALL';
             allBtn.onclick = () => {
                 currentPageView = 'all';
@@ -2287,31 +2493,31 @@
                     }
                 }
             }
-            
+
             const jsonString = JSON.stringify(data, null, 2);
-            
+
             // Safe update of header
             const rc = document.getElementById('resultCount');
             const cc = document.getElementById('charCount');
-            if(rc) rc.innerText = `ITEMS: ${itemCount}`;
-            if(cc) cc.innerText = `SIZE: ${formatBytes(jsonString.length)}`;
-            
+            if (rc) rc.innerText = `ITEMS: ${itemCount}`;
+            if (cc) cc.innerText = `SIZE: ${formatBytes(jsonString.length)}`;
+
             // Render JSON View
             const jsonView = document.getElementById('jsonView');
-            if(jsonView) jsonView.innerText = jsonString;
-            
+            if (jsonView) jsonView.innerText = jsonString;
+
             // Render Table View
             const tableView = document.getElementById('tableView');
-            if(tableView) {
+            if (tableView) {
                 tableView.innerHTML = '';
 
                 if (targetArray && targetArray.length > 0) {
                     const table = document.createElement('table');
                     table.className = 'w-full text-left border-collapse text-xs';
-                    
+
                     // Get headers
                     const headers = Object.keys(targetArray[0]);
-                    
+
                     // Create Head
                     const thead = document.createElement('thead');
                     thead.className = 'bg-white/5 text-neonBlue font-mono sticky top-0';
@@ -2335,12 +2541,12 @@
                             const td = document.createElement('td');
                             td.className = 'p-2 truncate max-w-[200px] align-top';
                             td.title = typeof row[h] === 'object' ? JSON.stringify(row[h]) : row[h];
-                            
+
                             let val = row[h];
                             if (val === null || val === undefined) val = '-';
                             else if (typeof val === 'object') val = '[OBJ]';
                             else if (String(val).startsWith('http')) val = `<a href="${val}" target="_blank" class="text-neonPink hover:underline">LINK</a>`;
-                            
+
                             td.innerHTML = val;
                             tr.appendChild(td);
                         });
@@ -2366,40 +2572,40 @@
             const tableView = document.getElementById('tableView');
             const btnJson = document.getElementById('viewBtnJson');
             const btnTable = document.getElementById('viewBtnTable');
-            
+
             // New Active Styles (Advanced Buttons)
             const activeClasses = ['bg-white/10', 'text-white', 'shadow-[0_0_15px_rgba(0,255,255,0.1)]', 'border-white/20'];
             const inactiveClasses = ['text-gray-500', 'border-transparent', 'hover:bg-white/5'];
 
             if (mode === 'json') {
-                if(jsonView) jsonView.classList.remove('hidden');
-                if(tableView) tableView.classList.add('hidden');
-                
-                if(btnJson) { 
-                    btnJson.classList.add(...activeClasses); 
+                if (jsonView) jsonView.classList.remove('hidden');
+                if (tableView) tableView.classList.add('hidden');
+
+                if (btnJson) {
+                    btnJson.classList.add(...activeClasses);
                     btnJson.classList.remove(...inactiveClasses);
                     // Add glow
                     btnJson.classList.add('text-neonGreen');
                     btnJson.classList.remove('text-white');
                 }
-                if(btnTable) { 
-                    btnTable.classList.remove(...activeClasses, 'text-neonBlue'); 
-                    btnTable.classList.add(...inactiveClasses); 
+                if (btnTable) {
+                    btnTable.classList.remove(...activeClasses, 'text-neonBlue');
+                    btnTable.classList.add(...inactiveClasses);
                 }
             } else {
-                if(jsonView) jsonView.classList.add('hidden');
-                if(tableView) tableView.classList.remove('hidden');
-                
-                if(btnTable) { 
-                    btnTable.classList.add(...activeClasses); 
-                    btnTable.classList.remove(...inactiveClasses); 
+                if (jsonView) jsonView.classList.add('hidden');
+                if (tableView) tableView.classList.remove('hidden');
+
+                if (btnTable) {
+                    btnTable.classList.add(...activeClasses);
+                    btnTable.classList.remove(...inactiveClasses);
                     // Add glow
                     btnTable.classList.add('text-neonBlue');
                     btnTable.classList.remove('text-white');
                 }
-                if(btnJson) { 
-                    btnJson.classList.remove(...activeClasses, 'text-neonGreen'); 
-                    btnJson.classList.add(...inactiveClasses); 
+                if (btnJson) {
+                    btnJson.classList.remove(...activeClasses, 'text-neonGreen');
+                    btnJson.classList.add(...inactiveClasses);
                 }
             }
         }
@@ -2444,7 +2650,7 @@
             // OR keep the full response. Usually users want the extraction result.
             // Our API returns { data: {...}, message: ... }. Let's download the inner data if present.
             const payload = currentData.data || currentData;
-            
+
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
@@ -2459,7 +2665,7 @@
                 alert("No data to download.");
                 return;
             }
-            
+
             // Unwrap { data: ... } if present
             const payload = currentData.data || currentData;
 
@@ -2484,7 +2690,7 @@
 
             for (const row of targetArray) {
                 const values = headers.map(header => {
-                    const val = row[header] || ''; 
+                    const val = row[header] || '';
                     const escaped = ('' + val).replace(/"/g, '\\"');
                     return `"${escaped}"`;
                 });
@@ -2505,13 +2711,31 @@
     </script>
     <style>
         @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(200%);
+            }
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,255,255,0.2); }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,255,255,0.4); }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 255, 0.4);
+        }
     </style>
 </body>
+
 </html>
