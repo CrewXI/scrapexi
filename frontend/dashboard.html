@@ -2204,10 +2204,11 @@
                 document.getElementById('currentOnetimeCredits').textContent = window.userCredits.onetime.toLocaleString();
 
                 // Disable current plan button and grey it out
+                // Note: currentTier is UPPERCASE (e.g., 'STARTER', 'PRO', 'BUSINESS')
                 const planMapping = {
-                    'Starter': { cardId: 'starterPlanCard', btnId: 'starterPlanBtn' },
-                    'Pro': { cardId: 'proPlanCard', btnId: 'proPlanBtn' },
-                    'Business': { cardId: 'businessPlanCard', btnId: 'businessPlanBtn' }
+                    'STARTER': { cardId: 'starterPlanCard', btnId: 'starterPlanBtn' },
+                    'PRO': { cardId: 'proPlanCard', btnId: 'proPlanBtn' },
+                    'BUSINESS': { cardId: 'businessPlanCard', btnId: 'businessPlanBtn' }
                 };
 
                 // Reset all plans first (enable them)
