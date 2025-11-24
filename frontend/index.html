@@ -9,11 +9,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
     <style>
         /* Custom Fonts */
-        .font-cyber { font-family: 'Orbitron', sans-serif; }
-        .font-tech { font-family: 'Rajdhani', sans-serif; }
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
 
         body {
             font-family: 'Rajdhani', sans-serif;
@@ -33,7 +40,8 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.05; /* Barely visible */
+            opacity: 0.05;
+            /* Barely visible */
             z-index: -1;
             filter: grayscale(100%) contrast(1.2);
             pointer-events: none;
@@ -41,24 +49,56 @@
 
         /* Animations */
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
-        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
 
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.6); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            }
         }
-        
+
         /* Neon Text */
-        .text-glow-blue { text-shadow: 0 0 10px rgba(0, 255, 255, 0.7); }
-        .text-glow-pink { text-shadow: 0 0 10px rgba(255, 0, 255, 0.7); }
-        .text-neonBlue { color: #00FFFF; }
-        .text-neonPink { color: #FF00FF; }
-        .text-neonGreen { color: #00FF99; }
-        
+        .text-glow-blue {
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        }
+
+        .text-glow-pink {
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
+
+        .text-neonBlue {
+            color: #00FFFF;
+        }
+
+        .text-neonPink {
+            color: #FF00FF;
+        }
+
+        .text-neonGreen {
+            color: #00FF99;
+        }
+
         /* Glassmorphism Cards */
         .glass-card {
             background: rgba(20, 20, 35, 0.6);
@@ -69,7 +109,7 @@
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .glass-card:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 20px 50px rgba(0, 255, 255, 0.15);
@@ -80,7 +120,10 @@
         .glass-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             border-radius: inherit;
             padding: 1px;
             background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent, rgba(255, 0, 255, 0.3), transparent);
@@ -93,7 +136,7 @@
         /* Hero Glow */
         .hero-glow {
             background: radial-gradient(circle at 70% 30%, rgba(0, 255, 255, 0.1) 0%, transparent 60%),
-                        radial-gradient(circle at 30% 70%, rgba(255, 0, 255, 0.1) 0%, transparent 60%);
+                radial-gradient(circle at 30% 70%, rgba(255, 0, 255, 0.1) 0%, transparent 60%);
         }
 
         /* Cyber Button */
@@ -108,6 +151,7 @@
             transition: 0.3s;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
+
         .cyber-btn:hover {
             background: rgba(0, 255, 255, 0.1);
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
@@ -117,12 +161,21 @@
         /* Scroll Reveal */
         .reveal-on-scroll {
             opacity: 0;
-            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1); /* Slowed down from 1s to 2s */
+            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Slowed down from 1s to 2s */
         }
-        
-        .reveal-on-scroll.slide-up { transform: translateY(50px); }
-        .reveal-on-scroll.slide-left { transform: translateX(50px); }
-        .reveal-on-scroll.slide-right { transform: translateX(-50px); }
+
+        .reveal-on-scroll.slide-up {
+            transform: translateY(50px);
+        }
+
+        .reveal-on-scroll.slide-left {
+            transform: translateX(50px);
+        }
+
+        .reveal-on-scroll.slide-right {
+            transform: translateX(-50px);
+        }
 
         .reveal-on-scroll.visible {
             opacity: 1;
@@ -131,13 +184,18 @@
 
         /* Specific fix for Hero Image Hover */
         .hero-image-container {
-            border-radius: 1rem; /* rounded-2xl */
+            border-radius: 1rem;
+            /* rounded-2xl */
             overflow: hidden;
-            transform: translateZ(0); /* Force GPU layer */
-            will-change: transform; /* Optimize */
+            transform: translateZ(0);
+            /* Force GPU layer */
+            will-change: transform;
+            /* Optimize */
         }
+
         .hero-image-container img {
-            border-radius: 1rem; /* Explicitly set on img too */
+            border-radius: 1rem;
+            /* Explicitly set on img too */
         }
 
         /* FAQ Accordion - Robust JS Method */
@@ -146,17 +204,88 @@
             overflow: hidden;
             transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .faq-trigger.active {
             border-color: rgba(0, 255, 255, 0.5);
             background: rgba(0, 255, 255, 0.05);
         }
+
         .faq-trigger.active .faq-icon {
             transform: rotate(45deg);
             color: #00FFFF;
             text-shadow: 0 0 8px #00FFFF;
         }
+
         .faq-icon {
             transition: transform 0.3s ease;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: rgba(10, 10, 20, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 1rem;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .legal-link {
+            color: #00FFFF;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .legal-link:hover {
+            color: #FF00FF;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
 
         /* Interactive Title Effect */
@@ -166,6 +295,7 @@
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             filter: blur(1.5px);
         }
+
         .interactive-title:hover {
             background-position: right center;
             filter: blur(0.3px) drop-shadow(0 0 20px rgba(0, 255, 255, 0.6)) drop-shadow(0 0 40px rgba(255, 0, 255, 0.4));
@@ -204,19 +334,23 @@
                 <div class="flex items-center group cursor-pointer">
                     <span class="text-4xl mr-3 group-hover:rotate-12 transition-transform duration-300">🕷️</span>
                     <h1 class="font-cyber text-3xl text-white tracking-widest">
-                        <span class="text-neonBlue text-glow-blue">SCRAPE</span><span class="text-neonPink text-glow-pink">Xi</span>
+                        <span class="text-neonBlue text-glow-blue">SCRAPE</span><span
+                            class="text-neonPink text-glow-pink">Xi</span>
                     </h1>
                 </div>
 
                 <!-- Nav Links -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#how-it-works" class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonBlue transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-transparent hover:border-neonBlue/30 rounded-lg">
+                    <a href="#how-it-works"
+                        class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonBlue transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-transparent hover:border-neonBlue/30 rounded-lg">
                         How it Works
                     </a>
-                    <a href="#pricing" class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonGreen transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] border border-transparent hover:border-neonGreen/30 rounded-lg">
+                    <a href="#pricing"
+                        class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonGreen transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,255,153,0.3)] border border-transparent hover:border-neonGreen/30 rounded-lg">
                         Pricing
                     </a>
-                    <a href="#use-cases" class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonPink transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,0,255,0.3)] border border-transparent hover:border-neonPink/30 rounded-lg">
+                    <a href="#use-cases"
+                        class="nav-link px-4 py-2 font-cyber text-sm font-bold tracking-widest text-gray-400 hover:text-neonPink transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,0,255,0.3)] border border-transparent hover:border-neonPink/30 rounded-lg">
                         Use Cases
                     </a>
                 </div>
@@ -233,24 +367,30 @@
     </nav>
 
     <!-- Hero Section -->
-    <main class="min-h-screen flex flex-col justify-center pt-20 pb-0 tall:pt-32 tall:pb-12 hero-glow relative overflow-hidden">
-        <div class="max-w-7xl 3xl:max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex flex-col justify-center tall:justify-evenly">
-            
+    <main
+        class="min-h-screen flex flex-col justify-center pt-20 pb-0 tall:pt-32 tall:pb-12 hero-glow relative overflow-hidden">
+        <div
+            class="max-w-7xl 3xl:max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex flex-col justify-center tall:justify-evenly">
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 3xl:gap-32 tall:gap-20 items-center">
                 <!-- Left Content -->
                 <div class="text-left reveal-on-scroll slide-right">
-                    <div class="inline-flex items-center px-3 py-1.5 rounded border border-neonBlue/30 bg-neonBlue/10 text-neonBlue text-xs font-mono tracking-widest mb-6 tall:mb-10 animate-pulse">
+                    <div
+                        class="inline-flex items-center px-3 py-1.5 rounded border border-neonBlue/30 bg-neonBlue/10 text-neonBlue text-xs font-mono tracking-widest mb-6 tall:mb-10 animate-pulse">
                         <span class="w-1.5 h-1.5 rounded-full bg-neonBlue mr-2"></span>
                         Powered by the Latest AI
                     </div>
 
-                    <h1 class="text-4xl md:text-6xl 3xl:text-8xl font-cyber font-bold tracking-wide mb-6 tall:mb-10 text-white leading-tight">
+                    <h1
+                        class="text-4xl md:text-6xl 3xl:text-8xl font-cyber font-bold tracking-wide mb-6 tall:mb-10 text-white leading-tight">
                         MAKE THE WEB <br>
-                        <span class="interactive-title inline-block text-transparent bg-clip-text bg-gradient-to-r from-neonBlue via-white to-neonPink text-glow-blue cursor-default whitespace-nowrap">AI-COMPATIBLE</span>
+                        <span
+                            class="interactive-title inline-block text-transparent bg-clip-text bg-gradient-to-r from-neonBlue via-white to-neonPink text-glow-blue cursor-default whitespace-nowrap">AI-COMPATIBLE</span>
                     </h1>
 
-                    <p class="text-lg 3xl:text-2xl text-gray-300 max-w-xl 3xl:max-w-3xl mb-8 tall:mb-12 leading-relaxed font-medium tracking-wide">
-                        Stop writing fragile selectors. ScrapeXi connects LLMs to the entire internet, 
+                    <p
+                        class="text-lg 3xl:text-2xl text-gray-300 max-w-xl 3xl:max-w-3xl mb-8 tall:mb-12 leading-relaxed font-medium tracking-wide">
+                        Stop writing fragile selectors. ScrapeXi connects LLMs to the entire internet,
                         allowing you to extract structured JSON data using simple natural language queries.
                     </p>
 
@@ -258,14 +398,24 @@
                         <button id="supabaseLoginBtn" onclick="signInWithGoogle()"
                             class="group relative px-8 py-4 3xl:px-10 3xl:py-5 rounded bg-white text-black font-cyber font-bold text-base 3xl:text-xl tracking-widest transition-all duration-500 ease-out hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,255,255,0.5)] flex items-center justify-center gap-3 overflow-hidden border border-transparent hover:border-white/50">
                             <!-- Shine Effect -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out z-0"></div>
-                            
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out z-0">
+                            </div>
+
                             <div class="relative z-10 flex items-center gap-3">
                                 <svg class="w-5 h-5 3xl:w-6 3xl:h-6" viewBox="0 0 24 24">
-                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                    <path
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                        fill="#4285F4" />
+                                    <path
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                        fill="#34A853" />
+                                    <path
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                        fill="#FBBC05" />
+                                    <path
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                        fill="#EA4335" />
                                 </svg>
                                 INITIALIZE SESSION
                             </div>
@@ -280,19 +430,25 @@
 
                 <!-- Right Content: Spider Hero Image -->
                 <div class="relative hidden lg:block reveal-on-scroll slide-left" style="transition-delay: 200ms;">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-neonBlue to-neonPink rounded-2xl blur-xl opacity-30 animate-pulse"></div>
-                    
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-neonBlue to-neonPink rounded-2xl blur-xl opacity-30 animate-pulse">
+                    </div>
+
                     <!-- Hero Image Container with Fix -->
-                    <div class="hero-image-container relative border border-white/10 shadow-2xl transform hover:scale-[1.02] transition-all duration-700 ease-out group">
-                        <img src="ScrapeXiLogo1.jpg" alt="ScrapeXi Spider" class="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 max-h-[400px] 3xl:max-h-[600px] w-auto mx-auto">
-                        
+                    <div
+                        class="hero-image-container relative border border-white/10 shadow-2xl transform hover:scale-[1.02] transition-all duration-700 ease-out group">
+                        <img src="ScrapeXiLogo1.jpg" alt="ScrapeXi Spider"
+                            class="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 max-h-[400px] 3xl:max-h-[600px] w-auto mx-auto">
+
                         <!-- Floating Code Card Overlay -->
-                        <div class="absolute -bottom-8 -left-8 w-80 3xl:w-96 glass-card p-5 3xl:p-8 rounded-xl transform rotate-3 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500 border-l-4 border-neonGreen z-20 bg-black/90">
+                        <div
+                            class="absolute -bottom-8 -left-8 w-80 3xl:w-96 glass-card p-5 3xl:p-8 rounded-xl transform rotate-3 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500 border-l-4 border-neonGreen z-20 bg-black/90">
                             <div class="flex items-center gap-3 mb-3 border-b border-white/10 pb-2">
                                 <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                                 <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                                 <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                                <span class="text-[10px] 3xl:text-sm font-mono text-gray-500 ml-auto tracking-wider">LIVE_FEED_MONITOR</span>
+                                <span
+                                    class="text-[10px] 3xl:text-sm font-mono text-gray-500 ml-auto tracking-wider">LIVE_FEED_MONITOR</span>
                             </div>
                             <pre class="text-[10px] 3xl:text-sm font-mono text-neonGreen leading-relaxed">
 {
@@ -309,27 +465,43 @@
 
             <!-- Features Grid (Neon Cards) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 3xl:gap-12 mt-8 3xl:mt-16 tall:mt-20 tall:gap-10">
-                <div class="glass-card p-5 3xl:p-8 tall:p-8 rounded-xl reveal-on-scroll slide-up" style="transition-delay: 100ms;">
-                    <div class="w-10 h-10 3xl:w-14 3xl:h-14 tall:w-14 tall:h-14 bg-neonBlue/10 border border-neonBlue/30 rounded-lg flex items-center justify-center text-xl 3xl:text-3xl tall:text-2xl mb-3 3xl:mb-5 tall:mb-5 shadow-[0_0_15px_rgba(0,255,255,0.2)] animate-float">🤖</div>
-                    <h3 class="text-lg 3xl:text-2xl tall:text-xl font-cyber font-bold mb-2 text-white">Self-Healing Selectors</h3>
-                    <p class="text-sm 3xl:text-lg tall:text-base text-gray-300 leading-relaxed">UI changes won't break your scrapers. Our AI understands the page semantics visually, just like a human.</p>
+                <div class="glass-card p-5 3xl:p-8 tall:p-8 rounded-xl reveal-on-scroll slide-up"
+                    style="transition-delay: 100ms;">
+                    <div
+                        class="w-10 h-10 3xl:w-14 3xl:h-14 tall:w-14 tall:h-14 bg-neonBlue/10 border border-neonBlue/30 rounded-lg flex items-center justify-center text-xl 3xl:text-3xl tall:text-2xl mb-3 3xl:mb-5 tall:mb-5 shadow-[0_0_15px_rgba(0,255,255,0.2)] animate-float">
+                        🤖</div>
+                    <h3 class="text-lg 3xl:text-2xl tall:text-xl font-cyber font-bold mb-2 text-white">Self-Healing
+                        Selectors</h3>
+                    <p class="text-sm 3xl:text-lg tall:text-base text-gray-300 leading-relaxed">UI changes won't break
+                        your scrapers. Our AI understands the page semantics visually, just like a human.</p>
                 </div>
-                <div class="glass-card p-5 3xl:p-8 tall:p-8 rounded-xl reveal-on-scroll slide-up" style="transition-delay: 200ms;">
-                    <div class="w-10 h-10 3xl:w-14 3xl:h-14 tall:w-14 tall:h-14 bg-neonPink/10 border border-neonPink/30 rounded-lg flex items-center justify-center text-xl 3xl:text-3xl tall:text-2xl mb-3 3xl:mb-5 tall:mb-5 shadow-[0_0_15px_rgba(255,0,255,0.2)] animate-float" style="animation-delay: 1s;">⚡</div>
-                    <h3 class="text-lg 3xl:text-2xl tall:text-xl font-cyber font-bold mb-2 text-white">Powered by Gemini 2.0</h3>
-                    <p class="text-sm 3xl:text-lg tall:text-base text-gray-300 leading-relaxed">Leverage the massive 1M+ token context window and superior reasoning capabilities of Gemini Flash 2.0.</p>
+                <div class="glass-card p-5 3xl:p-8 tall:p-8 rounded-xl reveal-on-scroll slide-up"
+                    style="transition-delay: 200ms;">
+                    <div class="w-10 h-10 3xl:w-14 3xl:h-14 tall:w-14 tall:h-14 bg-neonPink/10 border border-neonPink/30 rounded-lg flex items-center justify-center text-xl 3xl:text-3xl tall:text-2xl mb-3 3xl:mb-5 tall:mb-5 shadow-[0_0_15px_rgba(255,0,255,0.2)] animate-float"
+                        style="animation-delay: 1s;">⚡</div>
+                    <h3 class="text-lg 3xl:text-2xl tall:text-xl font-cyber font-bold mb-2 text-white">Powered by Gemini
+                        2.0</h3>
+                    <p class="text-sm 3xl:text-lg tall:text-base text-gray-300 leading-relaxed">Leverage the massive 1M+
+                        token context window and superior reasoning capabilities of Gemini Flash 2.0.</p>
                 </div>
-                <div class="glass-card p-5 3xl:p-8 tall:p-8 rounded-xl reveal-on-scroll slide-up" style="transition-delay: 300ms;">
-                    <div class="w-10 h-10 3xl:w-14 3xl:h-14 tall:w-14 tall:h-14 bg-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center text-xl 3xl:text-3xl tall:text-2xl mb-3 3xl:mb-5 tall:mb-5 shadow-[0_0_15px_rgba(168,85,247,0.2)] animate-float" style="animation-delay: 2s;">🛡️</div>
-                    <h3 class="text-lg 3xl:text-2xl tall:text-xl font-cyber font-bold mb-2 text-white">Enterprise Security</h3>
-                    <p class="text-sm 3xl:text-lg tall:text-base text-gray-300 leading-relaxed">Built for scale. Features include advanced anti-bot evasion, rotating residential proxies, and automated CAPTCHA solving.</p>
+                <div class="glass-card p-5 3xl:p-8 tall:p-8 rounded-xl reveal-on-scroll slide-up"
+                    style="transition-delay: 300ms;">
+                    <div class="w-10 h-10 3xl:w-14 3xl:h-14 tall:w-14 tall:h-14 bg-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center text-xl 3xl:text-3xl tall:text-2xl mb-3 3xl:mb-5 tall:mb-5 shadow-[0_0_15px_rgba(168,85,247,0.2)] animate-float"
+                        style="animation-delay: 2s;">⚖️</div>
+                    <h3 class="text-lg 3xl:text-2xl tall:text-xl font-cyber font-bold mb-2 text-white">Legal
+                        Compliance</h3>
+                    <p class="text-sm 3xl:text-lg tall:text-base text-gray-300 leading-relaxed">Scrape data legally with
+                        your own credentials.
+                        <span class="text-yellow-400">You are responsible for following each website's Terms of
+                            Service.</span>
+                    </p>
                 </div>
             </div>
 
         </div>
     </main>
 
-        </div>
+    </div>
     </main>
 
     <!-- How It Works Section -->
@@ -343,32 +515,46 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                 <!-- Connecting Line (Desktop) -->
-                <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-neonBlue via-neonPink to-neonGreen opacity-30 -translate-y-1/2 z-0"></div>
+                <div
+                    class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-neonBlue via-neonPink to-neonGreen opacity-30 -translate-y-1/2 z-0">
+                </div>
 
                 <!-- Step 1 -->
-                <div class="relative glass-card p-8 rounded-2xl reveal-on-scroll slide-right z-10 bg-dark-900/90 overflow-visible" style="transition-delay: 0ms;">
-                    <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-dark-900 border border-neonBlue rounded-full flex items-center justify-center text-neonBlue font-bold font-mono z-20 shadow-[0_0_15px_rgba(0,255,255,0.5)]">01</div>
+                <div class="relative glass-card p-8 rounded-2xl reveal-on-scroll slide-right z-10 bg-dark-900/90 overflow-visible"
+                    style="transition-delay: 0ms;">
+                    <div
+                        class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-dark-900 border border-neonBlue rounded-full flex items-center justify-center text-neonBlue font-bold font-mono z-20 shadow-[0_0_15px_rgba(0,255,255,0.5)]">
+                        01</div>
                     <div class="mt-6 text-center">
                         <h4 class="text-xl font-bold text-white mb-3">Select Website</h4>
-                        <p class="text-sm text-gray-400">Input your target URL or list of domains. Our system initializes a headless browser instance in our secure cloud infrastructure.</p>
+                        <p class="text-sm text-gray-400">Input your target URL or list of domains. Our system
+                            initializes a headless browser instance in our secure cloud infrastructure.</p>
                     </div>
                 </div>
 
                 <!-- Step 2 -->
-                <div class="relative glass-card p-8 rounded-2xl reveal-on-scroll slide-right z-10 bg-dark-900/90 overflow-visible" style="transition-delay: 200ms;">
-                    <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-dark-900 border border-neonPink rounded-full flex items-center justify-center text-neonPink font-bold font-mono z-20 shadow-[0_0_15px_rgba(255,0,255,0.5)]">02</div>
+                <div class="relative glass-card p-8 rounded-2xl reveal-on-scroll slide-right z-10 bg-dark-900/90 overflow-visible"
+                    style="transition-delay: 200ms;">
+                    <div
+                        class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-dark-900 border border-neonPink rounded-full flex items-center justify-center text-neonPink font-bold font-mono z-20 shadow-[0_0_15px_rgba(255,0,255,0.5)]">
+                        02</div>
                     <div class="mt-6 text-center">
                         <h4 class="text-xl font-bold text-white mb-3">Define Schema</h4>
-                        <p class="text-sm text-gray-400">Describe the data you want in plain English. E.g., <em>"Get all product names and prices."</em> Our LLM translates this into extraction logic.</p>
+                        <p class="text-sm text-gray-400">Describe the data you want in plain English. E.g., <em>"Get all
+                                product names and prices."</em> Our LLM translates this into extraction logic.</p>
                     </div>
                 </div>
 
                 <!-- Step 3 -->
-                <div class="relative glass-card p-8 rounded-2xl reveal-on-scroll slide-right z-10 bg-dark-900/90 overflow-visible" style="transition-delay: 400ms;">
-                    <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-dark-900 border border-neonGreen rounded-full flex items-center justify-center text-neonGreen font-bold font-mono z-20 shadow-[0_0_15px_rgba(0,255,153,0.5)]">03</div>
+                <div class="relative glass-card p-8 rounded-2xl reveal-on-scroll slide-right z-10 bg-dark-900/90 overflow-visible"
+                    style="transition-delay: 400ms;">
+                    <div
+                        class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-dark-900 border border-neonGreen rounded-full flex items-center justify-center text-neonGreen font-bold font-mono z-20 shadow-[0_0_15px_rgba(0,255,153,0.5)]">
+                        03</div>
                     <div class="mt-6 text-center">
                         <h4 class="text-xl font-bold text-white mb-3">Extract & Sync</h4>
-                        <p class="text-sm text-gray-400">Data is extracted, cleaned, and synced to your database or available for instant JSON/CSV download. No maintenance required.</p>
+                        <p class="text-sm text-gray-400">Data is extracted, cleaned, and synced to your database or
+                            available for instant JSON/CSV download. No maintenance required.</p>
                     </div>
                 </div>
             </div>
@@ -386,10 +572,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Starter -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonBlue/50 reveal-on-scroll slide-up" style="transition-delay: 0ms;">
+                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonBlue/50 reveal-on-scroll slide-up"
+                    style="transition-delay: 0ms;">
                     <div class="text-center mb-6">
                         <h4 class="text-xl font-cyber text-white mb-2">STARTER</h4>
-                        <div class="text-4xl font-bold text-neonBlue mb-1">$10<span class="text-sm text-gray-500 font-normal">/mo</span></div>
+                        <div class="text-4xl font-bold text-neonBlue mb-1">$10<span
+                                class="text-sm text-gray-500 font-normal">/mo</span></div>
                         <p class="text-xs text-gray-400">For hobbyists and small projects</p>
                     </div>
                     <div class="space-y-4 font-mono text-sm text-gray-300 mb-8">
@@ -406,16 +594,21 @@
                             <span class="text-white">2 Threads</span>
                         </div>
                     </div>
-                    <button class="cyber-btn w-full py-3 text-sm font-bold border-neonBlue text-neonBlue hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">INITIATE</button>
+                    <button
+                        class="cyber-btn w-full py-3 text-sm font-bold border-neonBlue text-neonBlue hover:shadow-[0_0_15px_rgba(0,255,255,0.3)]">INITIATE</button>
                 </div>
 
                 <!-- Pro -->
                 <div class="reveal-on-scroll slide-up" style="transition-delay: 150ms;">
-                    <div class="glass-card p-8 rounded-2xl border border-neonPink/50 shadow-[0_0_20px_rgba(255,0,255,0.1)] hover:border-neonPink transform scale-105 h-full">
-                        <div class="absolute top-0 right-0 bg-neonPink text-black text-[10px] font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
+                    <div
+                        class="glass-card p-8 rounded-2xl border border-neonPink/50 shadow-[0_0_20px_rgba(255,0,255,0.1)] hover:border-neonPink transform scale-105 h-full">
+                        <div
+                            class="absolute top-0 right-0 bg-neonPink text-black text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                            POPULAR</div>
                         <div class="text-center mb-6">
                             <h4 class="text-xl font-cyber text-white mb-2">PRO</h4>
-                            <div class="text-4xl font-bold text-neonPink mb-1">$30<span class="text-sm text-gray-500 font-normal">/mo</span></div>
+                            <div class="text-4xl font-bold text-neonPink mb-1">$30<span
+                                    class="text-sm text-gray-500 font-normal">/mo</span></div>
                             <p class="text-xs text-gray-400">For power users and startups</p>
                         </div>
                         <div class="space-y-4 font-mono text-sm text-gray-300 mb-8">
@@ -432,15 +625,18 @@
                                 <span class="text-white">10 Threads</span>
                             </div>
                         </div>
-                        <button class="cyber-btn w-full py-3 text-sm font-bold border-neonPink text-neonPink hover:shadow-[0_0_15px_rgba(255,0,255,0.3)]">INITIATE</button>
+                        <button
+                            class="cyber-btn w-full py-3 text-sm font-bold border-neonPink text-neonPink hover:shadow-[0_0_15px_rgba(255,0,255,0.3)]">INITIATE</button>
                     </div>
                 </div>
 
                 <!-- Business -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonGreen/50 reveal-on-scroll slide-up" style="transition-delay: 300ms;">
+                <div class="glass-card p-8 rounded-2xl border border-white/10 hover:border-neonGreen/50 reveal-on-scroll slide-up"
+                    style="transition-delay: 300ms;">
                     <div class="text-center mb-6">
                         <h4 class="text-xl font-cyber text-white mb-2">BUSINESS</h4>
-                        <div class="text-4xl font-bold text-neonGreen mb-1">$50<span class="text-sm text-gray-500 font-normal">/mo</span></div>
+                        <div class="text-4xl font-bold text-neonGreen mb-1">$50<span
+                                class="text-sm text-gray-500 font-normal">/mo</span></div>
                         <p class="text-xs text-gray-400">For scaling data operations</p>
                     </div>
                     <div class="space-y-4 font-mono text-sm text-gray-300 mb-8">
@@ -457,7 +653,8 @@
                             <span class="text-white">Unlimited</span>
                         </div>
                     </div>
-                    <button class="cyber-btn w-full py-3 text-sm font-bold border-neonGreen text-neonGreen hover:shadow-[0_0_15px_rgba(0,255,153,0.3)]">INITIATE</button>
+                    <button
+                        class="cyber-btn w-full py-3 text-sm font-bold border-neonGreen text-neonGreen hover:shadow-[0_0_15px_rgba(0,255,153,0.3)]">INITIATE</button>
                 </div>
             </div>
         </div>
@@ -467,7 +664,8 @@
     <section id="use-cases" class="py-32 bg-dark-900 relative overflow-hidden">
         <!-- Diagonal decoration -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
-            <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[150%] bg-neonBlue/5 transform rotate-12 blur-3xl"></div>
+            <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[150%] bg-neonBlue/5 transform rotate-12 blur-3xl">
+            </div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -482,25 +680,33 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 0ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left"
+                    style="transition-delay: 0ms;">
                     <span class="text-4xl mb-4 block">🛍️</span>
                     <h4 class="text-xl font-bold text-white mb-2">E-Commerce</h4>
-                    <p class="text-sm text-gray-400">Monitor competitor pricing, track inventory levels, and analyze product trends in real-time.</p>
+                    <p class="text-sm text-gray-400">Monitor competitor pricing, track inventory levels, and analyze
+                        product trends in real-time.</p>
                 </div>
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 100ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left"
+                    style="transition-delay: 100ms;">
                     <span class="text-4xl mb-4 block">🏘️</span>
                     <h4 class="text-xl font-bold text-white mb-2">Real Estate</h4>
-                    <p class="text-sm text-gray-400">Aggregate listings from multiple sources, track market value changes, and identify investment opportunities.</p>
+                    <p class="text-sm text-gray-400">Aggregate listings from multiple sources, track market value
+                        changes, and identify investment opportunities.</p>
                 </div>
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 200ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left"
+                    style="transition-delay: 200ms;">
                     <span class="text-4xl mb-4 block">💼</span>
                     <h4 class="text-xl font-bold text-white mb-2">Lead Gen</h4>
-                    <p class="text-sm text-gray-400">Extract contact details from professional networks and directories to fuel your sales pipeline.</p>
+                    <p class="text-sm text-gray-400">Extract contact details from professional networks and directories
+                        to fuel your sales pipeline.</p>
                 </div>
-                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left" style="transition-delay: 300ms;">
+                <div class="glass-card p-8 rounded-xl hover:bg-white/5 reveal-on-scroll slide-left"
+                    style="transition-delay: 300ms;">
                     <span class="text-4xl mb-4 block">📊</span>
                     <h4 class="text-xl font-bold text-white mb-2">Finance</h4>
-                    <p class="text-sm text-gray-400">Scrape alternative data, news sentiment, and corporate filings for algorithmic trading models.</p>
+                    <p class="text-sm text-gray-400">Scrape alternative data, news sentiment, and corporate filings for
+                        algorithmic trading models.</p>
                 </div>
             </div>
         </div>
@@ -516,104 +722,170 @@
             <div class="space-y-4 reveal-on-scroll slide-up">
                 <!-- Q1 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is coding knowledge required?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is coding
+                            knowledge required?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            No. ScrapeXi uses AI to understand plain English instructions. However, for advanced integrations, we provide a robust API.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            No. ScrapeXi uses AI to understand plain English instructions. However, for advanced
+                            integrations, we provide a robust API.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q2 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">How do you handle CAPTCHAs?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">How do
+                            you handle CAPTCHAs?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            We utilize a stealth browsing layer and integrated CAPTCHA solving services to ensure high success rates, even on difficult sites.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            We use stealth browsing technology to reduce CAPTCHA triggers by making automated browsers
+                            appear more human-like. When CAPTCHAs do appear, users can solve them manually during the
+                            scraping session. We do not use automated CAPTCHA-breaking AI, ensuring full legal
+                            compliance.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q3 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Can I scrape dynamic Single Page Apps (SPAs)?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Can I
+                            scrape dynamic Single Page Apps (SPAs)?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            Yes. ScrapeXi runs a full headless browser that renders JavaScript, allowing it to scrape modern React, Vue, and Angular applications seamlessly.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Yes. ScrapeXi runs a full headless browser that renders JavaScript, allowing it to scrape
+                            modern React, Vue, and Angular applications seamlessly.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q4 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Does it work with LinkedIn or Instagram?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Does it
+                            work with LinkedIn or Instagram?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            Yes, but you must use our <strong>Stealth Mode</strong>. For authenticated sites, we support session state injection (cookies) to bypass login screens securely.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Yes, but you must use our <strong>Stealth Mode</strong>. For authenticated sites, we support
+                            session state injection (cookies) to bypass login screens securely.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q5 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">What is the pricing model?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">What is
+                            the pricing model?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            We offer a generous free tier (10MB data/month). Paid plans start at $29/mo for higher concurrency and unlimited data retention.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            We offer a generous free tier (10MB data/month). Paid plans start at $29/mo for higher
+                            concurrency and unlimited data retention.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q6 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is my data secure?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is my
+                            data secure?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            Absolutely. All data is encrypted at rest and in transit. We do not store your credentials; they are used transiently for the active session only.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Absolutely. All data is encrypted at rest and in transit. We do not store your credentials;
+                            they are used transiently for the active session only.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q7 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Can I export to Google Sheets?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Can I
+                            export to Google Sheets?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            Currently, we support JSON and CSV exports which can be imported into Sheets. Direct integration is coming in Q2 2025.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Currently, we support JSON and CSV exports which can be imported into Sheets. Direct
+                            integration is coming in Q2 2025.
                         </div>
                     </div>
                 </div>
 
                 <!-- Q8 -->
                 <div class="group">
-                    <button class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300" onclick="toggleFAQ(this)">
-                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">How fast is the extraction?</span>
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">How fast
+                            is the extraction?</span>
                         <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
                     </button>
                     <div class="faq-answer">
-                        <div class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
-                            Simple pages extract in under 2 seconds. Complex, dynamic sites with AI processing typically take 5-10 seconds depending on the page size.
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Simple pages extract in under 2 seconds. Complex, dynamic sites with AI processing typically
+                            take 5-10 seconds depending on the page size.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q9 - Legal Compliance -->
+                <div class="group">
+                    <button
+                        class="faq-trigger w-full p-6 text-left flex justify-between items-center bg-dark-800/50 hover:bg-dark-800 border border-white/10 hover:border-neonBlue/30 rounded-lg transition-all duration-300"
+                        onclick="toggleFAQ(this)">
+                        <span class="font-bold text-lg text-white group-hover:text-neonBlue transition-colors">Is web
+                            scraping legal?</span>
+                        <span class="faq-icon text-2xl text-gray-500 font-mono">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div
+                            class="p-6 pt-2 text-gray-400 border-x border-b border-white/5 rounded-b-lg bg-black/20 leading-relaxed">
+                            Yes, when done responsibly. Recent court rulings (hiQ v. LinkedIn, Van Buren v. United
+                            States) have clarified that scraping publicly available data and using your own credentials
+                            to access your authorized data is generally legal under the Computer Fraud and Abuse Act
+                            (CFAA).
+                            <br><br>
+                            <span class="legal-link" onclick="openLegalModal()">📖 Read our comprehensive legal
+                                guide</span> to understand your rights, responsibilities, and best practices for
+                            compliant web scraping.
                         </div>
                     </div>
                 </div>
@@ -631,12 +903,15 @@
                 </h1>
             </div>
             <div class="flex space-x-8 font-mono text-sm text-gray-500">
-                <a href="#" class="hover:text-white transition">TERMS</a>
-                <a href="#" class="hover:text-white transition">PRIVACY</a>
-                <a href="#" class="hover:text-white transition">CONTACT</a>
+                <a href="javascript:void(0)" onclick="openLegalModal()"
+                    class="hover:text-white transition">LEGALITIES</a>
+                <a href="/terms-of-service.html" class="hover:text-white transition">TERMS</a>
+                <a href="/privacy-policy.html" class="hover:text-white transition">PRIVACY</a>
+                <a href="mailto:chisholm@crewxi.com" class="hover:text-white transition">CONTACT</a>
             </div>
-            <div class="mt-8 md:mt-0 text-gray-600 text-sm">
-                © 2025 ScrapeXi Inc.
+            <div class="mt-8 md:mt-0 text-gray-600 text-sm text-center md:text-right">
+                <div>© 2025 ScrapeXI</div>
+                <div class="text-xs text-gray-700 mt-1">A Series B company of CrewXI LLC</div>
             </div>
         </div>
     </footer>
@@ -648,7 +923,7 @@
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 if (targetId === '#') return;
-                
+
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
                     const startPosition = window.pageYOffset;
@@ -662,10 +937,10 @@
                         const progress = timestamp - start;
                         // Ease Out Cubic: 1 - pow(1 - x, 3) 
                         // Fast start, slow end
-                        const ease = (t) => 1 - Math.pow(1 - t, 3); 
-                        
+                        const ease = (t) => 1 - Math.pow(1 - t, 3);
+
                         const percentage = Math.min(progress / duration, 1);
-                        
+
                         window.scrollTo(0, startPosition + distance * ease(percentage));
 
                         if (progress < duration) {
@@ -702,7 +977,7 @@
         function toggleFAQ(button) {
             const content = button.nextElementSibling;
             const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
-            
+
             // Close all others
             document.querySelectorAll('.faq-answer').forEach(el => {
                 el.style.maxHeight = '0px';
@@ -724,18 +999,18 @@
         let supabase;
 
         async function initSupabase() {
-            const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'http://localhost:8000' 
+            const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:8000'
                 : '';
 
             try {
-                const res = await fetch(`${API_BASE}/config`); 
+                const res = await fetch(`${API_BASE}/config`);
                 const config = await res.json();
 
                 if (config.supabase_url && config.supabase_anon_key) {
                     // @ts-ignore
                     supabase = window.supabase.createClient(config.supabase_url, config.supabase_anon_key);
-                    
+
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
                         // Update nav button if logged in
@@ -767,7 +1042,335 @@
                 alert("Login failed: " + error.message);
             }
         }
+
+        // Legal Modal Functions
+        function openLegalModal() {
+            document.getElementById('legalModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLegalModal() {
+            document.getElementById('legalModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('legalModal');
+            if (event.target === modal) {
+                closeLegalModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeLegalModal();
+            }
+        });
     </script>
+
+    <!-- Legal Information Modal -->
+    <div id="legalModal" class="modal-overlay">
+        <div class="modal-content p-8 md:p-12">
+            <!-- Close Button -->
+            <div class="flex justify-between items-start mb-6">
+                <h2 class="text-3xl md:text-4xl font-cyber font-bold text-neonBlue">Web Scraping Legal Guide</h2>
+                <button onclick="closeLegalModal()"
+                    class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+
+            <!-- Legal Content -->
+            <div class="text-gray-300 space-y-6 leading-relaxed">
+
+                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                    <p class="text-yellow-300 text-sm"><strong>⚖️ Disclaimer:</strong> This information is for
+                        educational purposes only and does not constitute legal advice. We are not lawyers. For specific
+                        legal guidance, please consult with a qualified attorney specializing in technology and internet
+                        law.</p>
+                </div>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">🏛️ Legal Status of Web Scraping (2024-2025)</h3>
+
+                <h4 class="text-xl font-bold text-white mt-6 mb-3">⚖️ Key Court Rulings</h4>
+
+                <div class="bg-black/30 border border-cyan-500/20 rounded-lg p-6 mb-4">
+                    <h5 class="text-lg font-bold text-cyan-400 mb-2">1. Van Buren v. United States (2021) - Supreme
+                        Court</h5>
+                    <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                        <li><strong class="text-white">Ruling:</strong> Narrowed the Computer Fraud and Abuse Act (CFAA)
+                        </li>
+                        <li><strong class="text-white">Key Point:</strong> "Exceeds authorized access" means accessing
+                            data you're <strong>not entitled to access</strong>, NOT using authorized data in
+                            unauthorized ways</li>
+                        <li><strong class="text-white">Impact:</strong> If you have legitimate login credentials, using
+                            them to access data you're authorized to see is generally NOT a CFAA violation, even if you
+                            use that data in ways the site doesn't like</li>
+                    </ul>
+                </div>
+
+                <div class="bg-black/30 border border-cyan-500/20 rounded-lg p-6 mb-4">
+                    <h5 class="text-lg font-bold text-cyan-400 mb-2">2. hiQ Labs v. LinkedIn (2022) - 9th Circuit</h5>
+                    <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                        <li><strong class="text-white">Ruling:</strong> Scraping <strong>publicly available
+                                data</strong> does NOT violate CFAA</li>
+                        <li><strong class="text-white">Key Point:</strong> LinkedIn couldn't use CFAA to block hiQ from
+                            scraping public profiles</li>
+                        <li><strong class="text-white">Impact:</strong> Public data scraping is generally legal under
+                            CFAA</li>
+                    </ul>
+                </div>
+
+                <h4 class="text-xl font-bold text-white mt-8 mb-3">🟢 Generally Legal Scenarios</h4>
+                <ul class="list-disc list-inside space-y-2 ml-4">
+                    <li><strong>Scraping PUBLIC data</strong> (no login required) - Court precedent supports this</li>
+                    <li><strong>Using YOUR OWN credentials</strong> to access YOUR OWN data - Van Buren supports this
+                    </li>
+                    <li><strong>Respecting rate limits</strong> and not causing harm to the website</li>
+                </ul>
+
+                <h4 class="text-xl font-bold text-yellow-400 mt-8 mb-3">🟡 Gray Area: Authenticated Scraping</h4>
+                <p>When users scrape sites with their own credentials:</p>
+
+                <div class="grid md:grid-cols-2 gap-4 my-4">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-green-400 mb-2">✅ Arguments FOR Legality:</h5>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-400">
+                            <li>Users have authorized access (they own the credentials)</li>
+                            <li>Van Buren says using authorized access in "unauthorized ways" isn't a CFAA violation
+                            </li>
+                            <li>They're accessing data they're entitled to see</li>
+                        </ul>
+                    </div>
+                    <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-yellow-400 mb-2">⚠️ Potential Risks:</h5>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-400">
+                            <li>Terms of Service violations (civil, not criminal)</li>
+                            <li>Contract law - ToS violations could be breach of contract</li>
+                            <li>DMCA/Copyright if scraping copyrighted content</li>
+                            <li>GDPR/Privacy laws if scraping personal data (EU)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4 class="text-xl font-bold text-red-400 mt-8 mb-3">🔴 Clearly Illegal Activities</h4>
+                <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                    <li><strong class="text-red-300">Bypassing technical barriers</strong> - Exploiting vulnerabilities,
+                        breaking CAPTCHAs with AI</li>
+                    <li><strong class="text-red-300">Using stolen credentials</strong> - Accessing accounts you don't
+                        own</li>
+                    <li><strong class="text-red-300">Accessing unauthorized data</strong> - Data you're not entitled to
+                        see</li>
+                    <li><strong class="text-red-300">DDoS-level traffic</strong> - Causing harm to the website's
+                        infrastructure</li>
+                </ul>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">🍪 Cookie Sessions & Authentication</h3>
+
+                <div class="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-6 mb-4">
+                    <h5 class="text-lg font-bold text-cyan-400 mb-3">✅ Cookie Sessions Are NOT Backdoors</h5>
+                    <p class="mb-3">When you log in with username/password:</p>
+                    <ol class="list-decimal list-inside space-y-2 ml-4 text-gray-400">
+                        <li>User enters credentials ✅ (authorized)</li>
+                        <li>Server says "OK, here's a cookie" ✅ (server grants this)</li>
+                        <li>Browser sends cookie with each request ✅ (normal HTTP behavior)</li>
+                    </ol>
+                    <p class="mt-3 text-white"><strong>This is exactly how websites WANT you to authenticate.</strong>
+                    </p>
+                </div>
+
+                <h4 class="text-xl font-bold text-white mt-6 mb-3">What IS a Backdoor?</h4>
+                <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                    <li>❌ SQL injection to bypass login</li>
+                    <li>❌ Using stolen/leaked credentials</li>
+                    <li>❌ Finding unprotected API endpoints that should require authentication</li>
+                    <li>❌ Session hijacking (stealing someone else's cookie)</li>
+                </ul>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">🤖 CAPTCHAs & Technical Barriers</h3>
+
+                <div class="grid md:grid-cols-2 gap-4 my-4">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-green-400 mb-2">✅ LEGAL Approaches:</h5>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-400">
+                            <li><strong>Human-assisted solving</strong> - User solves CAPTCHA themselves</li>
+                            <li><strong>CAPTCHA solving services</strong> - Real humans solve it (2Captcha,
+                                Anti-Captcha)</li>
+                            <li><strong>Waiting/Respecting</strong> - Pause and let user solve it</li>
+                            <li><strong>Rate limiting</strong> - Slow down to avoid triggering CAPTCHAs</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-red-400 mb-2">❌ ILLEGAL/Risky Approaches:</h5>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-400">
+                            <li><strong>Automated CAPTCHA breaking</strong> - Using AI/ML without human involvement</li>
+                            <li><strong>Bypassing entirely</strong> - Finding backdoors to avoid CAPTCHA pages</li>
+                            <li><strong>Exploiting vulnerabilities</strong> - Breaking the CAPTCHA system</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="text-cyan-300 italic">💡 Think of it this way: CAPTCHA says "prove you're human" - Having a
+                    human solve it = complying ✅ | Using AI to fake being human = circumventing ❌</p>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">📋 Best Practices for ScrapeXI Users</h3>
+
+                <div class="bg-black/30 border border-purple-500/30 rounded-lg p-6">
+                    <ol class="list-decimal list-inside space-y-3 text-gray-400">
+                        <li><strong class="text-white">Only use YOUR OWN credentials</strong> - Never use stolen or
+                            shared accounts</li>
+                        <li><strong class="text-white">Respect rate limits</strong> - Don't overwhelm websites with
+                            requests</li>
+                        <li><strong class="text-white">Scrape responsibly</strong> - Only collect data you're authorized
+                            to access</li>
+                        <li><strong class="text-white">Review Terms of Service</strong> - Understand that ToS violations
+                            are civil matters, not criminal</li>
+                        <li><strong class="text-white">Use for personal/business purposes</strong> - Don't resell
+                            scraped data without permission</li>
+                        <li><strong class="text-white">Respect robots.txt</strong> - While not legally binding, it shows
+                            good faith</li>
+                        <li><strong class="text-white">Stop if asked</strong> - If you receive a cease-and-desist,
+                            consult a lawyer</li>
+                    </ol>
+                </div>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">🎯 ScrapeXI's Position</h3>
+
+                <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
+                    <p class="mb-4">ScrapeXI is a <strong class="text-white">browser automation tool</strong> that:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                        <li>Logs in using the user's own credentials</li>
+                        <li>Maintains sessions via standard HTTP cookies (exactly as a web browser does)</li>
+                        <li>Accesses only data the user is authorized to see</li>
+                        <li>Functions identically to manual browsing with automation</li>
+                    </ul>
+                    <p class="mt-4 text-cyan-300"><strong>We provide the tool - users are responsible for how they use
+                            it.</strong></p>
+                </div>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">🔍 ScrapeXI Technical Compliance Audit</h3>
+
+                <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-4">
+                    <h5 class="text-lg font-bold text-green-400 mb-3">✅ NO AUTOMATED CAPTCHA BREAKING</h5>
+                    <p class="mb-3 text-white">We've thoroughly audited our codebase and confirmed:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                        <li><strong class="text-white">No CAPTCHA solving services</strong> - No integration with
+                            2Captcha, Anti-Captcha, or similar automated services</li>
+                        <li><strong class="text-white">No AI CAPTCHA breaking</strong> - No machine learning models
+                            attempting to solve CAPTCHAs</li>
+                        <li><strong class="text-white">No CAPTCHA bypass code</strong> - No code attempting to
+                            circumvent CAPTCHA systems</li>
+                        <li><strong class="text-white">Manual solving only</strong> - When CAPTCHAs appear, users solve
+                            them manually during the session</li>
+                    </ul>
+                </div>
+
+                <div class="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-6 mb-4">
+                    <h5 class="text-lg font-bold text-cyan-400 mb-3">🛡️ What "Stealth Mode" Actually Does (100% Legal)
+                    </h5>
+                    <p class="mb-3 text-white">Our optional <code
+                            class="bg-black/50 px-2 py-1 rounded text-cyan-300">playwright-stealth</code> library is
+                        completely legal and only:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                        <li><strong class="text-white">Removes automation detection markers</strong> - Like <code
+                                class="bg-black/50 px-1 rounded text-cyan-300">navigator.webdriver</code> flag</li>
+                        <li><strong class="text-white">Randomizes browser fingerprints</strong> - User agent, viewport
+                            size, timezone (normal browser behavior)</li>
+                        <li><strong class="text-white">Makes automated browsers appear human-like</strong> - Mimics
+                            natural browsing patterns</li>
+                        <li><strong class="text-red-300">Does NOT break CAPTCHAs or bypass security</strong> - Only
+                            reduces detection, doesn't circumvent protection</li>
+                    </ul>
+                    <p class="mt-3 text-cyan-300 italic">💡 This is the same technology used by legitimate browser
+                        automation tools like Selenium and Puppeteer.</p>
+                </div>
+
+                <h4 class="text-xl font-bold text-white mt-6 mb-3">✅ Additional Compliance Checks</h4>
+
+                <div class="grid md:grid-cols-2 gap-4 my-4">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-green-400 mb-2">🔐 Authentication Methods</h5>
+                        <ul class="list-none space-y-1 text-sm text-gray-400">
+                            <li>✅ Uses standard HTTP cookies (legitimate)</li>
+                            <li>✅ Accepts user-provided credentials only</li>
+                            <li>✅ Users use their own accounts</li>
+                            <li>✅ No credential theft or unauthorized access</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-green-400 mb-2">⏱️ Rate Limiting</h5>
+                        <ul class="list-none space-y-1 text-sm text-gray-400">
+                            <li>✅ Has configurable wait times</li>
+                            <li>✅ Adds random delays in stealth mode</li>
+                            <li>✅ Respects website load (no DDoS)</li>
+                            <li>✅ User-controlled request pacing</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-green-400 mb-2">📊 Data Access</h5>
+                        <ul class="list-none space-y-1 text-sm text-gray-400">
+                            <li>✅ Only accesses authorized data</li>
+                            <li>✅ Uses user's own login credentials</li>
+                            <li>✅ No unauthorized data access</li>
+                            <li>✅ Respects user permissions</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h5 class="font-bold text-green-400 mb-2">🔒 Session Management</h5>
+                        <ul class="list-none space-y-1 text-sm text-gray-400">
+                            <li>✅ Standard browser storage state (cookies)</li>
+                            <li>✅ No session hijacking</li>
+                            <li>✅ No backdoor access</li>
+                            <li>✅ Legitimate authentication flow</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mt-6">
+                    <h5 class="text-lg font-bold text-blue-400 mb-3">🎯 Bottom Line: ScrapeXI is 100% Legal</h5>
+                    <p class="text-gray-300">Our service operates as a legitimate browser automation tool, similar to
+                        Selenium, Playwright, and Puppeteer. We:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4 mt-3 text-gray-400">
+                        <li>Do NOT break CAPTCHAs or bypass security measures</li>
+                        <li>Do NOT use stolen credentials or unauthorized access</li>
+                        <li>Do NOT exploit vulnerabilities or backdoors</li>
+                        <li>Do NOT cause harm to website infrastructure</li>
+                        <li>DO use standard authentication (cookies, user credentials)</li>
+                        <li>DO respect rate limits and website resources</li>
+                        <li>DO comply with Van Buren and hiQ court rulings</li>
+                    </ul>
+                </div>
+
+                <h3 class="text-2xl font-bold text-neonBlue mt-8 mb-4">📚 Additional Resources</h3>
+                <ul class="list-disc list-inside space-y-2 ml-4 text-gray-400">
+                    <li><a href="https://en.wikipedia.org/wiki/Van_Buren_v._United_States" target="_blank"
+                            class="text-cyan-400 hover:text-cyan-300 underline">Van Buren v. United States
+                            (Wikipedia)</a></li>
+                    <li><a href="https://en.wikipedia.org/wiki/HiQ_Labs_v._LinkedIn" target="_blank"
+                            class="text-cyan-400 hover:text-cyan-300 underline">hiQ Labs v. LinkedIn (Wikipedia)</a>
+                    </li>
+                    <li><a href="https://www.eff.org/deeplinks/2021/07/eff-ninth-circuit-recent-supreme-court-decision-van-buren-does-not-criminalize-web"
+                            target="_blank" class="text-cyan-400 hover:text-cyan-300 underline">EFF Analysis: Van Buren
+                            Decision</a></li>
+                </ul>
+
+                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mt-8">
+                    <p class="text-yellow-300 text-sm"><strong>⚠️ Final Note:</strong> Laws vary by jurisdiction and are
+                        constantly evolving. This guide reflects the current state of U.S. law as of 2024-2025. Always
+                        consult with a qualified attorney for legal advice specific to your situation.</p>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button onclick="closeLegalModal()"
+                        class="cyber-btn px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-all">
+                        Close Guide
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
