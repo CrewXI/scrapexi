@@ -767,17 +767,32 @@ async def stripe_webhook(request: Request):
     Stripe webhook handler - ONLY ADDS CREDITS, NEVER SUBTRACTS
     Handles: subscriptions, one-time purchases, renewals, cancellations
     """
+    print("🔔 Webhook endpoint hit!")
+    print(f"   Headers: {dict(request.headers)}")
+
     payload = await request.body()
+    print(f"   Payload length: {len(payload)} bytes")
+
     sig_header = request.headers.get("stripe-signature")
+    print(f"   Signature present: {bool(sig_header)}")
+
+    # Check if webhook secret is configured
+    if not STRIPE_WEBHOOK_SECRET:
+        print("⚠️ WARNING: STRIPE_WEBHOOK_SECRET not configured!")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Webhook secret not configured"}
+        )
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+        print("✅ Webhook signature verified!")
     except ValueError as e:
         print(f"❌ Stripe webhook - Invalid payload: {e}")
-        raise HTTPException(status_code=400, detail="Invalid payload")
+        return JSONResponse(status_code=400, content={"error": "Invalid payload"})
     except stripe.error.SignatureVerificationError as e:
         print(f"❌ Stripe webhook - Invalid signature: {e}")
-        raise HTTPException(status_code=400, detail="Invalid signature")
+        return JSONResponse(status_code=400, content={"error": "Invalid signature"})
 
     event_type = event["type"]
     data = event["data"]["object"]
@@ -900,6 +915,88 @@ async def stripe_webhook(request: Request):
                     print(f"❌ Error processing renewal: {e}")
 
         # ============================================================
+        # SUBSCRIPTION CREATED - New subscription (alternative to checkout.session.completed)
+        # ============================================================
+        elif event_type == "customer.subscription.created":
+            customer_id = data.get("customer")
+            sub_id = data.get("id")
+
+            print(f"   Subscription ID: {sub_id}, Customer: {customer_id}")
+
+            if sub_id and customer_id:
+                try:
+                    customer = stripe.Customer.retrieve(customer_id)
+                    customer_email = customer.email
+
+                    print(f"   Customer email: {customer_email}")
+
+                    if data["items"]["data"]:
+                        price_id = data["items"]["data"][0]["price"]["id"]
+                        item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
+
+                        print(f"   Price ID: {price_id}, Item limit: {item_limit}")
+
+                        # Add subscription credits via RPC
+                        result = supabase.rpc(
+                            "add_subscription_credits",
+                            {
+                                "p_user_email": customer_email,
+                                "p_stripe_customer_id": customer_id,
+                                "p_stripe_subscription_id": sub_id,
+                                "p_price_id": price_id,
+                                "p_item_limit": item_limit,
+                            },
+                        ).execute()
+
+                        print(f"✅ Subscription created: {customer_email} -> {item_limit} items (Price: {price_id})")
+                        print(f"   RPC Result: {result.data}")
+                except Exception as e:
+                    print(f"❌ Error processing subscription.created: {e}")
+                    import traceback
+                    traceback.print_exc()
+
+        # ============================================================
+        # SUBSCRIPTION CREATED - New subscription (alternative to checkout.session.completed)
+        # ============================================================
+        elif event_type == "customer.subscription.created":
+            customer_id = data.get("customer")
+            sub_id = data.get("id")
+
+            print(f"   Subscription ID: {sub_id}, Customer: {customer_id}")
+
+            if sub_id and customer_id:
+                try:
+                    customer = stripe.Customer.retrieve(customer_id)
+                    customer_email = customer.email
+
+                    print(f"   Customer email: {customer_email}")
+
+                    if data["items"]["data"]:
+                        price_id = data["items"]["data"][0]["price"]["id"]
+                        item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
+
+                        print(f"   Price ID: {price_id}, Item limit: {item_limit}")
+
+                        # Add subscription credits via RPC
+                        result = supabase.rpc(
+                            "add_subscription_credits",
+                            {
+                                "p_user_email": customer_email,
+                                "p_stripe_customer_id": customer_id,
+                                "p_stripe_subscription_id": sub_id,
+                                "p_price_id": price_id,
+                                "p_item_limit": item_limit,
+                            },
+                        ).execute()
+
+                        print(f"✅ Subscription created: {customer_email} -> {item_limit} items (Price: {price_id})")
+                        print(f"   RPC Result: {result.data}")
+                except Exception as e:
+                    print(f"❌ Error processing subscription.created: {e}")
+                    import traceback
+                    traceback.print_exc()
+
+        # ============================================================
         # SUBSCRIPTION UPDATED - Plan upgrade/downgrade
         # ============================================================
         elif event_type == "customer.subscription.updated":
@@ -938,24 +1035,39 @@ async def stripe_webhook(request: Request):
             customer_id = data.get("customer")
             sub_id = data.get("id")
 
-            if customer_id:
+            if customer_id and sub_id:
                 try:
                     customer = stripe.Customer.retrieve(customer_id)
                     customer_email = customer.email
 
-                    # Downgrade to free tier
-                    supabase.table("profiles").update({
-                        "subscription_status": "cancelled",
-                        "subscription_tier": "Free",
-                        "items_limit": FREE_TIER_LIMIT,
-                        "items_used": 0,
-                        "subscription_id": None,
-                        "subscription_price_id": None,
-                    }).eq("email", customer_email).execute()
+                    # ✅ CRITICAL: Only cancel if subscription ID matches!
+                    # This prevents cancelling the wrong subscription when user has multiple
+                    profile_result = supabase.table("profiles").select("subscription_id").eq("email", customer_email).execute()
 
-                    print(f"✅ Subscription cancelled: {customer_email} -> downgraded to Free tier ({FREE_TIER_LIMIT} items)")
+                    if profile_result.data and len(profile_result.data) > 0:
+                        current_sub_id = profile_result.data[0].get("subscription_id")
+
+                        # Only downgrade if the cancelled subscription matches the current one
+                        if current_sub_id == sub_id:
+                            supabase.table("profiles").update({
+                                "subscription_status": "cancelled",
+                                "subscription_tier": "Free",
+                                "items_limit": FREE_TIER_LIMIT,
+                                "items_used": 0,
+                                "subscription_id": None,
+                                "subscription_price_id": None,
+                            }).eq("email", customer_email).execute()
+
+                            print(f"✅ Subscription cancelled: {customer_email} -> downgraded to Free tier ({FREE_TIER_LIMIT} items)")
+                        else:
+                            print(f"⚠️ Subscription {sub_id} cancelled but doesn't match current subscription {current_sub_id} - ignoring")
+                    else:
+                        print(f"⚠️ No profile found for {customer_email}")
+
                 except Exception as e:
                     print(f"❌ Error processing cancellation: {e}")
+                    import traceback
+                    traceback.print_exc()
 
         # ============================================================
         # PAYMENT FAILED - Handle failed payments
@@ -993,10 +1105,16 @@ async def stripe_webhook(request: Request):
 
     except Exception as e:
         print(f"❌ Webhook processing error: {e}")
+        import traceback
+        traceback.print_exc()
         # Don't raise exception - return 200 to Stripe to prevent retries
         # Log the error for manual review
 
-    return {"status": "success", "event_type": event_type}
+    print(f"✅ Webhook processed successfully: {event_type}")
+    return JSONResponse(
+        status_code=200,
+        content={"status": "success", "event_type": event_type}
+    )
 
 
 # Serve Frontend (SPA)

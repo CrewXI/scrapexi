@@ -1138,7 +1138,8 @@
                     <h3 class="text-sm font-cyber text-white tracking-wider uppercase">Monthly Subscriptions</h3>
 
                     <!-- Starter Plan -->
-                    <div class="glass-card p-5 border border-white/10 hover:border-neonBlue/50 transition rounded-lg">
+                    <div id="starterPlanCard"
+                        class="glass-card p-5 border border-white/10 hover:border-neonBlue/50 transition rounded-lg">
                         <div class="flex items-start justify-between mb-3">
                             <div>
                                 <h4 class="text-lg font-cyber text-neonBlue">STARTER</h4>
@@ -1150,14 +1151,14 @@
                                 <p class="text-xl font-bold text-neonGreen">1,000</p>
                             </div>
                         </div>
-                        <button onclick="subscribeToPlan('price_1SWK4S8nEz73sTkiiWWP5tQ2')"
+                        <button id="starterPlanBtn" onclick="subscribeToPlan('price_1SWK4S8nEz73sTkiiWWP5tQ2')"
                             class="w-full cyber-btn px-4 py-2 text-xs font-bold border-neonBlue text-neonBlue hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]">
                             SUBSCRIBE
                         </button>
                     </div>
 
                     <!-- Pro Plan -->
-                    <div
+                    <div id="proPlanCard"
                         class="glass-card p-5 border border-neonPink/50 hover:border-neonPink transition rounded-lg relative overflow-hidden">
                         <div
                             class="absolute top-0 right-0 bg-neonPink text-black text-[10px] font-bold px-3 py-1 tracking-wider">
@@ -1173,14 +1174,15 @@
                                 <p class="text-xl font-bold text-neonGreen">5,000</p>
                             </div>
                         </div>
-                        <button onclick="subscribeToPlan('price_1SWK6C8nEz73sTkimA2XyrU0')"
+                        <button id="proPlanBtn" onclick="subscribeToPlan('price_1SWK6C8nEz73sTkimA2XyrU0')"
                             class="w-full cyber-btn px-4 py-2 text-xs font-bold border-neonPink text-neonPink hover:shadow-[0_0_20px_rgba(255,0,255,0.4)]">
                             SUBSCRIBE
                         </button>
                     </div>
 
                     <!-- Business Plan -->
-                    <div class="glass-card p-5 border border-white/10 hover:border-neonGreen/50 transition rounded-lg">
+                    <div id="businessPlanCard"
+                        class="glass-card p-5 border border-white/10 hover:border-neonGreen/50 transition rounded-lg">
                         <div class="flex items-start justify-between mb-3">
                             <div>
                                 <h4 class="text-lg font-cyber text-neonGreen">BUSINESS</h4>
@@ -1192,7 +1194,7 @@
                                 <p class="text-xl font-bold text-neonGreen">10,000</p>
                             </div>
                         </div>
-                        <button onclick="subscribeToPlan('price_1SWK6p8nEz73sTkicVIwLUP7')"
+                        <button id="businessPlanBtn" onclick="subscribeToPlan('price_1SWK6p8nEz73sTkicVIwLUP7')"
                             class="w-full cyber-btn px-4 py-2 text-xs font-bold border-neonGreen text-neonGreen hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]">
                             SUBSCRIBE
                         </button>
@@ -2196,9 +2198,43 @@
 
             // Update current plan display
             if (window.userCredits) {
-                document.getElementById('currentPlanDisplay').textContent = window.userCredits.tier || 'FREE';
+                const currentTier = window.userCredits.tier || 'FREE';
+                document.getElementById('currentPlanDisplay').textContent = currentTier;
                 document.getElementById('currentSubCredits').textContent = window.userCredits.subscription.toLocaleString();
                 document.getElementById('currentOnetimeCredits').textContent = window.userCredits.onetime.toLocaleString();
+
+                // Disable current plan button and grey it out
+                const planMapping = {
+                    'Starter': { cardId: 'starterPlanCard', btnId: 'starterPlanBtn' },
+                    'Pro': { cardId: 'proPlanCard', btnId: 'proPlanBtn' },
+                    'Business': { cardId: 'businessPlanCard', btnId: 'businessPlanBtn' }
+                };
+
+                // Reset all plans first (enable them)
+                Object.values(planMapping).forEach(plan => {
+                    const card = document.getElementById(plan.cardId);
+                    const btn = document.getElementById(plan.btnId);
+                    if (card && btn) {
+                        card.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                        btn.textContent = 'SUBSCRIBE';
+                    }
+                });
+
+                // Disable current plan
+                if (planMapping[currentTier]) {
+                    const currentPlan = planMapping[currentTier];
+                    const card = document.getElementById(currentPlan.cardId);
+                    const btn = document.getElementById(currentPlan.btnId);
+
+                    if (card && btn) {
+                        card.classList.add('opacity-50', 'cursor-not-allowed');
+                        btn.disabled = true;
+                        btn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                        btn.textContent = 'CURRENT PLAN';
+                    }
+                }
             }
         }
 
