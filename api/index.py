@@ -716,14 +716,21 @@ def cancel_job(job_id: str):
 @app.post("/create-checkout-session")
 async def create_checkout_session(
     price_id: str = Body(..., embed=True),
-    mode: str = Body(..., embed=True)  # 'subscription' or 'payment'
+    mode: str = Body(..., embed=True),  # 'subscription' or 'payment'
+    user_email: str = Body(..., embed=True)  # User's email for customer lookup
 ):
     """
     Create a Stripe Checkout Session for subscriptions or one-time purchases.
 
+    For subscription upgrades/downgrades:
+    - Checks if user has existing subscription
+    - Cancels old subscription at period end
+    - Creates new subscription immediately
+
     Args:
         price_id: Stripe Price ID (e.g., price_1SWK4S8nEz73sTkiiWWP5tQ2)
         mode: 'subscription' for monthly plans, 'payment' for one-time purchases
+        user_email: User's email address
 
     Returns:
         JSON with checkout URL
@@ -737,22 +744,65 @@ async def create_checkout_session(
         if price_id not in PLAN_LIMITS:
             raise HTTPException(status_code=400, detail=f"Invalid price_id: {price_id}")
 
+        # Check if user has existing subscription (for upgrades/downgrades)
+        customer_id = None
+        existing_subscription_id = None
+
+        if mode == 'subscription':
+            # Get user's profile from Supabase
+            profile_result = supabase.table("profiles").select("stripe_customer_id, subscription_id, subscription_price_id").eq("email", user_email).execute()
+
+            if profile_result.data and len(profile_result.data) > 0:
+                profile = profile_result.data[0]
+                customer_id = profile.get("stripe_customer_id")
+                existing_subscription_id = profile.get("subscription_id")
+                current_price_id = profile.get("subscription_price_id")
+
+                # If user is trying to subscribe to the same plan, return error
+                if current_price_id == price_id:
+                    raise HTTPException(status_code=400, detail="You are already subscribed to this plan")
+
+                # If user has existing subscription, cancel it at period end
+                if existing_subscription_id:
+                    try:
+                        print(f"🔄 User {user_email} upgrading/downgrading from {current_price_id} to {price_id}")
+                        print(f"   Cancelling old subscription {existing_subscription_id} at period end")
+
+                        # Cancel old subscription at period end (they keep access until renewal)
+                        stripe.Subscription.modify(
+                            existing_subscription_id,
+                            cancel_at_period_end=True
+                        )
+                        print(f"✅ Old subscription will cancel at period end")
+                    except stripe.error.StripeError as e:
+                        print(f"⚠️ Warning: Could not cancel old subscription: {e}")
+                        # Continue anyway - webhook will handle cleanup
+
         # Create Stripe Checkout Session
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
+        checkout_params = {
+            'payment_method_types': ['card'],
+            'line_items': [{
                 'price': price_id,
                 'quantity': 1,
             }],
-            mode=mode,
-            success_url='https://scrapexi.com/dashboard?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url='https://scrapexi.com/dashboard',
-            # Allow promotion codes
-            allow_promotion_codes=True,
-        )
+            'mode': mode,
+            'success_url': 'https://scrapexi.com/dashboard?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url': 'https://scrapexi.com/dashboard',
+            'allow_promotion_codes': True,
+            'customer_email': user_email,  # Pre-fill email
+        }
+
+        # If user has existing Stripe customer ID, use it
+        if customer_id:
+            checkout_params['customer'] = customer_id
+            del checkout_params['customer_email']  # Can't use both
+
+        checkout_session = stripe.checkout.Session.create(**checkout_params)
 
         return {"url": checkout_session.url}
 
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
     except stripe.error.StripeError as e:
         print(f"❌ Stripe error creating checkout session: {e}")
         raise HTTPException(status_code=500, detail=f"Stripe error: {str(e)}")

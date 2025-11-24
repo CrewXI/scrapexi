@@ -291,8 +291,8 @@
 
     <!-- Header -->
     <header
-        class="h-20 flex items-center justify-between px-8 z-10 border-b border-white/5 bg-darkBg/80 backdrop-blur-sm flex-shrink-0">
-        <div class="flex items-center gap-4">
+        class="h-16 sm:h-20 flex items-center justify-between px-2 sm:px-4 lg:px-8 z-10 border-b border-white/5 bg-darkBg/80 backdrop-blur-sm flex-shrink-0">
+        <div class="flex items-center gap-2 sm:gap-4">
             <div class="relative group">
                 <div
                     class="absolute -inset-1 bg-gradient-to-r from-neonPink to-neonBlue rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200">
@@ -303,20 +303,20 @@
                 </div>
             </div>
             <div>
-                <h1 class="font-cyber text-2xl text-white tracking-widest uppercase"><span
+                <h1 class="font-cyber text-lg sm:text-2xl text-white tracking-widest uppercase"><span
                         class="text-neonBlue text-glow-blue">Scrape</span><span
                         class="text-neonPink text-glow-pink">Xi</span></h1>
-                <div class="flex items-center gap-2">
+                <div class="hidden sm:flex items-center gap-2">
                     <div class="w-1.5 h-1.5 rounded-full bg-neonGreen animate-pulse shadow-[0_0_10px_#00FF99]"></div>
                     <span class="text-[10px] tracking-[0.2em] text-neonGreen uppercase">System Online</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 sm:gap-6">
             <!-- Credit Display in Header -->
             <div id="headerCredits"
-                class="hidden sm:flex items-center gap-4 px-4 py-2 glass-card rounded-lg border border-neonBlue/20">
+                class="hidden md:flex items-center gap-4 px-4 py-2 glass-card rounded-lg border border-neonBlue/20">
                 <div class="text-right">
                     <p class="text-[9px] text-gray-400 tracking-wider uppercase mb-0.5">Total Credits</p>
                     <p id="headerTotalCredits" class="text-sm font-bold text-neonBlue tracking-wider">...</p>
@@ -332,8 +332,8 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 px-4 py-2 glass-card rounded-lg">
-                <img id="userAvatar" src="" class="w-8 h-8 rounded border border-white/20">
+            <div class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 glass-card rounded-lg">
+                <img id="userAvatar" src="" class="w-6 h-6 sm:w-8 sm:h-8 rounded border border-white/20">
                 <div class="text-right hidden sm:block">
                     <p id="userName" class="text-xs font-bold text-white tracking-wider uppercase">Operator</p>
                 </div>
@@ -348,74 +348,79 @@
     </header>
 
     <!-- Main Interface -->
-    <div class="flex-1 flex overflow-hidden p-6 gap-6 z-10">
+    <div
+        class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden p-2 lg:p-6 gap-2 lg:gap-6 z-10 pb-20 lg:pb-2">
 
-        <!-- Sidebar Nav -->
-        <nav class="w-16 lg:w-20 glass-card rounded-2xl flex flex-col items-center py-8 gap-8 flex-shrink-0">
+        <!-- Sidebar Nav (Hidden on mobile/tablet, shown on desktop only) -->
+        <nav class="hidden lg:flex w-20 glass-card rounded-2xl flex-col items-center py-8 gap-8 flex-shrink-0">
             <a href="#" onclick="closeAllModals()"
-                class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110">
+                class="p-3 rounded-xl bg-white/5 border border-neonBlue/30 text-neonBlue shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all hover:scale-110 relative group">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
+                <span
+                    class="absolute left-full ml-4 px-3 py-2 bg-black/90 backdrop-blur-md border border-neonBlue/50 rounded-lg text-neonBlue text-xs font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_0_20px_rgba(0,255,255,0.3)]">
+                    SCRAPE
+                </span>
             </a>
             <a href="#" onclick="openTemplatesModal()"
-                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                title="Template Library">
+                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all relative group">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
                 </svg>
+                <span
+                    class="absolute left-full ml-4 px-3 py-2 bg-black/90 backdrop-blur-md border border-neonPink/50 rounded-lg text-neonPink text-xs font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_0_20px_rgba(255,0,255,0.3)]">
+                    TEMPLATES
+                </span>
             </a>
             <a href="#" onclick="openHistoryModal()"
-                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                title="Search History">
+                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all relative group">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
+                <span
+                    class="absolute left-full ml-4 px-3 py-2 bg-black/90 backdrop-blur-md border border-white/50 rounded-lg text-white text-xs font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                    HISTORY
+                </span>
             </a>
             <div class="flex-1"></div>
 
             <!-- Upgrade Button -->
             <button onclick="openUpgradePanel()"
-                class="p-3 rounded-xl bg-gradient-to-r from-neonPink/20 to-neonBlue/20 border border-neonPink/50 text-neonPink shadow-[0_0_20px_rgba(255,0,255,0.3)] transition-all hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,255,0.5)] animate-pulse"
-                title="Upgrade Plan">
+                class="p-3 rounded-xl bg-gradient-to-r from-neonPink/20 to-neonBlue/20 border border-neonPink/50 text-neonPink shadow-[0_0_20px_rgba(255,0,255,0.3)] transition-all hover:scale-110 hover:shadow-[0_0_30px_rgba(255,0,255,0.5)] animate-pulse relative group">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
+                <span
+                    class="absolute left-full ml-4 px-3 py-2 bg-black/90 backdrop-blur-md border border-neonPink/50 rounded-lg text-neonPink text-xs font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_0_20px_rgba(255,0,255,0.3)]">
+                    UPGRADE
+                </span>
             </button>
 
-            <div id="userStats"
-                class="flex flex-col items-center gap-3 text-[9px] font-mono text-gray-500 w-full text-center border-t border-b border-white/5 py-4 mb-4">
-                <div>
-                    <span class="block text-neonBlue mb-0.5 tracking-wider">USED</span>
-                    <span id="statUsed" class="text-white text-[10px]">...</span>
-                </div>
-                <div>
-                    <span class="block text-neonPink mb-0.5 tracking-wider">LEFT</span>
-                    <span id="statLeft" class="text-white text-[10px]">...</span>
-                </div>
-                <div>
-                    <span class="block text-neonGreen mb-0.5 tracking-wider">PLAN</span>
-                    <span id="statPlan" class="text-white text-[10px]">...</span>
-                </div>
-            </div>
 
-            <a href="#" class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+
+            <a href="#" onclick="openSettingsModal()"
+                class="p-3 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all relative group">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
+                <span
+                    class="absolute left-full ml-4 px-3 py-2 bg-black/90 backdrop-blur-md border border-white/50 rounded-lg text-white text-xs font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                    SETTINGS
+                </span>
             </a>
         </nav>
 
         <!-- Configuration Module -->
         <div
-            class="w-[500px] flex flex-col gap-0 overflow-hidden h-full glass-card rounded-2xl border border-white/10 flex-shrink-0 relative">
+            class="w-full lg:w-[500px] flex flex-col gap-0 overflow-hidden min-h-[calc(100vh-12rem)] lg:min-h-0 lg:h-full glass-card rounded-2xl border border-white/10 flex-shrink-0 relative">
 
             <!-- Tabs Header -->
             <div class="flex border-b border-white/10 h-14 bg-black/40">
@@ -773,10 +778,11 @@
         </div>
 
         <!-- Output Panel -->
-        <div class="flex-1 glass-card rounded-2xl flex flex-col overflow-hidden">
-            <div class="h-12 border-b border-white/5 flex items-center px-6 bg-black/20 flex-shrink-0 relative">
-                <!-- LEFT: Info -->
-                <div class="flex items-center gap-4">
+        <div
+            class="w-full lg:flex-1 min-h-[calc(100vh-12rem)] lg:min-h-0 lg:h-auto glass-card rounded-2xl flex flex-col overflow-hidden">
+            <div class="h-12 border-b border-white/5 flex items-center px-2 sm:px-6 bg-black/20 flex-shrink-0 relative">
+                <!-- LEFT: Info (Hidden on screens ≤1280px) -->
+                <div class="hidden 2xl:flex items-center gap-4">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-neonBlue animate-pulse"></div>
                         <span class="font-mono text-sm text-neonBlue tracking-widest">DATA_STREAM</span>
@@ -788,24 +794,26 @@
                 </div>
 
                 <!-- CENTER: View Toggles (Advanced Buttons) -->
-                <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <!-- On small screens (≤1280px): positioned on left. On large screens (>1280px): centered -->
+                <div
+                    class="2xl:absolute 2xl:left-1/2 2xl:top-1/2 2xl:transform 2xl:-translate-x-1/2 2xl:-translate-y-1/2">
                     <div class="flex bg-black/60 rounded-lg p-1 border border-white/10 shadow-inner gap-1">
                         <button onclick="toggleView('table')" id="viewBtnTable"
-                            class="w-24 py-1.5 text-[10px] font-bold font-mono rounded-md transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
+                            class="w-16 sm:w-24 py-1.5 text-[9px] sm:text-[10px] font-bold font-mono rounded-md transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
                             TABLE
                         </button>
                         <div class="w-px bg-white/10 my-1"></div>
                         <button onclick="toggleView('json')" id="viewBtnJson"
-                            class="w-24 py-1.5 text-[10px] font-bold font-mono rounded-md text-gray-500 hover:text-white transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
+                            class="w-16 sm:w-24 py-1.5 text-[9px] sm:text-[10px] font-bold font-mono rounded-md text-gray-500 hover:text-white transition-all duration-300 border border-transparent flex items-center justify-center tracking-widest hover:bg-white/5">
                             JSON
                         </button>
                     </div>
                 </div>
 
                 <!-- RIGHT: Actions -->
-                <div class="flex gap-2 ml-auto">
+                <div class="flex gap-1 sm:gap-2 ml-auto">
                     <button onclick="saveCurrentAsTemplate()"
-                        class="text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors flex items-center gap-1">
+                        class="hidden sm:flex text-gray-500 hover:text-neonBlue font-mono text-sm transition-colors items-center gap-1">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -813,20 +821,20 @@
                         SAVE_TPL
                     </button>
                     <button onclick="openTemplatesModal()"
-                        class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors flex items-center gap-1 mr-4">
+                        class="hidden sm:flex text-gray-500 hover:text-neonPink font-mono text-sm transition-colors items-center gap-1 mr-4">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
                         </svg>
                         EXPLORE
                     </button>
-                    <div class="w-px h-4 bg-white/10 self-center mx-1"></div>
+                    <div class="hidden sm:block w-px h-4 bg-white/10 self-center mx-1"></div>
                     <button onclick="copyToClipboard()"
-                        class="text-gray-500 hover:text-neonPink font-mono text-sm transition-colors">[COPY]</button>
+                        class="text-gray-500 hover:text-neonPink font-mono text-[10px] sm:text-sm transition-colors">[COPY]</button>
                     <button onclick="downloadRawJson()"
-                        class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[RAW]</button>
+                        class="text-gray-500 hover:text-white font-mono text-[10px] sm:text-sm transition-colors">[RAW]</button>
                     <button onclick="downloadCsv()"
-                        class="text-gray-500 hover:text-white font-mono text-sm transition-colors">[CSV]</button>
+                        class="text-gray-500 hover:text-white font-mono text-[10px] sm:text-sm transition-colors">[CSV]</button>
                 </div>
             </div>
             <div id="output"
@@ -864,6 +872,26 @@
                 <div id="tableView" class="hidden w-full"></div>
             </div>
         </div>
+
+        <!-- Footer (only visible on mobile/tablet, hidden on desktop) -->
+        <footer class="lg:hidden border-t border-white/10 py-8 bg-black/40 mt-12 w-full">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row justify-between items-center text-xs font-mono text-gray-500">
+                    <div class="mb-4 md:mb-0 text-center md:text-left">
+                        <div>© 2025 ScrapeXI. All rights reserved.</div>
+                        <div class="text-gray-600 mt-1">A Series B company of CrewXI LLC</div>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="/" class="hover:text-neonBlue transition">Legalities</a>
+                        <a href="/terms-of-service.html" target="_blank" class="hover:text-neonBlue transition">Terms of
+                            Service</a>
+                        <a href="/privacy-policy.html" target="_blank" class="hover:text-neonBlue transition">Privacy
+                            Policy</a>
+                        <a href="mailto:chisholm@crewxi.com" class="hover:text-neonBlue transition">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Help Modal -->
@@ -932,31 +960,32 @@
 
     <!-- Templates Modal -->
     <div id="templatesModal"
-        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-xl p-4">
         <div class="glass-card rounded-xl max-w-6xl w-full h-[90vh] flex flex-col border-neonPink/30">
 
             <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-white/5">
-                <h2 class="text-2xl font-cyber text-white tracking-wide flex items-center gap-3">
-                    <span class="text-neonPink">TEMPLATE</span> LIBRARY
-                </h2>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <input type="text" placeholder="SEARCH_MODULES..."
-                            class="cyber-input bg-black/50 pl-10 pr-4 py-2 rounded text-xs w-64">
-                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
+            <div class="flex flex-col gap-4 p-4 sm:p-6 border-b border-white/5">
+                <div class="flex items-center justify-between">
+                    <h2
+                        class="text-xl sm:text-2xl font-cyber text-white tracking-wide flex items-center gap-2 sm:gap-3">
+                        <span class="text-neonPink">TEMPLATE</span> LIBRARY
+                    </h2>
                     <button onclick="document.getElementById('templatesModal').classList.add('hidden')"
-                        class="text-gray-500 hover:text-white">
+                        class="text-gray-500 hover:text-white flex-shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
+                </div>
+                <div class="relative w-full sm:w-64">
+                    <input type="text" placeholder="SEARCH_MODULES..."
+                        class="cyber-input bg-black/50 pl-10 pr-4 py-2 rounded text-xs w-full">
+                    <svg class="w-4 h-4 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                 </div>
             </div>
 
@@ -989,7 +1018,7 @@
 
     <!-- History Modal -->
     <div id="historyModal"
-        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-xl p-4">
         <div class="glass-card rounded-xl max-w-5xl w-full h-[90vh] flex flex-col border-neonBlue/30">
 
             <!-- Modal Header -->
@@ -1009,16 +1038,19 @@
             </div>
 
             <!-- Modal Body -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-0 bg-black/20">
+            <div class="flex-1 overflow-auto custom-scrollbar p-0 bg-black/20">
                 <table class="w-full text-left border-collapse">
-                    <thead class="bg-white/5 text-xs uppercase font-mono text-gray-400 sticky top-0 backdrop-blur-md">
+                    <thead
+                        class="bg-white/5 text-xs uppercase font-mono text-gray-400 sticky top-0 backdrop-blur-md z-10">
                         <tr>
                             <th class="p-4 border-b border-white/10">Status</th>
                             <th class="p-4 border-b border-white/10">Target</th>
                             <th class="p-4 border-b border-white/10">Items</th>
                             <th class="p-4 border-b border-white/10">Data Usage</th>
                             <th class="p-4 border-b border-white/10">Time</th>
-                            <th class="p-4 border-b border-white/10 text-right">Action</th>
+                            <th
+                                class="p-4 border-b border-white/10 text-right sticky right-0 bg-white/5 backdrop-blur-md">
+                                Action</th>
                         </tr>
                     </thead>
                     <tbody id="historyTableBody" class="text-sm font-mono text-gray-300">
@@ -1029,9 +1061,190 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal"
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-xl p-4">
+        <div class="glass-card rounded-xl max-w-4xl w-full h-[90vh] flex flex-col border-neonBlue/30">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/5">
+                <h2 class="text-2xl font-cyber text-white tracking-wide flex items-center gap-3">
+                    <svg class="w-6 h-6 text-neonBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-neonBlue">SYSTEM</span> SETTINGS
+                </h2>
+                <button onclick="document.getElementById('settingsModal').classList.add('hidden')"
+                    class="text-gray-500 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+
+                <!-- Account Section -->
+                <div class="glass-card p-6 rounded-lg border border-white/10">
+                    <h3 class="text-lg font-cyber text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-neonBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Account Information
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-2">EMAIL</label>
+                            <input type="email" id="settingsEmail" readonly
+                                class="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-sm text-gray-300 font-mono cursor-not-allowed"
+                                value="Loading...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-2">USER ID</label>
+                            <input type="text" id="settingsUserId" readonly
+                                class="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-sm text-gray-300 font-mono cursor-not-allowed"
+                                value="Loading...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing & Subscription Section -->
+                <div class="glass-card p-6 rounded-lg border border-white/10">
+                    <h3 class="text-lg font-cyber text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        Billing & Subscription
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-black/40 rounded border border-white/10">
+                            <div>
+                                <p class="text-sm font-mono text-white">Current Plan</p>
+                                <p id="settingsCurrentPlan" class="text-xs text-gray-400 mt-1">Loading...</p>
+                            </div>
+                            <div class="text-right">
+                                <p id="settingsPlanPrice" class="text-lg font-bold text-neonPink">$0</p>
+                                <p class="text-xs text-gray-500">/month</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="manageSubscription()"
+                                class="flex-1 cyber-btn px-4 py-3 text-sm font-bold border-neonBlue text-neonBlue hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]">
+                                MANAGE SUBSCRIPTION
+                            </button>
+                            <button onclick="cancelSubscription()"
+                                class="flex-1 cyber-btn px-4 py-3 text-sm font-bold border-red-500 text-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                                CANCEL PLAN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage & Limits Section -->
+                <div class="glass-card p-6 rounded-lg border border-white/10">
+                    <h3 class="text-lg font-cyber text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-neonGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Usage & Limits
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-2">
+                                <span class="text-gray-400">SUBSCRIPTION CREDITS</span>
+                                <span id="settingsSubCredits" class="text-neonBlue">0 / 0</span>
+                            </div>
+                            <div class="w-full bg-black/40 rounded-full h-2 overflow-hidden">
+                                <div id="settingsSubCreditsBar" class="bg-neonBlue h-full transition-all"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-mono mb-2">
+                                <span class="text-gray-400">ONE-TIME CREDITS</span>
+                                <span id="settingsOnetimeCredits" class="text-neonPink">0</span>
+                            </div>
+                            <div class="w-full bg-black/40 rounded-full h-2 overflow-hidden">
+                                <div id="settingsOnetimeCreditsBar" class="bg-neonPink h-full transition-all"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Access Section -->
+                <div class="glass-card p-6 rounded-lg border border-white/10">
+                    <h3 class="text-lg font-cyber text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        API Access
+                    </h3>
+                    <div class="space-y-4">
+                        <p class="text-xs text-gray-400">Use the ScrapeXI API to integrate scraping into your
+                            applications.</p>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-2">API KEY</label>
+                            <div class="flex gap-2">
+                                <input type="password" id="settingsApiKey" readonly
+                                    class="flex-1 bg-black/40 border border-white/10 rounded px-4 py-2 text-sm text-gray-300 font-mono"
+                                    value="••••••••••••••••">
+                                <button onclick="toggleApiKeyVisibility()"
+                                    class="cyber-btn px-4 py-2 text-xs border-white/20 text-gray-400 hover:text-white">
+                                    SHOW
+                                </button>
+                                <button onclick="copyApiKey()"
+                                    class="cyber-btn px-4 py-2 text-xs border-neonBlue text-neonBlue">
+                                    COPY
+                                </button>
+                            </div>
+                        </div>
+                        <button onclick="regenerateApiKey()"
+                            class="cyber-btn px-4 py-2 text-xs border-purple-400 text-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                            REGENERATE API KEY
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="glass-card p-6 rounded-lg border border-red-500/30 bg-red-500/5">
+                    <h3 class="text-lg font-cyber text-red-500 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Danger Zone
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-mono text-white">Delete Account</p>
+                                <p class="text-xs text-gray-400 mt-1">Permanently delete your account and all data</p>
+                            </div>
+                            <button onclick="deleteAccount()"
+                                class="cyber-btn px-4 py-2 text-xs border-red-500 text-red-500 hover:bg-red-500/10">
+                                DELETE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- Stealth Help Modal -->
     <div id="stealthHelpModal"
-        class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-xl p-4">
         <div
             class="glass-card rounded-xl max-w-2xl w-full p-8 relative border-purple-500/30 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onclick="document.getElementById('stealthHelpModal').classList.add('hidden')"
@@ -1239,25 +1452,55 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/10 py-8 bg-black/40 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center text-xs font-mono text-gray-500">
-                <div class="mb-4 md:mb-0 text-center md:text-left">
-                    <div>© 2025 ScrapeXI. All rights reserved.</div>
-                    <div class="text-gray-600 mt-1">A Series B company of CrewXI LLC</div>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="/" class="hover:text-neonBlue transition">Legalities</a>
-                    <a href="/terms-of-service.html" target="_blank" class="hover:text-neonBlue transition">Terms of
-                        Service</a>
-                    <a href="/privacy-policy.html" target="_blank" class="hover:text-neonBlue transition">Privacy
-                        Policy</a>
-                    <a href="mailto:chisholm@crewxi.com" class="hover:text-neonBlue transition">Contact</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <!-- Mobile Bottom Navigation (visible only on mobile) -->
+    <nav
+        class="lg:hidden fixed bottom-0 left-0 right-0 h-16 glass-card border-t border-white/10 flex items-center justify-around z-50 bg-darkBg/95 backdrop-blur-md">
+        <a href="#" onclick="closeAllModals()"
+            class="flex flex-col items-center justify-center p-1 text-neonBlue hover:bg-white/5 rounded-lg transition-all flex-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span class="text-[8px] mt-1 font-mono tracking-wider">SCRAPE</span>
+        </a>
+
+        <a href="#" onclick="openTemplatesModal()"
+            class="flex flex-col items-center justify-center p-1 text-gray-400 hover:text-neonPink hover:bg-white/5 rounded-lg transition-all flex-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <span class="text-[7px] mt-1 font-mono tracking-wider">TEMPLATES</span>
+        </a>
+
+        <a href="#" onclick="openHistoryModal()"
+            class="flex flex-col items-center justify-center p-1 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all flex-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-[8px] mt-1 font-mono tracking-wider">HISTORY</span>
+        </a>
+
+        <a href="#" onclick="openUpgradePanel()"
+            class="flex flex-col items-center justify-center p-1 text-gray-400 hover:text-neonPink hover:bg-white/5 rounded-lg transition-all flex-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            <span class="text-[8px] mt-1 font-mono tracking-wider">UPGRADE</span>
+        </a>
+
+        <a href="#" onclick="openSettingsModal()"
+            class="flex flex-col items-center justify-center p-1 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all flex-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="text-[8px] mt-1 font-mono tracking-wider">SETTINGS</span>
+        </a>
+    </nav>
 
     <script>
         var currentData = null;
@@ -2248,21 +2491,33 @@
             try {
                 showStatus('info', '🔄 Redirecting to Stripe checkout...');
 
+                // Get user email
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    throw new Error('Please log in to subscribe');
+                }
+                const userEmail = session.user.email;
+
                 const response = await fetch(`${API_BASE}/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         price_id: priceId,
-                        mode: 'subscription'
+                        mode: 'subscription',
+                        user_email: userEmail
                     })
                 });
 
                 const data = await response.json();
 
+                if (!response.ok) {
+                    throw new Error(data.detail || data.error || 'Failed to create checkout session');
+                }
+
                 if (data.url) {
                     window.location.href = data.url;
                 } else {
-                    throw new Error(data.error || 'Failed to create checkout session');
+                    throw new Error('No checkout URL returned');
                 }
             } catch (e) {
                 console.error('Subscription error:', e);
@@ -2274,21 +2529,33 @@
             try {
                 showStatus('info', '🔄 Redirecting to Stripe checkout...');
 
+                // Get user email
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    throw new Error('Please log in to purchase credits');
+                }
+                const userEmail = session.user.email;
+
                 const response = await fetch(`${API_BASE}/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         price_id: priceId,
-                        mode: 'payment'
+                        mode: 'payment',
+                        user_email: userEmail
                     })
                 });
 
                 const data = await response.json();
 
+                if (!response.ok) {
+                    throw new Error(data.detail || data.error || 'Failed to create checkout session');
+                }
+
                 if (data.url) {
                     window.location.href = data.url;
                 } else {
-                    throw new Error(data.error || 'Failed to create checkout session');
+                    throw new Error('No checkout URL returned');
                 }
             } catch (e) {
                 console.error('One-time purchase error:', e);
@@ -2384,9 +2651,9 @@
                         <td class="p-4 font-mono text-xs text-neonBlue">${itemCount}</td>
                         <td class="p-4 font-mono text-xs">${usage}</td>
                         <td class="p-4 text-xs text-gray-500">${date}</td>
-                        <td class="p-4 text-right">
+                        <td class="p-4 text-right sticky right-0 bg-black/80 backdrop-blur-sm border-l border-white/10">
                             ${job.status === 'completed' && job.data ?
-                            `<button onclick="loadJobData('${job.id}')" class="text-neonBlue hover:text-white text-xs underline">LOAD DATA</button>` :
+                            `<button onclick="loadJobData('${job.id}')" class="text-neonBlue hover:text-white text-xs underline font-bold">LOAD DATA</button>` :
                             '<span class="text-gray-600">-</span>'}
                         </td>
                     `;
@@ -2498,6 +2765,148 @@
                 showStatus('error', e.message);
             }
         }
+
+        // ============================================================
+        // SETTINGS MODAL FUNCTIONS
+        // ============================================================
+
+        async function openSettingsModal() {
+            closeAllModals();
+            document.getElementById('settingsModal').classList.remove('hidden');
+
+            if (!supabase) return;
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                // Populate account info
+                document.getElementById('settingsEmail').value = session.user.email || 'N/A';
+                document.getElementById('settingsUserId').value = session.user.id || 'N/A';
+
+                // Populate billing & usage info
+                if (window.userCredits) {
+                    const plan = window.userCredits.subscription_tier || 'free';
+                    const planNames = {
+                        'free': 'Free Plan',
+                        'starter': 'Starter Plan',
+                        'pro': 'Professional Plan',
+                        'enterprise': 'Enterprise Plan'
+                    };
+                    const planPrices = {
+                        'free': 0,
+                        'starter': 29,
+                        'pro': 99,
+                        'enterprise': 299
+                    };
+
+                    document.getElementById('settingsCurrentPlan').textContent = planNames[plan] || 'Unknown';
+                    document.getElementById('settingsPlanPrice').textContent = '$' + (planPrices[plan] || 0);
+
+                    // Usage bars
+                    const subUsed = window.userCredits.subscription_credits_used || 0;
+                    const subTotal = window.userCredits.subscription_credits_total || 0;
+                    const subPercent = subTotal > 0 ? (subUsed / subTotal) * 100 : 0;
+                    document.getElementById('settingsSubCredits').textContent = `${subUsed} / ${subTotal}`;
+                    document.getElementById('settingsSubCreditsBar').style.width = subPercent + '%';
+
+                    const onetimeCredits = window.userCredits.onetime_credits || 0;
+                    document.getElementById('settingsOnetimeCredits').textContent = onetimeCredits;
+                    // For one-time, we'll show a simple indicator (no max)
+                    document.getElementById('settingsOnetimeCreditsBar').style.width = (onetimeCredits > 0 ? '100' : '0') + '%';
+                }
+
+                // API Key (we'll use user ID as a simple API key for now)
+                document.getElementById('settingsApiKey').value = session.user.id;
+
+            } catch (e) {
+                console.error("Settings Error:", e);
+            }
+        }
+
+        function manageSubscription() {
+            // Open billing modal or redirect to Stripe portal
+            openBillingModal();
+        }
+
+        function openBillingModal() {
+            // For now, just show an alert. In production, this would open Stripe Customer Portal
+            alert('Billing management coming soon! You will be redirected to Stripe Customer Portal.');
+        }
+
+        async function cancelSubscription() {
+            if (!confirm('Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your billing period.')) {
+                return;
+            }
+
+            // In production, this would call Stripe API to cancel subscription
+            alert('Subscription cancellation coming soon! Please contact support at chisholm@crewxi.com');
+        }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('settingsApiKey');
+            const button = event.target;
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = 'HIDE';
+            } else {
+                input.type = 'password';
+                button.textContent = 'SHOW';
+            }
+        }
+
+        function copyApiKey() {
+            const input = document.getElementById('settingsApiKey');
+            const value = input.value;
+            navigator.clipboard.writeText(value).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'COPIED!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        async function regenerateApiKey() {
+            if (!confirm('Are you sure you want to regenerate your API key? This will invalidate your current key and may break existing integrations.')) {
+                return;
+            }
+
+            // In production, this would generate a new API key in the database
+            alert('API key regeneration coming soon!');
+        }
+
+        async function deleteAccount() {
+            const confirmation = prompt('This action is PERMANENT and cannot be undone. All your data will be deleted.\n\nType "DELETE MY ACCOUNT" to confirm:');
+
+            if (confirmation !== 'DELETE MY ACCOUNT') {
+                alert('Account deletion cancelled.');
+                return;
+            }
+
+            if (!supabase) return;
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                // In production, this would:
+                // 1. Delete all user data from database
+                // 2. Cancel any active subscriptions
+                // 3. Delete the auth account
+
+                alert('Account deletion coming soon! Please contact support at chisholm@crewxi.com to delete your account.');
+
+            } catch (e) {
+                console.error("Delete Error:", e);
+                alert('Error deleting account: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // SCRAPER FUNCTIONS
+        // ============================================================
 
         async function runScraper() {
             const btn = document.getElementById('scrapeBtn');
