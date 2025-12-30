@@ -155,19 +155,13 @@ def find_next_page_button(page, model_name: str):
         # Ask Gemini to identify the next button
         model = genai.GenerativeModel(model_name)  # type: ignore
         prompt = f"""
-        You are analyzing a webpage to find pagination buttons.
+        You are analyzing a webpage to find the "Next Page" button for pagination.
         
-        Here are the clickable elements:
+        Here are the clickable elements that might be the next page button:
         {clickable_elements[:20]}  
         
-        Which element is most likely a pagination button? Look for:
-        - "Next" or "Next Page"
-        - "Load More" or "See More"
-        - "Show More" or "View More"
-        - Arrow icons (→, ›, »)
-        - Numbers like "2", "3" (for next page)
-        
-        Respond with ONLY the element's index number (0-{len(clickable_elements)-1}), or "NONE" if there's no clear pagination button.
+        Which element is most likely the "Next Page" button?
+        Respond with ONLY the element's index number (0-{len(clickable_elements)-1}), or "NONE" if there's no clear next button.
         
         Response format: Just the number, nothing else.
         """
@@ -218,7 +212,7 @@ def extract_with_gemini(text_content: str, query: str, model_name: str):
         The user wants to extract information based on this query: "{query}"
         
         DATA SOURCE:
-        {text_content[:50000]} 
+        {text_content[:100000]} 
         
         INSTRUCTIONS:
         1. Identify the data matching the query.
@@ -329,14 +323,6 @@ def scrape(request: ScrapeRequest):
             pages_to_scrape = (
                 request.end_page - request.start_page + 1 if request.pagination_enabled else 1
             )
-
-            # Enforce max 10 pages limit
-            MAX_PAGES = 10
-            if pages_to_scrape > MAX_PAGES:
-                print(f"⚠️ Requested {pages_to_scrape} pages, limiting to {MAX_PAGES}")
-                pages_to_scrape = MAX_PAGES
-                request.end_page = request.start_page + MAX_PAGES - 1
-
             current_page_num = request.start_page  # Track the actual page number we're on
 
             # Determine the starting URL
@@ -415,44 +401,16 @@ def scrape(request: ScrapeRequest):
                                 print(f"AI-predicted URL failed: {e}")
                                 next_url = None
 
-                    # Strategy 2: Try to find and click "Next" button (or "Load More")
+                    # Strategy 2: Try to find and click "Next" button
                     if not next_url:
-                        print(f"Looking for 'Next' or 'Load More' button...")
+                        print(f"Looking for 'Next' button...")
                         next_selector = find_next_page_button(page, request.model_name)
 
                         if next_selector:
                             try:
-                                current_url_before = page.url
-                                content_length_before = len(page.content())
-
-                                print(f"Clicking next/load-more button: {next_selector}")
+                                print(f"Clicking next button: {next_selector}")
                                 page.click(next_selector, timeout=5000)
-
-                                # Wait for either navigation or AJAX content update
-                                page.wait_for_timeout(3000)  # Initial wait for AJAX
-
-                                # Check if URL changed (traditional pagination)
-                                if page.url != current_url_before:
-                                    print(f"URL changed (traditional pagination): {page.url}")
-                                    page.wait_for_load_state("networkidle", timeout=10000)
-                                else:
-                                    # URL didn't change - this is AJAX "Load More" pattern
-                                    print(
-                                        "URL unchanged - AJAX 'Load More' detected, waiting for content update..."
-                                    )
-
-                                    # Wait up to 10 seconds for content to change
-                                    for attempt in range(10):
-                                        page.wait_for_timeout(1000)
-                                        current_content_length = len(page.content())
-                                        if current_content_length > content_length_before:
-                                            print(
-                                                f"New content loaded! Size: {content_length_before} -> {current_content_length} bytes"
-                                            )
-                                            break
-                                    else:
-                                        print("Warning: Content size didn't change after clicking")
-
+                                page.wait_for_timeout(2000)  # Wait for navigation
                                 current_page_num += 1  # Increment page counter
                                 continue  # Success, move to next iteration
                             except Exception as e:
@@ -479,68 +437,20 @@ def scrape(request: ScrapeRequest):
                         print(f"All pagination strategies failed: {fallback_error}")
                         break  # Stop pagination if we can't navigate
 
+            # Combine all pages
+            content = "\n\n".join(all_content)
             browser.close()
 
-            # 7. AI Processing - Process Each Page in Parallel
-            print(f"Scrape successful. Processing {len(all_content)} pages...")
+            # 7. AI Processing
+            print(f"Scrape successful. Content length: {len(content)}")
+
+            clean_text = clean_html(content)
+            print(f"DEBUG: Extracted Text Preview: {clean_text[:500]}")
 
             if request.query or request.prompt:
                 query_text = request.query or request.prompt or ""
-
-                # Process each page separately with ThreadPoolExecutor
-                from concurrent.futures import ThreadPoolExecutor, as_completed
-
-                page_results = {}
-
-                def process_single_page(page_index, page_html):
-                    """Process a single page with Gemini"""
-                    try:
-                        page_num = request.start_page + page_index
-                        print(f"🔄 Processing Page {page_num} with Gemini...")
-                        clean_text = clean_html(page_html)
-                        result = extract_with_gemini(clean_text, query_text, request.model_name)
-                        print(
-                            f"✅ Page {page_num} completed - {len(result) if isinstance(result, list) else 'N/A'} items"
-                        )
-                        return page_num, result
-                    except Exception as e:
-                        print(f"❌ Page {page_num} failed: {e}")
-                        return page_num, {"error": str(e)}
-
-                # Process up to 4 pages in parallel
-                with ThreadPoolExecutor(max_workers=min(4, len(all_content))) as executor:
-                    futures = {
-                        executor.submit(process_single_page, idx, content): idx
-                        for idx, content in enumerate(all_content)
-                    }
-
-                    for future in as_completed(futures):
-                        page_num, result = future.result()
-                        page_results[f"page_{page_num}"] = result
-
-                # Combine all results for "All" view
-                combined_data = []
-                for page_key in sorted(page_results.keys(), key=lambda x: int(x.split("_")[1])):
-                    page_data = page_results[page_key]
-                    if isinstance(page_data, list):
-                        combined_data.extend(page_data)
-                    elif isinstance(page_data, dict) and not page_data.get("error"):
-                        # Extract first list from dict
-                        for value in page_data.values():
-                            if isinstance(value, list):
-                                combined_data.extend(value)
-                                break
-
-                # Return paginated results
-                final_result = {
-                    "pages": page_results,  # Individual page results
-                    "all": combined_data,  # Combined results
-                    "pagination": {
-                        "start_page": request.start_page,
-                        "end_page": request.end_page,
-                        "total_pages": len(all_content),
-                    },
-                }
+                print(f"Processing with Gemini... Query: {query_text}")
+                data = extract_with_gemini(clean_text, query_text, request.model_name)
 
                 # Cancel timeout alarm (success)
                 try:
@@ -548,7 +458,7 @@ def scrape(request: ScrapeRequest):
                 except Exception:
                     pass
 
-                return {"status": "success", "url": request.url, "data": final_result}
+                return {"status": "success", "url": request.url, "data": data}
             else:
                 # Raw HTML mode
                 # Cancel timeout alarm (success)

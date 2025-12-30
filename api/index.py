@@ -49,18 +49,12 @@ def ensure_browser_installed():
     return None
 
 
-# Stripe Price ID to Item Limit Mapping
+# Plan Limits (MB)
 PLAN_LIMITS = {
-    # Monthly Subscriptions
-    "price_1SWK4S8nEz73sTkiiWWP5tQ2": 1000,   # Starter - $10/mo - 1,000 items
-    "price_1SWK6C8nEz73sTkimA2XyrU0": 5000,   # Pro - $30/mo - 5,000 items
-    "price_1SWK6p8nEz73sTkicVIwLUP7": 10000,  # Business - $50/mo - 10,000 items
-    # One-Time Purchases
-    "price_1SX5238nEz73sTkihOE3NC3y": 5000,   # One-Time - $40 - 5,000 items
+    "price_1SWK4S8nEz73sTkiiWWP5tQ2": 10.0,
+    "price_1SWK6C8nEz73sTkimA2XyrU0": 50.0,
+    "price_1SWK6p8nEz73sTkicVIwLUP7": 100.0,
 }
-
-# Free tier default
-FREE_TIER_LIMIT = 100
 
 # Stealth Logic (Optional dependency)
 try:
@@ -100,7 +94,7 @@ class ScrapeRequest(BaseModel):
     prompt: Optional[str] = None
     wait_time: int = 2
     use_local_backend: bool = True
-    model_name: str = "gemini-2.5-flash-lite"
+    model_name: str = "gemini-2.5-flash"
     pagination_enabled: bool = False
     max_pages: int = 3
     page2_url: Optional[str] = None
@@ -121,7 +115,7 @@ class ScrapeResponse(BaseModel):
 
 class JobStatusResponse(BaseModel):
     status: str
-    data: Optional[Any] = None  # Can be Dict, List, or any JSON-serializable data
+    data: Optional[Dict[str, Any]] = None
     message: Optional[str] = None
     pages_scraped: int = 0
     error: Optional[str] = None
@@ -139,96 +133,38 @@ def get_config():
     }
 
 
-def check_and_deduct_credits(user_id: str, item_count: int):
-    """
-    Atomically check if user has enough credits and deduct them in one transaction.
-    This prevents race conditions where multiple simultaneous requests could exceed limits.
-
-    Returns: dict with success status and details
-    Raises: HTTPException(402) if insufficient credits
-    """
-    if not user_id or not supabase:
-        raise HTTPException(status_code=500, detail="Database not available")
-
-    try:
-        # Call atomic RPC function that checks AND deducts in one transaction with row locking
-        response = supabase.rpc(
-            "atomic_deduct_credits",
-            {"p_user_id": user_id, "p_item_count": item_count}
-        ).execute()
-
-        result = response.data
-
-        if not result.get("success"):
-            error_msg = result.get("error", "Insufficient credits")
-            available = result.get("available", 0)
-            subscription_avail = result.get("subscription_available", 0)
-            onetime_avail = result.get("onetime_available", 0)
-
-            raise HTTPException(
-                status_code=402,
-                detail=f"{error_msg}. Available: {available:,} credits (Subscription: {subscription_avail:,}, One-Time: {onetime_avail:,}). Please upgrade your plan or purchase more credits."
-            )
-
-        # Success - credits were deducted atomically
-        print(f"✅ Deducted {item_count} credits from user {user_id}: "
-              f"Subscription: {result.get('from_subscription', 0)}, "
-              f"One-Time: {result.get('from_onetime', 0)}")
-
-        return result
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"❌ Error in atomic credit deduction: {e}")
-        raise HTTPException(status_code=500, detail=f"Credit check failed: {str(e)}")
-
-
 def check_data_usage(user_id: str):
-    """
-    DEPRECATED: Use check_and_deduct_credits() instead for atomic operations.
-    This function is kept for backwards compatibility but should not be used for new code.
-    """
     if not user_id or not supabase:
         return
     try:
         response = (
             supabase.table("profiles")
-            .select("items_limit, items_used, one_time_credits")
+            .select("data_usage_mb_limit, data_usage_mb_used")
             .eq("id", user_id)
             .single()
             .execute()
         )
         if response.data:
-            limit = int(response.data.get("items_limit") or 100)
-            used = int(response.data.get("items_used") or 0)
-            onetime = int(response.data.get("one_time_credits") or 0)
-
-            subscription_available = max(0, limit - used)
-            total_available = subscription_available + onetime
-
-            if total_available <= 0:
+            limit = float(response.data.get("data_usage_mb_limit") or 10.0)
+            used = float(response.data.get("data_usage_mb_used") or 0.0)
+            if used >= limit:
                 raise Exception(
-                    f"Credit limit reached. Available: 0 credits (Subscription: {subscription_available:,}, One-Time: {onetime:,}). Please upgrade your plan or purchase more credits."
+                    f"Data usage limit reached ({used:.2f}/{limit:.2f} MB). Please upgrade your plan."
                 )
     except Exception as e:
         print(f"Error checking usage: {e}")
-        if "limit reached" in str(e).lower() or "credit" in str(e).lower():
+        if "limit reached" in str(e):
             raise e
 
 
-def update_data_usage(user_id: str, item_count: int):
-    """
-    DEPRECATED: Use check_and_deduct_credits() instead for atomic operations.
-    This function is kept for backwards compatibility.
-    """
+def update_data_usage(user_id: str, amount_mb: float):
     if not user_id or not supabase:
         return
     try:
         supabase.rpc(
-            "increment_items_usage", {"p_user_id": user_id, "p_item_count": item_count}
+            "increment_data_usage", {"p_user_id": user_id, "p_amount_mb": amount_mb}
         ).execute()
-        print(f"Updated usage for {user_id}: +{item_count} items")
+        print(f"Updated usage for {user_id}: +{amount_mb:.4f} MB")
     except Exception as e:
         print(f"Failed to update usage: {e}")
 
@@ -298,59 +234,38 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             resp.raise_for_status()
             result = resp.json()
 
-            # Handle Smart vs Raw response (with pagination support)
+            # Handle Smart vs Raw response
             final_data = None
             message = "Remote Scrape Complete"
-            pages_scraped = 1
 
             if "data" in result:
-                # AI Extraction Success (could be paginated or single page)
-                data_result = result["data"]
-
-                # Check if this is paginated data (has 'pages', 'all', 'pagination')
-                if isinstance(data_result, dict) and "all" in data_result:
-                    # Paginated result
-                    final_data = data_result  # Store full structure with pages
-                    pages_scraped = data_result.get("pagination", {}).get("total_pages", 1)
-                    message = f"AI Extraction Complete ({pages_scraped} pages)"
-                else:
-                    # Single page result
-                    final_data = data_result
-                    message = "AI Extraction Complete"
+                # AI Extraction Success
+                final_data = result["data"]
+                message = "AI Extraction Complete"
             elif "html" in result:
                 # Raw HTML fallback
                 final_data = {"raw_html_preview": str(result["html"])[:500] + "..."}
                 message = "Raw HTML Extracted"
 
-            # Count items (rows/contacts/leads)
-            item_count = 0
+            # Calculate Size for Billing (Rough estimate)
+            size_mb = 0.0
             if final_data:
-                if isinstance(final_data, list):
-                    item_count = len(final_data)
-                elif isinstance(final_data, dict):
-                    # Check for 'all' array (paginated results)
-                    if "all" in final_data and isinstance(final_data["all"], list):
-                        item_count = len(final_data["all"])
-                    else:
-                        # Find the first array in the dict
-                        for value in final_data.values():
-                            if isinstance(value, list):
-                                item_count = len(value)
-                                break
+                json_str = json.dumps(final_data)
+                size_bytes = len(json_str.encode("utf-8"))
+                size_mb = size_bytes / (1024 * 1024)
 
-            if request.user_id and item_count > 0:
-                update_data_usage(request.user_id, item_count)
+            if request.user_id:
+                update_data_usage(request.user_id, size_mb)
 
             # Update Job Status in DB (Completion)
             try:
-                print(f"✅ Remote job completed - {item_count} items from {pages_scraped} pages")
                 supabase.table("jobs").update(
                     {
                         "status": "completed",
-                        "item_count": item_count,
+                        "data_usage_mb": size_mb,
                         "completed_at": "now()",
                         "data": final_data,
-                        "pages_scraped": pages_scraped,
+                        "pages_scraped": 1,  # Remote service currently does 1 page
                     }
                 ).eq("id", job_id).execute()
             except Exception as e:
@@ -544,46 +459,35 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
             browser.close()
 
             if active_jobs[job_id].get("status") != "cancelled":
-                # Count items (rows/contacts/leads)
-                item_count = 0
+                # Calculate Size
+                size_mb = 0.0
                 if result_data:
-                    if isinstance(result_data, list):
-                        item_count = len(result_data)
-                    elif isinstance(result_data, dict):
-                        # Find the first array in the dict (e.g., {"products": [...], "jobs": [...]})
-                        for value in result_data.values():
-                            if isinstance(value, list):
-                                item_count = len(value)
-                                break
+                    json_str = json.dumps(result_data)
+                    size_bytes = len(json_str.encode("utf-8"))
+                    size_mb = size_bytes / (1024 * 1024)
 
-                if request.user_id and item_count > 0:
-                    update_data_usage(request.user_id, item_count)
+                if request.user_id:
+                    update_data_usage(request.user_id, size_mb)
 
                 # Update DB Completion
                 try:
-                    print(f"✅ Job {job_id} COMPLETED - {item_count} items extracted")
                     supabase.table("jobs").update(
                         {
                             "status": "completed",
-                            "item_count": item_count,
+                            "data_usage_mb": size_mb,
                             "completed_at": "now()",
                             "data": result_data,
                             "pages_scraped": pages_scraped,
                         }
                     ).eq("id", job_id).execute()
-                    print(f"✅ Job {job_id} database updated successfully")
                 except Exception as e:
-                    print(f"❌ Failed to update job success: {e}")
+                    print(f"Failed to update job success: {e}")
 
                 active_jobs[job_id]["status"] = "completed"
                 active_jobs[job_id]["data"] = result_data
-                print(f"✅ Job {job_id} marked as completed in active_jobs")
 
     except Exception as e:
-        print(f"❌ ERROR in job {job_id}: {e}")
-        import traceback
-
-        print(f"❌ Traceback: {traceback.format_exc()}")
+        print(f"ERROR in job {job_id}: {e}")
         # Update DB Failure
         try:
             supabase.table("jobs").update(
@@ -593,21 +497,12 @@ def run_scrape_task(job_id: str, request: ScrapeRequest):
                     "completed_at": "now()",
                 }
             ).eq("id", job_id).execute()
-            print(f"❌ Job {job_id} marked as failed in database")
         except Exception as log_err:
-            print(f"❌ Failed to update job failure: {log_err}")
+            print(f"Failed to update job failure: {log_err}")
 
 
 @app.post("/scrape", response_model=ScrapeResponse)
 def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
-    # Validate pagination (max 10 pages)
-    MAX_PAGES = 10
-    if request.pagination_enabled and request.max_pages > MAX_PAGES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Maximum {MAX_PAGES} pages per search allowed. Please adjust your range.",
-        )
-
     # Sync Check usage
     if request.user_id:
         try:
@@ -658,7 +553,6 @@ def scrape_endpoint(request: ScrapeRequest, background_tasks: BackgroundTasks):
         )
 
     background_tasks.add_task(run_scrape_task, job_id, request)
-    print(f"🚀 Job {job_id} queued and starting in background")
     return ScrapeResponse(job_id=job_id, status="queued")
 
 
@@ -713,458 +607,64 @@ def cancel_job(job_id: str):
     return {"message": "Job cancellation requested via DB"}
 
 
-@app.post("/create-checkout-session")
-async def create_checkout_session(
-    price_id: str = Body(..., embed=True),
-    mode: str = Body(..., embed=True),  # 'subscription' or 'payment'
-    user_email: str = Body(..., embed=True)  # User's email for customer lookup
-):
-    """
-    Create a Stripe Checkout Session for subscriptions or one-time purchases.
-
-    For subscription upgrades/downgrades:
-    - Checks if user has existing subscription
-    - Cancels old subscription at period end
-    - Creates new subscription immediately
-
-    Args:
-        price_id: Stripe Price ID (e.g., price_1SWK4S8nEz73sTkiiWWP5tQ2)
-        mode: 'subscription' for monthly plans, 'payment' for one-time purchases
-        user_email: User's email address
-
-    Returns:
-        JSON with checkout URL
-    """
-    try:
-        # Validate mode
-        if mode not in ['subscription', 'payment']:
-            raise HTTPException(status_code=400, detail="Invalid mode. Must be 'subscription' or 'payment'")
-
-        # Validate price_id exists in our system
-        if price_id not in PLAN_LIMITS:
-            raise HTTPException(status_code=400, detail=f"Invalid price_id: {price_id}")
-
-        # Check if user has existing subscription (for upgrades/downgrades)
-        customer_id = None
-        existing_subscription_id = None
-
-        if mode == 'subscription':
-            # Get user's profile from Supabase
-            profile_result = supabase.table("profiles").select("stripe_customer_id, subscription_id, subscription_price_id").eq("email", user_email).execute()
-
-            if profile_result.data and len(profile_result.data) > 0:
-                profile = profile_result.data[0]
-                customer_id = profile.get("stripe_customer_id")
-                existing_subscription_id = profile.get("subscription_id")
-                current_price_id = profile.get("subscription_price_id")
-
-                # If user is trying to subscribe to the same plan, return error
-                if current_price_id == price_id:
-                    raise HTTPException(status_code=400, detail="You are already subscribed to this plan")
-
-                # If user has existing subscription, cancel it at period end
-                if existing_subscription_id:
-                    try:
-                        print(f"🔄 User {user_email} upgrading/downgrading from {current_price_id} to {price_id}")
-                        print(f"   Cancelling old subscription {existing_subscription_id} at period end")
-
-                        # Cancel old subscription at period end (they keep access until renewal)
-                        stripe.Subscription.modify(
-                            existing_subscription_id,
-                            cancel_at_period_end=True
-                        )
-                        print(f"✅ Old subscription will cancel at period end")
-                    except stripe.error.StripeError as e:
-                        print(f"⚠️ Warning: Could not cancel old subscription: {e}")
-                        # Continue anyway - webhook will handle cleanup
-
-        # Create Stripe Checkout Session
-        checkout_params = {
-            'payment_method_types': ['card'],
-            'line_items': [{
-                'price': price_id,
-                'quantity': 1,
-            }],
-            'mode': mode,
-            'success_url': 'https://scrapexi.com/dashboard?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url': 'https://scrapexi.com/dashboard',
-            'allow_promotion_codes': True,
-            'customer_email': user_email,  # Pre-fill email
-        }
-
-        # If user has existing Stripe customer ID, use it
-        if customer_id:
-            checkout_params['customer'] = customer_id
-            del checkout_params['customer_email']  # Can't use both
-
-        checkout_session = stripe.checkout.Session.create(**checkout_params)
-
-        return {"url": checkout_session.url}
-
-    except HTTPException:
-        raise  # Re-raise HTTP exceptions as-is
-    except stripe.error.StripeError as e:
-        print(f"❌ Stripe error creating checkout session: {e}")
-        raise HTTPException(status_code=500, detail=f"Stripe error: {str(e)}")
-    except Exception as e:
-        print(f"❌ Error creating checkout session: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @app.post("/stripe/webhook")
 async def stripe_webhook(request: Request):
-    """
-    Stripe webhook handler - ONLY ADDS CREDITS, NEVER SUBTRACTS
-    Handles: subscriptions, one-time purchases, renewals, cancellations
-    """
-    print("🔔 Webhook endpoint hit!")
-    print(f"   Headers: {dict(request.headers)}")
-
     payload = await request.body()
-    print(f"   Payload length: {len(payload)} bytes")
-
     sig_header = request.headers.get("stripe-signature")
-    print(f"   Signature present: {bool(sig_header)}")
-
-    # Check if webhook secret is configured
-    if not STRIPE_WEBHOOK_SECRET:
-        print("⚠️ WARNING: STRIPE_WEBHOOK_SECRET not configured!")
-        return JSONResponse(
-            status_code=500,
-            content={"error": "Webhook secret not configured"}
-        )
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
-        print("✅ Webhook signature verified!")
     except ValueError as e:
-        print(f"❌ Stripe webhook - Invalid payload: {e}")
-        return JSONResponse(status_code=400, content={"error": "Invalid payload"})
+        raise HTTPException(status_code=400, detail="Invalid payload")
     except stripe.error.SignatureVerificationError as e:
-        print(f"❌ Stripe webhook - Invalid signature: {e}")
-        return JSONResponse(status_code=400, content={"error": "Invalid signature"})
+        raise HTTPException(status_code=400, detail="Invalid signature")
 
     event_type = event["type"]
     data = event["data"]["object"]
 
-    print(f"📡 Stripe Webhook Received: {event_type}")
-    print(f"   Event ID: {event.get('id')}")
+    print(f"Received Stripe Webhook: {event_type}")
 
-    try:
-        # ============================================================
-        # CHECKOUT SESSION COMPLETED - New subscription OR one-time purchase
-        # ============================================================
-        if event_type == "checkout.session.completed":
-            customer_email = data.get("customer_email") or data.get("customer_details", {}).get("email")
-            customer_id = data.get("customer")
-            mode = data.get("mode")  # 'subscription' or 'payment'
+    if event_type in ["checkout.session.completed", "invoice.payment_succeeded"]:
+        # Update Subscription
+        # Get customer email
+        customer_email = data.get("customer_email") or data.get("customer_details", {}).get("email")
 
-            print(f"   Mode: {mode}, Customer: {customer_email}")
+        # If invoice payment, fetch customer email from customer ID if not present
+        if not customer_email and "customer" in data:
+            try:
+                cust = stripe.Customer.retrieve(data["customer"])
+                customer_email = cust.email
+            except:
+                pass
 
-            if mode == "subscription":
-                # New subscription purchase
-                sub_id = data.get("subscription")
-                if sub_id and customer_email:
-                    try:
-                        sub = stripe.Subscription.retrieve(sub_id)
-                        if sub["items"]["data"]:
-                            price_id = sub["items"]["data"][0]["price"]["id"]
-                            item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
-
-                            # Add subscription credits via RPC
-                            result = supabase.rpc(
-                                "add_subscription_credits",
-                                {
-                                    "p_user_email": customer_email,
-                                    "p_stripe_customer_id": customer_id,
-                                    "p_stripe_subscription_id": sub_id,
-                                    "p_price_id": price_id,
-                                    "p_item_limit": item_limit,
-                                },
-                            ).execute()
-
-                            print(f"✅ Subscription created: {customer_email} -> {item_limit} items (Price: {price_id})")
-                            print(f"   Result: {result.data}")
-                    except Exception as e:
-                        print(f"❌ Error processing subscription: {e}")
-
-            elif mode == "payment":
-                # One-time purchase
-                payment_intent_id = data.get("payment_intent")
-                if payment_intent_id and customer_email:
-                    try:
-                        # Get line items to determine what was purchased
-                        session = stripe.checkout.Session.retrieve(
-                            data.get("id"),
-                            expand=["line_items"]
-                        )
-
-                        if session.line_items and session.line_items.data:
-                            price_id = session.line_items.data[0].price.id
-
-                            # Check if it's a one-time credit purchase
-                            if price_id in PLAN_LIMITS:
-                                credits = PLAN_LIMITS[price_id]
-                                amount = session.amount_total / 100  # Convert cents to dollars
-
-                                # Add one-time credits via RPC
-                                result = supabase.rpc(
-                                    "add_onetime_credits",
-                                    {
-                                        "p_user_email": customer_email,
-                                        "p_stripe_customer_id": customer_id,
-                                        "p_payment_intent_id": payment_intent_id,
-                                        "p_credits": credits,
-                                        "p_amount": amount,
-                                    },
-                                ).execute()
-
-                                if result.data and result.data.get("duplicate"):
-                                    print(f"⚠️ Duplicate payment detected: {payment_intent_id}")
-                                else:
-                                    print(f"✅ One-time purchase: {customer_email} -> +{credits} credits (${amount})")
-                                    print(f"   Result: {result.data}")
-                    except Exception as e:
-                        print(f"❌ Error processing one-time purchase: {e}")
-
-        # ============================================================
-        # INVOICE PAYMENT SUCCEEDED - Monthly subscription renewal
-        # ============================================================
-        elif event_type == "invoice.payment_succeeded":
-            customer_id = data.get("customer")
+        if customer_email and supabase:
+            # Get Subscription ID
             sub_id = data.get("subscription")
-            invoice_id = data.get("id")
-
-            if sub_id and customer_id:
+            if sub_id:
+                # Retrieve Subscription to get Price ID
                 try:
-                    # Get customer email
-                    customer = stripe.Customer.retrieve(customer_id)
-                    customer_email = customer.email
-
-                    # Get subscription details
                     sub = stripe.Subscription.retrieve(sub_id)
                     if sub["items"]["data"]:
                         price_id = sub["items"]["data"][0]["price"]["id"]
-                        item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
+                        limit_mb = PLAN_LIMITS.get(price_id, 10.0)  # Default to 10MB
 
-                        # Refresh subscription credits (resets items_used to 0)
-                        result = supabase.rpc(
-                            "add_subscription_credits",
+                        # Update Supabase
+                        supabase.rpc(
+                            "update_subscription",
                             {
-                                "p_user_email": customer_email,
-                                "p_stripe_customer_id": customer_id,
-                                "p_stripe_subscription_id": sub_id,
+                                "p_email": customer_email,
+                                "p_stripe_sub_id": sub_id,
                                 "p_price_id": price_id,
-                                "p_item_limit": item_limit,
+                                "p_limit_mb": limit_mb,
                             },
                         ).execute()
-
-                        print(f"✅ Subscription renewed: {customer_email} -> {item_limit} items refreshed")
-                        print(f"   Invoice: {invoice_id}")
+                        print(
+                            f"Updated subscription for {customer_email}: {price_id} -> {limit_mb}MB"
+                        )
                 except Exception as e:
-                    print(f"❌ Error processing renewal: {e}")
+                    print(f"Error updating subscription: {e}")
 
-        # ============================================================
-        # SUBSCRIPTION CREATED - New subscription (alternative to checkout.session.completed)
-        # ============================================================
-        elif event_type == "customer.subscription.created":
-            customer_id = data.get("customer")
-            sub_id = data.get("id")
-
-            print(f"   Subscription ID: {sub_id}, Customer: {customer_id}")
-
-            if sub_id and customer_id:
-                try:
-                    customer = stripe.Customer.retrieve(customer_id)
-                    customer_email = customer.email
-
-                    print(f"   Customer email: {customer_email}")
-
-                    if data["items"]["data"]:
-                        price_id = data["items"]["data"][0]["price"]["id"]
-                        item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
-
-                        print(f"   Price ID: {price_id}, Item limit: {item_limit}")
-
-                        # Add subscription credits via RPC
-                        result = supabase.rpc(
-                            "add_subscription_credits",
-                            {
-                                "p_user_email": customer_email,
-                                "p_stripe_customer_id": customer_id,
-                                "p_stripe_subscription_id": sub_id,
-                                "p_price_id": price_id,
-                                "p_item_limit": item_limit,
-                            },
-                        ).execute()
-
-                        print(f"✅ Subscription created: {customer_email} -> {item_limit} items (Price: {price_id})")
-                        print(f"   RPC Result: {result.data}")
-                except Exception as e:
-                    print(f"❌ Error processing subscription.created: {e}")
-                    import traceback
-                    traceback.print_exc()
-
-        # ============================================================
-        # SUBSCRIPTION CREATED - New subscription (alternative to checkout.session.completed)
-        # ============================================================
-        elif event_type == "customer.subscription.created":
-            customer_id = data.get("customer")
-            sub_id = data.get("id")
-
-            print(f"   Subscription ID: {sub_id}, Customer: {customer_id}")
-
-            if sub_id and customer_id:
-                try:
-                    customer = stripe.Customer.retrieve(customer_id)
-                    customer_email = customer.email
-
-                    print(f"   Customer email: {customer_email}")
-
-                    if data["items"]["data"]:
-                        price_id = data["items"]["data"][0]["price"]["id"]
-                        item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
-
-                        print(f"   Price ID: {price_id}, Item limit: {item_limit}")
-
-                        # Add subscription credits via RPC
-                        result = supabase.rpc(
-                            "add_subscription_credits",
-                            {
-                                "p_user_email": customer_email,
-                                "p_stripe_customer_id": customer_id,
-                                "p_stripe_subscription_id": sub_id,
-                                "p_price_id": price_id,
-                                "p_item_limit": item_limit,
-                            },
-                        ).execute()
-
-                        print(f"✅ Subscription created: {customer_email} -> {item_limit} items (Price: {price_id})")
-                        print(f"   RPC Result: {result.data}")
-                except Exception as e:
-                    print(f"❌ Error processing subscription.created: {e}")
-                    import traceback
-                    traceback.print_exc()
-
-        # ============================================================
-        # SUBSCRIPTION UPDATED - Plan upgrade/downgrade
-        # ============================================================
-        elif event_type == "customer.subscription.updated":
-            customer_id = data.get("customer")
-            sub_id = data.get("id")
-
-            if sub_id and customer_id:
-                try:
-                    customer = stripe.Customer.retrieve(customer_id)
-                    customer_email = customer.email
-
-                    if data["items"]["data"]:
-                        price_id = data["items"]["data"][0]["price"]["id"]
-                        item_limit = PLAN_LIMITS.get(price_id, FREE_TIER_LIMIT)
-
-                        # Update subscription (gives fresh credits on plan change)
-                        result = supabase.rpc(
-                            "add_subscription_credits",
-                            {
-                                "p_user_email": customer_email,
-                                "p_stripe_customer_id": customer_id,
-                                "p_stripe_subscription_id": sub_id,
-                                "p_price_id": price_id,
-                                "p_item_limit": item_limit,
-                            },
-                        ).execute()
-
-                        print(f"✅ Subscription updated: {customer_email} -> {item_limit} items (Price: {price_id})")
-                except Exception as e:
-                    print(f"❌ Error processing subscription update: {e}")
-
-        # ============================================================
-        # SUBSCRIPTION DELETED - Cancellation
-        # ============================================================
-        elif event_type == "customer.subscription.deleted":
-            customer_id = data.get("customer")
-            sub_id = data.get("id")
-
-            if customer_id and sub_id:
-                try:
-                    customer = stripe.Customer.retrieve(customer_id)
-                    customer_email = customer.email
-
-                    # ✅ CRITICAL: Only cancel if subscription ID matches!
-                    # This prevents cancelling the wrong subscription when user has multiple
-                    profile_result = supabase.table("profiles").select("subscription_id").eq("email", customer_email).execute()
-
-                    if profile_result.data and len(profile_result.data) > 0:
-                        current_sub_id = profile_result.data[0].get("subscription_id")
-
-                        # Only downgrade if the cancelled subscription matches the current one
-                        if current_sub_id == sub_id:
-                            supabase.table("profiles").update({
-                                "subscription_status": "cancelled",
-                                "subscription_tier": "Free",
-                                "items_limit": FREE_TIER_LIMIT,
-                                "items_used": 0,
-                                "subscription_id": None,
-                                "subscription_price_id": None,
-                            }).eq("email", customer_email).execute()
-
-                            print(f"✅ Subscription cancelled: {customer_email} -> downgraded to Free tier ({FREE_TIER_LIMIT} items)")
-                        else:
-                            print(f"⚠️ Subscription {sub_id} cancelled but doesn't match current subscription {current_sub_id} - ignoring")
-                    else:
-                        print(f"⚠️ No profile found for {customer_email}")
-
-                except Exception as e:
-                    print(f"❌ Error processing cancellation: {e}")
-                    import traceback
-                    traceback.print_exc()
-
-        # ============================================================
-        # PAYMENT FAILED - Handle failed payments
-        # ============================================================
-        elif event_type == "invoice.payment_failed":
-            customer_id = data.get("customer")
-            attempt_count = data.get("attempt_count", 0)
-
-            if customer_id:
-                try:
-                    customer = stripe.Customer.retrieve(customer_id)
-                    customer_email = customer.email
-
-                    # Mark as past_due
-                    supabase.table("profiles").update({
-                        "subscription_status": "past_due",
-                    }).eq("email", customer_email).execute()
-
-                    print(f"⚠️ Payment failed for {customer_email} (Attempt {attempt_count})")
-
-                    # After 3 failed attempts, downgrade to free
-                    if attempt_count >= 3:
-                        supabase.table("profiles").update({
-                            "subscription_status": "cancelled",
-                            "subscription_tier": "Free",
-                            "items_limit": FREE_TIER_LIMIT,
-                            "items_used": 0,
-                        }).eq("email", customer_email).execute()
-                        print(f"❌ Payment failed 3 times: {customer_email} -> downgraded to Free tier")
-                except Exception as e:
-                    print(f"❌ Error processing payment failure: {e}")
-
-        else:
-            print(f"ℹ️ Unhandled webhook event: {event_type}")
-
-    except Exception as e:
-        print(f"❌ Webhook processing error: {e}")
-        import traceback
-        traceback.print_exc()
-        # Don't raise exception - return 200 to Stripe to prevent retries
-        # Log the error for manual review
-
-    print(f"✅ Webhook processed successfully: {event_type}")
-    return JSONResponse(
-        status_code=200,
-        content={"status": "success", "event_type": event_type}
-    )
+    return {"status": "success"}
 
 
 # Serve Frontend (SPA)
